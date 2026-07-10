@@ -103,7 +103,9 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
 
   // Pitch Speed (MPH)
   // Standard theoretical pitch speed formula: RPM * pitch / 1056
-  const pitchSpeed = rpm > 0 ? Math.round(rpm * propeller.pitch / 1056) : 0;
+  // Propeller unloads in flight (RPM rises by ~20% compared to static static bench testing)
+  const flightRpm = rpm * 1.20;
+  const pitchSpeed = rpm > 0 ? Math.round(flightRpm * propeller.pitch / 1056) : 0;
 
   // Top Speed estimate in level flight (MPH)
   // Aerodynamic drag prevents plane from exceeding pitch speed.

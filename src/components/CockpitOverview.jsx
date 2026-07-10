@@ -548,6 +548,52 @@ export default function CockpitOverview({
                 </tbody>
               </table>
             </div>
+
+            {/* Builders Manual Download Section */}
+            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', textTransform: 'uppercase' }}>
+                BUILDERS MANUAL
+              </div>
+              {selectedAircraft.manualUrl ? (
+                <a 
+                  href={selectedAircraft.manualUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-retro"
+                  style={{ 
+                    fontSize: '11px', 
+                    padding: '8px 12px', 
+                    textAlign: 'center', 
+                    width: '100%', 
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>📥 DOWNLOAD MANUAL (PDF)</span>
+                </a>
+              ) : (
+                <button 
+                  disabled
+                  className="btn-retro"
+                  style={{ 
+                    fontSize: '11px', 
+                    padding: '8px 12px', 
+                    width: '100%', 
+                    opacity: 0.5, 
+                    cursor: 'not-allowed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>⚠️ MANUAL: NOT AVAILABLE</span>
+                </button>
+              )}
+            </div>
             
             {/* Decal stamp */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
