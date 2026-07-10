@@ -1,0 +1,438 @@
+/* Google Fonts for vintage/military/monospaced vibes */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Special+Elite&display=swap');
+
+:root {
+  --color-bg: #21130d;
+  --color-panel-bg: #1d110b;
+  --color-panel-border: #8e6840; /* Polished Brass */
+  --color-panel-header: #291a13;
+  
+  /* White High-Contrast Dial Theme (Default/Backlight OFF) */
+  --color-amber: #e0e0e0; 
+  --color-amber-dim: #8c8c8c;
+  --color-amber-glow: rgba(255, 255, 255, 0.08);
+  
+  --color-red: #d13535;
+  --color-red-dim: #731b1b;
+  --color-red-glow: rgba(209, 53, 53, 0.45);
+  
+  --color-green: #4caf50;
+  --color-green-dim: #2e6030;
+  --color-green-glow: rgba(76, 175, 80, 0.45);
+
+  --font-mono: 'Share Tech Mono', 'Consolas', 'Courier New', monospace;
+  --font-serif: 'Special Elite', 'Georgia', serif;
+}
+
+.crt-effect {
+  /* Warm Vacuum-Tube Amber Theme (Backlight ON) */
+  --color-amber: #f0b459; 
+  --color-amber-dim: #996e33;
+  --color-amber-glow: rgba(240, 180, 89, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-bg);
+  background-image: 
+    radial-gradient(circle at 50% 50%, #3e261a 0%, #170b07 100%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.006) 0px, rgba(255,255,255,0.006) 1px, transparent 1px, transparent 15px);
+  background-size: 100% 100%, 100% 180px;
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar for Retro Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #170b07;
+  border-left: 1px solid var(--color-panel-border);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-panel-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-amber-dim);
+}
+
+/* Warm Cockpit Backlight Overlay */
+.crt-effect {
+  position: relative;
+}
+
+.crt-effect::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(240, 180, 89, 0.04) 0%, transparent 75%);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Cockpit Vignette shadow */
+.crt-vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Panel Designs (Brushed metal / riveted style) */
+.metal-panel {
+  background-color: #1a0f0a;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #1d120d 0%, #110805 100%);
+  border: 2px solid #8e6840; /* Polished Brass */
+  box-shadow: 
+    inset 0 0 0 1.5px #e2bd89, /* Gold inner border line */
+    inset 0 0 12px rgba(0, 0, 0, 0.95),
+    0 10px 22px rgba(0, 0, 0, 0.75);
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panel Headers */
+.panel-header {
+  background-color: var(--color-panel-header);
+  border-bottom: 2px solid var(--color-panel-border);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.panel-header .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--color-amber);
+  font-size: 11px;
+  margin-right: 4px;
+}
+
+/* Rivets */
+.rivet {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle at 2px 2px, #6e5648, #2a1f1a);
+  border-radius: 50%;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+  position: absolute;
+  z-index: 10;
+}
+
+.rivet.top-left { top: 6px; left: 6px; }
+.rivet.top-right { top: 6px; right: 6px; }
+.rivet.bottom-left { bottom: 6px; left: 6px; }
+.rivet.bottom-right { bottom: 6px; right: 6px; }
+
+/* Screws */
+.screw {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 3px 3px, #7c6254, #1a120f);
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+.screw::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 1px;
+  width: 8px;
+  height: 2px;
+  background-color: #120e0c;
+  transform: rotate(45deg);
+}
+
+/* Glowing text effects */
+.glow-text {
+  text-shadow: 0 0 8px var(--color-amber-glow);
+}
+
+.glow-text-red {
+  color: var(--color-red);
+  text-shadow: 0 0 8px var(--color-red-glow);
+}
+
+.glow-text-green {
+  color: var(--color-green);
+  text-shadow: 0 0 8px var(--color-green-glow);
+}
+
+/* Retro Vintage Buttons */
+.btn-retro {
+  background: linear-gradient(#4d3527, #24150d);
+  border: 1.5px solid #8e6840; /* Polished Brass */
+  color: #ffc97a;
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 2px 4px rgba(0,0,0,0.6);
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.btn-retro:hover {
+  background: linear-gradient(#5d4130, #301d12);
+  color: #fff;
+  border-color: #e2bd89; /* Gold */
+  box-shadow: 0 0 12px rgba(226, 189, 137, 0.35);
+}
+
+.btn-retro:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.btn-retro.active {
+  background: linear-gradient(#c59d59, #6d4b1a);
+  border-color: #ffd699;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(197, 157, 89, 0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Red vintage launcher button */
+.btn-red-launcher {
+  background: linear-gradient(#d13535, #731b1b);
+  border: 2px solid #ff6b6b;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 5px 10px rgba(0,0,0,0.6),
+    0 0 15px var(--color-red-glow);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.btn-red-launcher:hover {
+  background: linear-gradient(#e24c4c, #8c2121);
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 5px 15px rgba(0,0,0,0.8),
+    0 0 25px rgba(209, 53, 53, 0.7);
+}
+
+.btn-red-launcher:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 3px 5px rgba(0,0,0,0.9),
+    0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 340px;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+}
+
+/* Card Styles */
+.card-content {
+  padding: 12px;
+  flex-grow: 1;
+}
+
+/* Table Style for Retro Stats */
+.retro-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.retro-table td {
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(56, 44, 36, 0.5);
+  font-size: 13px;
+}
+
+.retro-table tr:last-child td {
+  border-bottom: none;
+}
+
+.retro-table td.label {
+  color: var(--color-amber-dim);
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.retro-table td.val {
+  text-align: right;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Inputs and Forms */
+.retro-input, .retro-select {
+  background-color: #120e0c;
+  border: 1px solid var(--color-panel-border);
+  color: var(--color-amber);
+  padding: 8px;
+  font-family: var(--font-mono);
+  border-radius: 3px;
+  width: 100%;
+}
+
+.retro-input:focus, .retro-select:focus {
+  outline: none;
+  border-color: var(--color-amber);
+  box-shadow: 0 0 8px var(--color-amber-glow);
+}
+
+/* Navigation bar */
+.nav-bar {
+  display: flex;
+  background-color: #1a1310;
+  border-top: 2px solid var(--color-panel-border);
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 4px 16px;
+  gap: 8px;
+  justify-content: space-between;
+  overflow-x: auto;
+}
+
+.nav-item {
+  flex: 1;
+  min-width: 100px;
+  background: linear-gradient(#2a1f1a, #150f0c);
+  border: 1px solid var(--color-panel-border);
+  color: var(--color-amber-dim);
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.nav-item:hover {
+  color: var(--color-amber);
+  border-color: var(--color-amber-dim);
+}
+
+.nav-item.active {
+  background: linear-gradient(#731b1b, #300a0a);
+  border-color: var(--color-red);
+  color: #fff;
+  box-shadow: 0 0 10px var(--color-red-glow);
+}
+
+.nav-item.active svg {
+  color: var(--color-red);
+}
+
+/* Utilities */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+
+/* Status indicator lamps */
+.status-lamp {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+  border: 1px solid rgba(0,0,0,0.5);
+}
+
+.status-lamp.green {
+  background-color: var(--color-green);
+  box-shadow: 0 0 8px var(--color-green-glow), inset 0 1px 2px rgba(255,255,255,0.4);
+}
+.status-lamp.green.off {
+  background-color: var(--color-green-dim);
+  box-shadow: none;
+}
+
+.status-lamp.red {
+  background-color: var(--color-red);
+  box-shadow: 0 0 8px var(--color-red-glow), inset 0 1px 2px rgba(255,255,255,0.4);
+}
+.status-lamp.red.off {
+  background-color: var(--color-red-dim);
+  box-shadow: none;
+}
+
+.status-lamp.amber {
+  background-color: var(--color-amber);
+  box-shadow: 0 0 8px var(--color-amber-glow), inset 0 1px 2px rgba(255,255,255,0.4);
+}
+.status-lamp.amber.off {
+  background-color: var(--color-amber-dim);
+  box-shadow: none;
+}
