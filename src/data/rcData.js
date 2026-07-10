@@ -223,6 +223,36 @@ export const aircrafts = [
     manufacturer: "E-flite",
     image: "corsair.jpg",
     description: "E-flite 1.2m F4U Corsair. Highly detailed sport-scale model featuring functioning 3-blade prop drive and retractable landing gear."
+  },
+  {
+    id: "topflite-p40",
+    name: "TOP FLITE P-40 WARHAWK",
+    class: "60-CLASS",
+    wingspan: 64,
+    length: 54,
+    wingArea: 700,
+    emptyWeight: 7.6,
+    flyingWeight: 9.2,
+    powerRangeMin: 1000,
+    powerRangeMax: 2000,
+    manufacturer: "Top Flite",
+    image: "p40.jpg",
+    description: "Curtiss P-40 Warhawk. The workhorse WWII fighter famous for the Flying Tigers shark mouth nose art. Rugged airframe with unique landing gear twist rotation."
+  },
+  {
+    id: "topflite-p51",
+    name: "TOP FLITE P-51 MUSTANG",
+    class: "60-CLASS",
+    wingspan: 65,
+    length: 57,
+    wingArea: 734,
+    emptyWeight: 7.4,
+    flyingWeight: 9.0,
+    powerRangeMin: 1000,
+    powerRangeMax: 2000,
+    manufacturer: "Top Flite",
+    image: "p51.jpg",
+    description: "Top Flite Gold Edition P-51D Mustang. High-fidelity build-up kit design, recognized for its scale outlines, high-speed stability, and iconic bubble canopy."
   }
 ];
 

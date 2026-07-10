@@ -14,6 +14,7 @@ import propellerImg from '../assets/propeller.jpg';
 function renderNoseArt(planeId) {
   switch (planeId) {
     case 'p51d-mustang':
+    case 'topflite-p51':
       return (
         <svg viewBox="0 0 40 40" style={{ width: '100%', height: '100%', background: '#261611' }}>
           <path d="M5,20 L15,17 L20,5 L25,17 L35,20 L25,23 L20,35 L15,23 Z" fill="#e59d32" stroke="#fff" strokeWidth="0.5" />
@@ -114,6 +115,25 @@ function renderNoseArt(planeId) {
           <path d="M12,24 C14,18 26,18 28,24 C28,24 24,12 20,12 C16,12 12,24 12,24 Z" fill="#ffb347" />
           <circle cx="17" cy="18" r="1.5" fill="#000" />
           <circle cx="23" cy="18" r="1.5" fill="#000" />
+        </svg>
+      );
+    case 'topflite-p40':
+      return (
+        <svg viewBox="0 0 40 40" style={{ width: '100%', height: '100%', background: '#242a20' }}>
+          {/* Yellow Tiger eye slash background */}
+          <path d="M26,10 L31,14 L36,10" stroke="#ffb347" strokeWidth="1.5" fill="none" />
+          
+          {/* Shark mouth base */}
+          <path d="M6,22 C14,12 26,12 34,22 C28,28 12,28 6,22 Z" fill="#731b1b" stroke="#fff" strokeWidth="0.75" />
+          
+          {/* Teeth Top */}
+          <path d="M8,21 L10,24 L12,21 L14,24 L16,21 L18,24 L20,21 L22,24 L24,21 L26,24 L28,21 L30,24 L32,21" fill="#fff" />
+          {/* Teeth Bottom */}
+          <path d="M8,23 L10,20 L12,23 L14,20 L16,23 L18,20 L20,23 L22,20 L24,23 L26,20 L28,23 L30,20 L32,23" fill="#fff" />
+          
+          {/* Angry Eye */}
+          <ellipse cx="14" cy="14" rx="4" ry="2" fill="#ffb347" stroke="#000" strokeWidth="0.5" />
+          <circle cx="15" cy="14" r="1.2" fill="#000" />
         </svg>
       );
     default:
@@ -694,6 +714,16 @@ export default function CockpitOverview({
                       {activeSetupType ? recommendedSetups[activeSetupType].notes.speedEstimate : `${specs.pitchSpeed} - ${specs.topSpeed} MPH`}
                     </span>
                   </div>
+                  <div className="flex-between">
+                    <span style={{ color: 'var(--color-amber-dim)' }}>Amps Range:</span>
+                    <span style={{ fontWeight: 'bold', color: '#fff' }}>
+                      {activeSetupType === 'safe' ? '40 - 50 A' :
+                       activeSetupType === 'scale' ? '70 - 80 A' :
+                       activeSetupType === 'aggressive' ? '80 - 95 A' :
+                       activeSetupType === 'extreme' ? '110 - 120 A' :
+                       `${Math.round(specs.amps * 0.75)} - ${Math.round(specs.amps)} A`}
+                    </span>
+                  </div>
                 </div>
                 <p style={{ color: '#fff', fontSize: '10px', lineHeight: '1.2' }}>
                   {activeSetupType ? recommendedSetups[activeSetupType].notes.behavior : "Analyzing electrical characteristics of custom setup. Check Validator for details."}
@@ -714,7 +744,7 @@ export default function CockpitOverview({
                 <span className="badge">4</span> SYSTEM STATUS
               </div>
               <div className="card-content" style={{ padding: '8px' }}>
-                <div className="flex-between" style={{ marginBottom: '8px' }}>
+                <div className="flex-between" style={{ marginBottom: '4px' }}>
                   <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>OVERALL STATUS</span>
                   <span className={
                     specs.overallStatus === "GOOD" ? "glow-text-green" :
@@ -722,6 +752,11 @@ export default function CockpitOverview({
                   } style={{ fontWeight: 'bold', fontSize: '13px' }}>
                     {specs.overallStatus}
                   </span>
+                </div>
+
+                <div className="flex-between" style={{ marginBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '4px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>CURRENT DRAW</span>
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--color-red)', textShadow: '0 0 8px var(--color-red-glow)', fontFamily: 'var(--font-mono)' }}>{specs.amps} A</span>
                 </div>
 
                 <HorizontalBarGauge label="Motor Load" value={specs.motorLoad} percentage={specs.motorLoad} />
