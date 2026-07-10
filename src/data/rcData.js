@@ -491,6 +491,19 @@ export const motors = [
     internalResistance: 0.028,
     noLoadCurrent: 1.1,
     voltageSupported: "10S - 12S LiPo (37.0V - 44.4V)",
+  },
+  {
+    id: "avian-4260-800",
+    name: "SPEKTRUM AVIAN 4260 800KV",
+    model: "SPMXAM1000",
+    brand: "Spektrum",
+    kv: 800,
+    weight: 275,
+    maxCurrent: 70,
+    maxPower: 1200,
+    internalResistance: 0.019,
+    noLoadCurrent: 1.8,
+    voltageSupported: "3S - 4S LiPo (11.1V - 14.8V)",
     type: "Brushless Outrunner"
   }
 ];

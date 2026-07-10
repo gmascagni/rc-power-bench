@@ -6,6 +6,10 @@ import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } fro
 import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
 import pinupPilot from '../assets/pinup-pilot.jpg';
+import motorImg from '../assets/motor.jpg';
+import escImg from '../assets/esc.jpg';
+import batteryImg from '../assets/battery.jpg';
+import propellerImg from '../assets/propeller.jpg';
 
 function renderNoseArt(planeId) {
   switch (planeId) {
@@ -328,7 +332,7 @@ export default function CockpitOverview({
             <div className="flex-center gap-12" style={{ marginTop: '2px' }}>
               <span style={{ fontSize: '12px', color: '#ffb347', fontWeight: 'bold', letterSpacing: '1.5px' }}>{selectedAircraft.class} ARF REFERENCE</span>
               <span style={{ color: 'var(--color-panel-border)' }}>|</span>
-              <span style={{ fontStyle: 'italic', fontSize: '11px', color: 'var(--color-amber-dim)', letterSpacing: '1px' }}>Fly Fast. Fly Hard. Keep 'Em Flying!</span>
+              <span style={{ fontFamily: 'var(--font-script)', fontSize: '18px', color: '#ffc97a', letterSpacing: '1px' }}>Fly Fast. Fly Hard. Keep 'Em Flying!</span>
             </div>
           </div>
 
@@ -350,25 +354,23 @@ export default function CockpitOverview({
               
               <div style={{ 
                 position: 'absolute', 
-                top: '4px', 
-                right: '8px', 
-                fontSize: '11px', 
-                color: '#e24c4c', 
-                fontStyle: 'italic', 
-                fontFamily: 'var(--font-serif)',
-                fontWeight: 'bold',
-                textShadow: '1px 1px 1px #000'
+                top: '2px', 
+                right: '12px', 
+                fontSize: '18px', 
+                color: '#ff4d4d', 
+                fontFamily: 'var(--font-script)',
+                textShadow: '1px 1px 2px #000'
               }}>
                 Crimson Skies
               </div>
               <div style={{ 
                 position: 'absolute', 
-                bottom: '4px', 
-                right: '8px', 
-                fontSize: '7.5px', 
+                bottom: '1px', 
+                right: '12px', 
+                fontSize: '12px', 
                 color: '#ffc97a', 
-                fontWeight: 'bold',
-                textShadow: '1px 1px 1px #000'
+                fontFamily: 'var(--font-script)',
+                textShadow: '1px 1px 2px #000'
               }}>
                 No Clouds Too High
               </div>
@@ -560,7 +562,9 @@ export default function CockpitOverview({
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>MOTOR</div>
-                    {drawMotorSvg()}
+                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={motorImg} alt="Brushless Motor" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
                       className="retro-select" 
@@ -583,7 +587,9 @@ export default function CockpitOverview({
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>ESC</div>
-                    {drawEscSvg()}
+                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={escImg} alt="Electronic Speed Controller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
                       className="retro-select" 
@@ -606,7 +612,9 @@ export default function CockpitOverview({
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>BATTERY</div>
-                    {drawBatterySvg()}
+                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={batteryImg} alt="LiPo Battery" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
                       className="retro-select" 
@@ -629,7 +637,9 @@ export default function CockpitOverview({
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>PROPELLER</div>
-                    {drawPropellerSvg()}
+                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={propellerImg} alt="Propeller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
                       className="retro-select" 

@@ -102,11 +102,14 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   const thrustToWeight = aircraft.flyingWeight > 0 ? (thrust / aircraft.flyingWeight) : 0;
 
   // Pitch Speed (MPH)
-  // Pitch speed = RPM * pitch / 1056 (standard formula) * slip factor
-  const pitchSpeed = rpm > 0 ? Math.round((rpm * propeller.pitch / 1056) * 1.25) : 0;
+  // Standard theoretical pitch speed formula: RPM * pitch / 1056
+  const pitchSpeed = rpm > 0 ? Math.round(rpm * propeller.pitch / 1056) : 0;
 
-  // Top Speed estimate (MPH)
-  const topSpeed = rpm > 0 ? Math.round(pitchSpeed * 1.18) : 0;
+  // Top Speed estimate in level flight (MPH)
+  // Aerodynamic drag prevents plane from exceeding pitch speed.
+  // Loaded top speed is typical 74% - 90% of pitch speed, scaling with thrust-to-weight ratio.
+  const efficiencyFactor = Math.min(0.74 + 0.12 * Math.min(thrustToWeight, 1.5), 0.90);
+  const topSpeed = rpm > 0 ? Math.round(pitchSpeed * efficiencyFactor) : 0;
 
   // Flight Time (minutes)
   // Capacity is in mAh. Flight time at current draw:

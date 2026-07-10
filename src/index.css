@@ -1,8 +1,8 @@
-/* Google Fonts for vintage/military/monospaced vibes */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Special+Elite&display=swap');
+/* Google Fonts for vintage/military/monospaced/cursive vibes */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Special+Elite&family=Oswald:wght@500;700&family=Alex+Brush&display=swap');
 
 :root {
-  --color-bg: #21130d;
+  --color-bg: #0c0806;
   --color-panel-bg: #1d110b;
   --color-panel-border: #8e6840; /* Polished Brass */
   --color-panel-header: #291a13;
@@ -21,7 +21,8 @@
   --color-green-glow: rgba(76, 175, 80, 0.45);
 
   --font-mono: 'Share Tech Mono', 'Consolas', 'Courier New', monospace;
-  --font-serif: 'Special Elite', 'Georgia', serif;
+  --font-serif: 'Oswald', 'Special Elite', 'Georgia', serif;
+  --font-script: 'Alex Brush', 'Georgia', cursive;
 }
 
 .crt-effect {
@@ -40,9 +41,11 @@
 body {
   background-color: var(--color-bg);
   background-image: 
-    radial-gradient(circle at 50% 50%, #3e261a 0%, #170b07 100%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.006) 0px, rgba(255,255,255,0.006) 1px, transparent 1px, transparent 15px);
-  background-size: 100% 100%, 100% 180px;
+    radial-gradient(circle at 50% 50%, #1c130f 0%, #070403 100%),
+    radial-gradient(rgba(0, 0, 0, 0.35) 15%, transparent 20%),
+    radial-gradient(rgba(0, 0, 0, 0.35) 15%, transparent 20%);
+  background-size: 100% 100%, 8px 8px, 8px 8px;
+  background-position: 0 0, 0 0, 4px 4px;
   color: var(--color-amber);
   font-family: var(--font-mono);
   font-size: 14px;

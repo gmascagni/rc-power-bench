@@ -1,14 +1,25 @@
 import React from 'react';
 import { generatePowerCurve } from '../utils/calcEngine';
+import { recommendedSetups, motors, escs, batteries, propellers } from '../data/rcData';
 
 export default function PowerCurveChart({ aircraft, motor, esc, battery, propeller, currentThrottle }) {
-  // Generate data points
+  // Generate selected data points
   const data = generatePowerCurve(aircraft, motor, esc, battery, propeller);
+
+  // Retrieve stock recommended setup components (Scale Performance baseline)
+  const recSetup = recommendedSetups.scale;
+  const recMotor = motors.find(m => m.id === recSetup.motorId) || motor;
+  const recEsc = escs.find(e => e.id === recSetup.escId) || esc;
+  const recBattery = batteries.find(b => b.id === recSetup.batteryId) || battery;
+  const recPropeller = propellers.find(p => p.id === recSetup.propellerId) || propeller;
+
+  // Generate recommended data points
+  const recData = generatePowerCurve(aircraft, recMotor, recEsc, recBattery, recPropeller);
 
   // Dimensions of SVG
   const width = 380;
   const height = 180;
-  const padding = { top: 15, right: 35, bottom: 25, left: 35 };
+  const padding = { top: 18, right: 35, bottom: 25, left: 35 };
 
   // Scale functions
   const getX = (throttle) => {
@@ -25,10 +36,9 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
     return height - padding.bottom - (watts / 3000) * (height - padding.top - padding.bottom);
   };
 
-  // Generate path strings
+  // Generate path strings for selected setup
   let ampsPath = "";
   let wattsPath = "";
-
   data.forEach((p, idx) => {
     const x = getX(p.throttle);
     const yA = getYAmps(p.amps);
@@ -40,6 +50,23 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
     } else {
       ampsPath += ` L ${x} ${yA}`;
       wattsPath += ` L ${x} ${yW}`;
+    }
+  });
+
+  // Generate path strings for stock recommended setup
+  let recAmpsPath = "";
+  let recWattsPath = "";
+  recData.forEach((p, idx) => {
+    const x = getX(p.throttle);
+    const yA = getYAmps(p.amps);
+    const yW = getYWatts(p.watts);
+
+    if (idx === 0) {
+      recAmpsPath += `M ${x} ${yA}`;
+      recWattsPath += `M ${x} ${yW}`;
+    } else {
+      recAmpsPath += ` L ${x} ${yA}`;
+      recWattsPath += ` L ${x} ${yW}`;
     }
   });
 
@@ -76,9 +103,9 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
                 strokeDasharray="2,4" 
               />
               {/* Amps label (Left) */}
-              <text x={padding.left - 5} y={y + 4} fill="var(--color-amber-dim)" fontSize="8" textAnchor="end">{val}</text>
+              <text x={padding.left - 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="9.5" textAnchor="end">{val}</text>
               {/* Watts label (Right, maps 150A -> 3000W, so 30A -> 600W) */}
-              <text x={width - padding.right + 5} y={y + 4} fill="var(--color-amber-dim)" fontSize="8" textAnchor="start">{val * 20}</text>
+              <text x={width - padding.right + 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="9.5" textAnchor="start">{val * 20}</text>
             </g>
           );
         })}
@@ -97,30 +124,40 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
                 strokeWidth="1" 
                 strokeDasharray="2,4" 
               />
-              <text x={x} y={height - padding.bottom + 12} fill="var(--color-amber-dim)" fontSize="8" textAnchor="middle">{val}</text>
+              <text x={x} y={height - padding.bottom + 14} fill="var(--color-amber-dim)" fontSize="9.5" textAnchor="middle">{val}</text>
             </g>
           );
         })}
 
         {/* Legend */}
-        <g transform="translate(45, 12)">
-          <line x1="0" y1="0" x2="15" y2="0" stroke="var(--color-red)" strokeWidth="2" />
-          <text x="20" y="3" fill="var(--color-red)" fontSize="8" fontWeight="bold">Current (A)</text>
+        <g transform="translate(10, 12)">
+          {/* Selected curves */}
+          <line x1="0" y1="0" x2="12" y2="0" stroke="var(--color-red)" strokeWidth="2.5" />
+          <text x="16" y="3.5" fill="var(--color-red)" fontSize="8.5" fontWeight="bold" style={{ fontFamily: 'var(--font-serif)' }}>Current (A)</text>
           
-          <line x1="75" y1="0" x2="90" y2="0" stroke="var(--color-amber)" strokeWidth="2" />
-          <text x="95" y="3" fill="var(--color-amber)" fontSize="8" fontWeight="bold">Power (W)</text>
+          <line x1="82" y1="0" x2="94" y2="0" stroke="var(--color-amber)" strokeWidth="2.5" />
+          <text x="98" y="3.5" fill="var(--color-amber)" fontSize="8.5" fontWeight="bold" style={{ fontFamily: 'var(--font-serif)' }}>Power (W)</text>
+
+          {/* Recommended stock baseline curves */}
+          <line x1="160" y1="0" x2="172" y2="0" stroke="var(--color-red)" strokeWidth="1.5" strokeDasharray="3,2" strokeOpacity="0.5" />
+          <text x="176" y="3.5" fill="var(--color-red)" fillOpacity="0.65" fontSize="8.5" fontWeight="bold" style={{ fontFamily: 'var(--font-serif)' }}>Stock Amps</text>
+
+          <line x1="238" y1="0" x2="250" y2="0" stroke="var(--color-amber)" strokeWidth="1.5" strokeDasharray="3,2" strokeOpacity="0.5" />
+          <text x="254" y="3.5" fill="var(--color-amber)" fillOpacity="0.65" fontSize="8.5" fontWeight="bold" style={{ fontFamily: 'var(--font-serif)' }}>Stock Watts</text>
         </g>
 
         {/* Axis Labels */}
-        <text x={padding.left - 25} y={padding.top - 5} fill="var(--color-red)" fontSize="7" fontWeight="bold">AMPS</text>
-        <text x={width - padding.right + 2} y={padding.top - 5} fill="var(--color-amber)" fontSize="7" fontWeight="bold">WATTS</text>
-        <text x={width / 2} y={height - 2} fill="var(--color-amber-dim)" fontSize="8" textAnchor="middle" fontWeight="bold" style={{ letterSpacing: '1px' }}>THROTTLE %</text>
+        <text x={padding.left - 25} y={padding.top - 5} fill="var(--color-red)" fontSize="9" fontWeight="bold">AMPS</text>
+        <text x={width - padding.right + 2} y={padding.top - 5} fill="var(--color-amber)" fontSize="9" fontWeight="bold">WATTS</text>
+        <text x={width / 2} y={height - 2} fill="var(--color-amber-dim)" fontSize="10" textAnchor="middle" fontWeight="bold" style={{ letterSpacing: '1px' }}>THROTTLE %</text>
 
-        {/* Area Glow under curves */}
-        {/* Watts line path */}
-        <path d={wattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="2" style={{ filter: 'drop-shadow(0 0 2px var(--color-amber-glow))' }} />
-        {/* Amps line path */}
-        <path d={ampsPath} fill="none" stroke="var(--color-red)" strokeWidth="2" style={{ filter: 'drop-shadow(0 0 2px var(--color-red-glow))' }} />
+        {/* Stock Recommended Curves (Dashed & Faded) */}
+        <path d={recWattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="1.5" strokeDasharray="4,3" strokeOpacity="0.45" />
+        <path d={recAmpsPath} fill="none" stroke="var(--color-red)" strokeWidth="1.5" strokeDasharray="4,3" strokeOpacity="0.45" />
+
+        {/* Current Selected Curves (Solid & Glowing) */}
+        <path d={wattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 2.5px var(--color-amber-glow))' }} />
+        <path d={ampsPath} fill="none" stroke="var(--color-red)" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 2.5px var(--color-red-glow))' }} />
 
         {/* Vertical Throttle Indicator Cursor Line */}
         {currentThrottle > 0 && (
