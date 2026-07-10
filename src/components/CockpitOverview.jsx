@@ -302,7 +302,7 @@ export default function CockpitOverview({
           }}>v3.0.0</span>
         </div>
 
-        <div className="flex-between" style={{ padding: '8px 24px' }}>
+        <div className="flex-between header-flex" style={{ padding: '8px 24px' }}>
           {/* Logo Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <svg width="180" height="50" viewBox="0 0 180 50">
@@ -337,7 +337,7 @@ export default function CockpitOverview({
           </div>
 
           {/* Right Aviator Art Banner */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="header-aviator-banner" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ position: 'relative', width: '130px', height: '52px', border: '1.5px solid var(--color-panel-border)', borderRadius: '3px', overflow: 'hidden' }}>
               <img 
                 src={new URL(`../assets/aircraft/${selectedAircraft.image}`, import.meta.url).href} 
@@ -386,7 +386,7 @@ export default function CockpitOverview({
       <div className="dashboard-grid">
         
         {/* Left Side: Aircraft Selector & Database Specs */}
-        <section className="metal-panel">
+        <section className="metal-panel left-column">
           <div className="rivet top-left"></div>
           <div className="rivet top-right"></div>
           <div className="rivet bottom-left"></div>
@@ -542,10 +542,11 @@ export default function CockpitOverview({
         </section>
 
         {/* Center Section: Current setup cards, setup notes, status bars, and dials dashboard */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="middle-column" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
           {/* Top middle panel group: Setup, notes, overall status */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '16px' }}>
+          {/* Top middle panel group: Setup, notes, overall status */}
+          <div className="middle-row-grid" style={{ gap: '16px' }}>
             
             {/* 2. Current Setup component selector */}
             <div className="metal-panel">
@@ -556,7 +557,7 @@ export default function CockpitOverview({
               <div className="panel-header">
                 <span className="badge">2</span> CURRENT SETUP
               </div>
-              <div className="card-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', padding: '8px' }}>
+              <div className="card-content setup-inner-grid" style={{ gap: '8px', padding: '8px' }}>
                 
                 {/* Motor Select */}
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -761,7 +762,7 @@ export default function CockpitOverview({
           </div>
 
           {/* Performance prediction & power curve bottom row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 0.75fr 1fr', gap: '16px' }}>
+          <div className="bottom-row-grid" style={{ gap: '16px' }}>
             
             {/* 7. Performance Prediction card with plane image on left and specs table on right */}
             <div className="metal-panel">
@@ -772,7 +773,7 @@ export default function CockpitOverview({
               <div className="panel-header">
                 <span className="badge">7</span> PERFORMANCE PREDICTION
               </div>
-              <div className="card-content" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.2fr', gap: '10px', padding: '8px' }}>
+              <div className="card-content prediction-inner-grid" style={{ gap: '10px', padding: '8px' }}>
                 {/* Flight Photo with red/vignette overlay */}
                 <div style={{ 
                   border: '1.5px solid var(--color-panel-border)', 
@@ -886,7 +887,7 @@ export default function CockpitOverview({
         </div>
 
         {/* Right Side: Throttle slider, calculation launcher, and action utilities */}
-        <section className="metal-panel" style={{ height: '100%', justifyContent: 'space-between' }}>
+        <section className="metal-panel right-column" style={{ height: '100%', justifyContent: 'space-between' }}>
           <div className="rivet top-left"></div>
           <div className="rivet top-right"></div>
           <div className="rivet bottom-left"></div>
