@@ -712,6 +712,18 @@ const rawEscs = [
     weight: 105,
     voltageSupported: "6S - 12S LiPo (22.2V - 44.4V)",
     becOutput: "BEC: 6.0V/7.4V/8.4V @ 8A"
+  },
+  {
+    id: "avian-130a",
+    name: "SPEKTRUM AVIAN 130A SMART",
+    model: "SPMXAE1130",
+    brand: "Spektrum",
+    maxAmps: 130,
+    burstAmps: 160,
+    resistance: 0.0006,
+    weight: 120,
+    voltageSupported: "3S - 6S LiPo (11.1V - 22.2V)",
+    becOutput: "BEC: 6.0V-8.4V @ 8A"
   }
 ];
 
@@ -871,6 +883,24 @@ export const batteries = [
 ];
 
 export const propellers = [
+  {
+    id: "apc-14x12e",
+    name: "APC 14 x 12E",
+    diameter: 14,
+    pitch: 12,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.10
+  },
+  {
+    id: "apc-15x12e",
+    name: "APC 15 x 12E",
+    diameter: 15,
+    pitch: 12,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.12
+  },
   {
     id: "apc-15x10e",
     name: "APC 15 x 10E",

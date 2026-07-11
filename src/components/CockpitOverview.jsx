@@ -185,6 +185,64 @@ export default function CockpitOverview({
     }
   });
 
+  const [fastestSetup, setFastestSetup] = useState(null);
+
+  useEffect(() => {
+    let bestPitchSpeed = 0;
+    let bestCombo = null;
+
+    for (const m of motors) {
+      for (const p of propellers) {
+        for (const e of escs) {
+          for (const b of batteries) {
+            const cells = b.cells;
+            if (cells > 6 && e.voltageSupported && e.voltageSupported.includes("6S LiPo")) continue;
+            if (cells > 8 && e.voltageSupported && e.voltageSupported.includes("8S LiPo")) continue;
+            
+            const s = calculateSpecs({
+              aircraft: selectedAircraft,
+              motor: m,
+              esc: e,
+              battery: b,
+              propeller: p,
+              throttle: 100
+            });
+
+            // Ensure physical safety bounds are preserved to prevent unrealistic blowups
+            const isSafe = s.amps <= e.maxAmps * 1.1 && s.amps <= m.maxCurrent * 1.15;
+            
+            if (isSafe && s.pitchSpeed > bestPitchSpeed) {
+              bestPitchSpeed = s.pitchSpeed;
+              bestCombo = {
+                motorId: m.id,
+                escId: e.id,
+                batteryId: b.id,
+                propellerId: p.id,
+                pitchSpeed: s.pitchSpeed
+              };
+            }
+          }
+        }
+      }
+    }
+    setFastestSetup(bestCombo);
+  }, [selectedAircraft]);
+
+  const applyFastestSetup = () => {
+    if (fastestSetup) {
+      const m = motors.find(item => item.id === fastestSetup.motorId);
+      const e = escs.find(item => item.id === fastestSetup.escId);
+      const b = batteries.find(item => item.id === fastestSetup.batteryId);
+      const p = propellers.find(item => item.id === fastestSetup.propellerId);
+      if (m) setSelectedMotor(m);
+      if (e) setSelectedEsc(e);
+      if (b) setSelectedBattery(b);
+      if (p) setSelectedPropeller(p);
+      setThrottle(100);
+      setActiveSetupType("fastest");
+    }
+  };
+
   // Calculate outputs
   const specs = calculateSpecs({
     aircraft: selectedAircraft,
@@ -636,6 +694,32 @@ export default function CockpitOverview({
                     </button>
                   );
                 })}
+                
+                {fastestSetup && (
+                  <button 
+                    onClick={applyFastestSetup}
+                    className={`btn-retro ${activeSetupType === 'fastest' ? 'active' : ''}`}
+                    style={{ 
+                      justifyContent: 'space-between', 
+                      padding: '6px 12px', 
+                      fontSize: '11px',
+                      borderColor: activeSetupType === 'fastest' ? 'var(--color-red)' : 'rgba(209, 53, 53, 0.4)',
+                      boxShadow: activeSetupType === 'fastest' ? '0 0 10px var(--color-red-glow)' : 'none',
+                      marginTop: '6px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: 'var(--color-red)' }}>⚡</span>
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '11px', color: 'var(--color-red)' }}>SPEED RUN SETUP</div>
+                        <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>
+                          Max Pitch Speed: {fastestSetup.pitchSpeed} MPH
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`status-lamp ${activeSetupType === 'fastest' ? 'red' : 'red off'}`} />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -864,25 +948,25 @@ export default function CockpitOverview({
               </div>
               <div className="card-content" style={{ padding: '8px', fontSize: '11px' }}>
                 <div style={{ color: '#ffb347', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11px', marginBottom: '4px' }}>
-                  {activeSetupType ? recommendedSetups[activeSetupType].name : "CUSTOM WORKBENCH CONFIG"}
+                  {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].name : (activeSetupType === 'fastest' ? "SPEED RUN SETUP" : "CUSTOM WORKBENCH CONFIG")}
                 </div>
                 <div style={{ borderBottom: '1px solid var(--color-panel-border)', paddingBottom: '4px', marginBottom: '4px' }}>
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Voltage Range:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType ? recommendedSetups[activeSetupType].notes.voltageRange : `${selectedBattery.cells}S`}
+                      {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.voltageRange : `${selectedBattery.cells}S`}
                     </span>
                   </div>
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Power Range:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType ? recommendedSetups[activeSetupType].notes.powerRange : `${Math.round(specs.watts * 0.75)} - ${specs.watts} W`}
+                      {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.powerRange : `${Math.round(specs.watts * 0.75)} - ${specs.watts} W`}
                     </span>
                   </div>
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Speed Est:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType ? recommendedSetups[activeSetupType].notes.speedEstimate : `${specs.pitchSpeed} - ${specs.topSpeed} MPH`}
+                      {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.speedEstimate : `${specs.topSpeed} MPH / ${specs.pitchSpeed} MPH Pitch`}
                     </span>
                   </div>
                   <div className="flex-between">
@@ -897,10 +981,10 @@ export default function CockpitOverview({
                   </div>
                 </div>
                 <p style={{ color: '#fff', fontSize: '10px', lineHeight: '1.2' }}>
-                  {activeSetupType ? recommendedSetups[activeSetupType].notes.behavior : "Analyzing electrical characteristics of custom setup. Check Validator for details."}
+                  {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.behavior : (activeSetupType === 'fastest' ? "Extreme performance speed run setup. Tuned for maximum pitch speed and high static load." : "Analyzing electrical characteristics of custom setup. Check Validator for details.")}
                 </p>
                 <div style={{ color: 'var(--color-red)', fontWeight: 'bold', marginTop: '6px', fontSize: '9px', lineHeight: '1.1' }}>
-                  WARNING: {activeSetupType ? recommendedSetups[activeSetupType].notes.warning : "Ensure continuous cooling airflow around motor windings on static tests."}
+                  WARNING: {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.warning : (activeSetupType === 'fastest' ? "Monitor high current draw and temperatures closely to prevent battery thermal runaway." : "Ensure continuous cooling airflow around motor windings on static tests.")}
                 </div>
               </div>
             </div>
