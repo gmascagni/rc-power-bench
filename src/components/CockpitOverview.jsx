@@ -71,6 +71,7 @@ function renderNoseArt(planeId) {
         </svg>
       );
     case 'p47d-thunderbolt':
+    case 'seagull-p47-60':
       return (
         <svg viewBox="0 0 40 40" style={{ width: '100%', height: '100%', background: '#2b231e' }}>
           <circle cx="20" cy="20" r="12" fill="rgba(209, 53, 53, 0.15)" stroke="#d13535" strokeWidth="1" />

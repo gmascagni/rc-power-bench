@@ -32,8 +32,8 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   };
 
   const getYWatts = (watts) => {
-    // Watts ranges 0 to 3000
-    return height - padding.bottom - (watts / 3000) * (height - padding.top - padding.bottom);
+    // Watts ranges 0 to 5000
+    return height - padding.bottom - (watts / 5000) * (height - padding.top - padding.bottom);
   };
 
   // Generate path strings for selected setup
@@ -109,8 +109,8 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
               />
               {/* Amps label (Left) */}
               <text x={padding.left - 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="11" textAnchor="end">{val}</text>
-              {/* Watts label (Right, maps 150A -> 3000W, so 30A -> 600W) */}
-              <text x={width - padding.right + 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="11" textAnchor="start">{val * 20}</text>
+              {/* Watts label (Right, maps 150A -> 5000W, so 30A -> 1000W) */}
+              <text x={width - padding.right + 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="11" textAnchor="start">{Math.round(val * 5000 / 150)}</text>
             </g>
           );
         })}

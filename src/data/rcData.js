@@ -96,6 +96,22 @@ export const aircrafts = [
     manualUrl: null
   },
   {
+    id: "seagull-p47-60",
+    name: "SEAGULL P-47D THUNDERBOLT",
+    class: "60-CLASS",
+    wingspan: 63,
+    length: 52,
+    wingArea: 728,
+    emptyWeight: 7.6,
+    flyingWeight: 9.3,
+    powerRangeMin: 1000,
+    powerRangeMax: 1800,
+    manufacturer: "Seagull Models",
+    image: "p47.jpg",
+    description: "Seagull Models P-47D Thunderbolt 'Snafu'. Classic 60-size stand-off scale warbird. Finished in Olive Drab with yellow nose cowl and black/white invasion stripes.",
+    manualUrl: "https://www.legendhobby.com/manuals/SEA207%20P-47D%20SNAFU%2063inch.pdf"
+  },
+  {
     id: "hurricane",
     name: "HAWKER HURRICANE",
     class: "60-CLASS",
@@ -1056,6 +1072,15 @@ export const propellers = [
     type: "Electric",
     blades: 2,
     kProp: 1.12
+  },
+  {
+    id: "apc-16x14e",
+    name: "APC 16 x 14E",
+    diameter: 16,
+    pitch: 14,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.15
   },
   {
     id: "apc-14x10e",
