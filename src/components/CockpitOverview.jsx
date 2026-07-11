@@ -6,10 +6,22 @@ import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } fro
 import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
 import pinupPilot from '../assets/pinup-pilot.jpg';
-import motorImg from '../assets/motor.jpg';
-import escImg from '../assets/esc.jpg';
-import batteryImg from '../assets/battery.jpg';
-import propellerImg from '../assets/propeller.jpg';
+
+import motorSpektrum from '../assets/motor_spektrum.jpg';
+import motorElectric from '../assets/motor_electric.jpg';
+import motorGas from '../assets/motor_gas.jpg';
+import motorGlow from '../assets/motor_glow.jpg';
+
+import escSpektrum from '../assets/esc_spektrum.jpg';
+import escElectric from '../assets/esc_electric.jpg';
+import escServo from '../assets/esc_servo.jpg';
+
+import batterySpektrum from '../assets/battery_spektrum.jpg';
+import batteryLipo from '../assets/battery_lipo.jpg';
+import batteryGas from '../assets/battery_gas.jpg';
+
+import propeller2b from '../assets/propeller_2b.jpg';
+
 
 function renderNoseArt(planeId) {
   switch (planeId) {
@@ -241,6 +253,32 @@ export default function CockpitOverview({
       setThrottle(100);
       setActiveSetupType("fastest");
     }
+  };
+
+  // Helper functions to get active component images dynamically based on brand/type
+  const getMotorImage = () => {
+    if (selectedMotor.isGasOrGlow) {
+      return selectedMotor.engineType === 'gas' ? motorGas : motorGlow;
+    }
+    return selectedMotor.brand === 'Spektrum' ? motorSpektrum : motorElectric;
+  };
+
+  const getEscImage = () => {
+    if (selectedMotor.isGasOrGlow) {
+      return escServo; // throttle servo governs combustion engines
+    }
+    return selectedEsc.brand === 'Spektrum' ? escSpektrum : escElectric;
+  };
+
+  const getBatteryImage = () => {
+    if (selectedMotor.isGasOrGlow) {
+      return batteryGas; // fuel tank acts as battery energy equivalent
+    }
+    return selectedBattery.brand.includes('Spektrum') ? batterySpektrum : batteryLipo;
+  };
+
+  const getPropellerImage = () => {
+    return propeller2b;
   };
 
   // Calculate outputs
@@ -839,7 +877,7 @@ export default function CockpitOverview({
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>MOTOR</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={motorImg} alt="Brushless Motor" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                      <img src={getMotorImage()} alt="Brushless Motor" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
@@ -854,8 +892,12 @@ export default function CockpitOverview({
                     </select>
                   </div>
                   <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>Mod: {selectedMotor.model}</div>
-                    <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>Volt: {selectedMotor.voltageSupported.replace(" LiPo", "")}</div>
+                    <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedMotor.isGasOrGlow ? `Power: ${selectedMotor.horsepower} HP (${selectedMotor.displacement})` : `Mod: ${selectedMotor.model}`}
+                    </div>
+                    <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedMotor.isGasOrGlow ? `Fuel: ${selectedMotor.voltageSupported}` : `Volt: ${selectedMotor.voltageSupported.replace(" LiPo", "")}`}
+                    </div>
                   </div>
                 </div>
 
@@ -864,7 +906,7 @@ export default function CockpitOverview({
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>ESC</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={escImg} alt="Electronic Speed Controller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                      <img src={getEscImage()} alt="Electronic Speed Controller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
@@ -879,8 +921,12 @@ export default function CockpitOverview({
                     </select>
                   </div>
                   <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>Mod: {selectedEsc.model}</div>
-                    <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>Volt: {selectedEsc.voltageSupported.replace(" LiPo", "")}</div>
+                    <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedMotor.isGasOrGlow ? "Servo: Standard Size" : `Mod: ${selectedEsc.model}`}
+                    </div>
+                    <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedMotor.isGasOrGlow ? "Signal: PWM Servo Throttle" : `Volt: ${selectedEsc.voltageSupported.replace(" LiPo", "")}`}
+                    </div>
                   </div>
                 </div>
 
@@ -889,7 +935,7 @@ export default function CockpitOverview({
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>BATTERY</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={batteryImg} alt="LiPo Battery" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                      <img src={getBatteryImage()} alt="LiPo Battery" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
@@ -904,8 +950,12 @@ export default function CockpitOverview({
                     </select>
                   </div>
                   <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347' }}>{selectedBattery.cells}S Pack</div>
-                    <div>Cap: {selectedBattery.capacity}mAh</div>
+                    <div style={{ fontWeight: 'bold', color: '#ffb347' }}>
+                      {selectedMotor.isGasOrGlow ? "Fuel Capacity" : `${selectedBattery.cells}S Pack`}
+                    </div>
+                    <div>
+                      {selectedMotor.isGasOrGlow ? `Tank: ${selectedMotor.fuelCapacityOz} oz` : `Cap: ${selectedBattery.capacity}mAh`}
+                    </div>
                   </div>
                 </div>
 
@@ -914,7 +964,7 @@ export default function CockpitOverview({
                   <div>
                     <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>PROPELLER</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={propellerImg} alt="Propeller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                      <img src={getPropellerImage()} alt="Propeller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
                       style={{ fontSize: '9px', padding: '2px', width: '100%' }} 

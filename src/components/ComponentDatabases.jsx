@@ -31,11 +31,23 @@ export default function ComponentDatabases({
               <h3 style={titleStyle}>{m.name}</h3>
               <table className="retro-table" style={{ fontSize: '11px', marginBottom: '12px' }}>
                 <tbody>
-                  <tr><td className="label">KV Rating</td><td className="val">{m.kv} KV</td></tr>
-                  <tr><td className="label">Weight</td><td className="val">{m.weight} g</td></tr>
-                  <tr><td className="label">Max Current</td><td className="val">{m.maxCurrent} A</td></tr>
-                  <tr><td className="label">Max Power</td><td className="val">{m.maxPower} W</td></tr>
-                  <tr><td className="label">Internal Resistance</td><td className="val">{m.internalResistance} Ω</td></tr>
+                  {m.isGasOrGlow ? (
+                    <>
+                      <tr><td className="label">Displacement</td><td className="val">{m.displacement}</td></tr>
+                      <tr><td className="label">Horsepower</td><td className="val">{m.horsepower} HP</td></tr>
+                      <tr><td className="label">Max RPM</td><td className="val">{m.maxRpm} RPM</td></tr>
+                      <tr><td className="label">Weight</td><td className="val">{m.weight} g</td></tr>
+                      <tr><td className="label">Fuel System</td><td className="val">{m.voltageSupported}</td></tr>
+                    </>
+                  ) : (
+                    <>
+                      <tr><td className="label">KV Rating</td><td className="val">{m.kv} KV</td></tr>
+                      <tr><td className="label">Weight</td><td className="val">{m.weight} g</td></tr>
+                      <tr><td className="label">Max Current</td><td className="val">{m.maxCurrent} A</td></tr>
+                      <tr><td className="label">Max Power</td><td className="val">{m.maxPower} W</td></tr>
+                      <tr><td className="label">Internal Resistance</td><td className="val">{m.internalResistance} Ω</td></tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
