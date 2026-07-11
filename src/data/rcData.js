@@ -273,7 +273,7 @@ export const aircrafts = [
   }
 ];
 
-export const motors = [
+const rawMotors = [
   {
     id: "sunnysky-x4120",
     name: "SUNNYSKY X4120 III",
@@ -555,7 +555,9 @@ export const motors = [
   }
 ];
 
-export const escs = [
+export const motors = [...rawMotors].sort((a, b) => a.name.localeCompare(b.name));
+
+const rawEscs = [
   {
     id: "hobbywing-120a-hv",
     name: "HOBBYWING PLATINUM 120A HV V4",
@@ -698,8 +700,22 @@ export const escs = [
     weight: 105,
     voltageSupported: "3S - 8S LiPo (11.1V - 29.6V)",
     becOutput: "BEC: 5.0V-8.0V @ 7A"
+  },
+  {
+    id: "avian-80a-hv",
+    name: "SPEKTRUM AVIAN 80A SMART HV",
+    model: "SPMXAE1080HV",
+    brand: "Spektrum",
+    maxAmps: 80,
+    burstAmps: 120,
+    resistance: 0.0018,
+    weight: 105,
+    voltageSupported: "6S - 12S LiPo (22.2V - 44.4V)",
+    becOutput: "BEC: 6.0V/7.4V/8.4V @ 8A"
   }
 ];
+
+export const escs = [...rawEscs].sort((a, b) => a.name.localeCompare(b.name));
 
 export const batteries = [
   {
@@ -771,6 +787,86 @@ export const batteries = [
     internalResistance: 0.0015, // Total 0.018
     weight: 1450,
     brand: "Spektrum Smart"
+  },
+  {
+    id: "spektrum-4s-5000-120c",
+    name: "SPEKTRUM SMART G2 AIR 4S 5000mAh 120C LIPO",
+    cells: 4,
+    capacity: 5000,
+    cRating: 120,
+    internalResistance: 0.0010,
+    weight: 460,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "spektrum-5s-5000-120c",
+    name: "SPEKTRUM SMART G2 AIR 5S 5000mAh 120C LIPO",
+    cells: 5,
+    capacity: 5000,
+    cRating: 120,
+    internalResistance: 0.0010,
+    weight: 580,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "spektrum-6s-5000-120c",
+    name: "SPEKTRUM SMART G2 AIR 6S 5000mAh 120C LIPO",
+    cells: 6,
+    capacity: 5000,
+    cRating: 120,
+    internalResistance: 0.0010,
+    weight: 700,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "spektrum-8s-5000-120c",
+    name: "SPEKTRUM SMART G2 AIR 8S 5000mAh 120C LIPO",
+    cells: 8,
+    capacity: 5000,
+    cRating: 120,
+    internalResistance: 0.0010,
+    weight: 950,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "smc-4s-5600-fixedwing",
+    name: "SMC TRUE FLIGHT EXTREME FIXED WING 4S 5600mAh LIPO",
+    cells: 4,
+    capacity: 5600,
+    cRating: 135,
+    internalResistance: 0.0008,
+    weight: 480,
+    brand: "SMC Racing"
+  },
+  {
+    id: "smc-5s-5600-fixedwing",
+    name: "SMC TRUE FLIGHT EXTREME FIXED WING 5S 5600mAh LIPO",
+    cells: 5,
+    capacity: 5600,
+    cRating: 135,
+    internalResistance: 0.0008,
+    weight: 600,
+    brand: "SMC Racing"
+  },
+  {
+    id: "smc-6s-5600-fixedwing",
+    name: "SMC TRUE FLIGHT EXTREME FIXED WING 6S 5600mAh LIPO",
+    cells: 6,
+    capacity: 5600,
+    cRating: 135,
+    internalResistance: 0.0008,
+    weight: 710,
+    brand: "SMC Racing"
+  },
+  {
+    id: "smc-8s-5600-fixedwing",
+    name: "SMC TRUE FLIGHT EXTREME FIXED WING 8S 5600mAh LIPO",
+    cells: 8,
+    capacity: 5600,
+    cRating: 135,
+    internalResistance: 0.0008,
+    weight: 960,
+    brand: "SMC Racing"
   }
 ];
 

@@ -70,7 +70,7 @@ export default function ComponentDatabases({
                   <tr><td className="label">Burst Amps</td><td className="val">{e.burstAmps} A</td></tr>
                   <tr><td className="label">Internal Resistance</td><td className="val">{e.resistance} Ω</td></tr>
                   <tr><td className="label">Weight</td><td className="val">{e.weight} g</td></tr>
-                  <tr><td className="label">BEC Spec</td><td className="val">{e.becOutput.replace("BEC: ", "")}</td></tr>
+                  <tr><td className="label">BEC Spec</td><td className="val">{(e.becOutput || "N/A").replace("BEC: ", "")}</td></tr>
                 </tbody>
               </table>
             </div>

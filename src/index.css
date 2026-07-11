@@ -505,3 +505,67 @@ body {
     display: none !important;
   }
 }
+
+/* Modal overlays for system dialogs (Compare/Export) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  max-width: 580px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+}
+
+.comparison-table th, .comparison-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(142, 104, 64, 0.3);
+  font-size: 11px;
+  text-align: center;
+}
+
+.comparison-table th {
+  color: var(--color-panel-border);
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.comparison-table td.label-cell {
+  text-align: left;
+  color: var(--color-amber-dim);
+  font-weight: bold;
+  font-size: 10.5px;
+}
+
+.comparison-table td.active-cell {
+  color: #fff;
+  font-weight: bold;
+}
+
+.comparison-table td.stock-cell {
+  color: var(--color-amber);
+}
+
+.comparison-table td.saved-cell {
+  color: #ffc97a;
+}
