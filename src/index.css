@@ -458,7 +458,7 @@ body {
 
 .bottom-row-grid {
   display: grid;
-  grid-template-columns: 1.3fr 0.75fr 1fr;
+  grid-template-columns: 1.3fr 0.5fr 1.55fr;
 }
 
 .setup-inner-grid {

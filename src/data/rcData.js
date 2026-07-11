@@ -29,7 +29,7 @@ export const aircrafts = [
     manufacturer: "Top Flite",
     image: "corsair.jpg",
     description: "Chance Vought F4U Corsair. Carrier-capable fighter bomber. Known for its distinct inverted gull wings and dark navy blue paint scheme.",
-    manualUrl: "https://manuals.hobbico.com/top/topa0101-manual.pdf"
+    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=11649"
   },
   {
     id: "spitfire-mk9",
@@ -141,7 +141,8 @@ export const aircrafts = [
     manufacturer: "ESM / Seagull",
     image: "p38.jpg",
     description: "Lockheed P-38 Lightning. Twin-engine heavy fighter with a twin-boom design and central nacelle. Marked with bold Normandy stripes for D-Day operations.",
-    manualUrl: null
+    manualUrl: null,
+    enginesCount: 2
   },
   {
     id: "f6f-hellcat",
@@ -253,7 +254,7 @@ export const aircrafts = [
     manufacturer: "Top Flite",
     image: "p40.jpg",
     description: "Curtiss P-40 Warhawk. The workhorse WWII fighter famous for the Flying Tigers shark mouth nose art. Rugged airframe with unique landing gear twist rotation.",
-    manualUrl: "https://manuals.hobbico.com/top/topa0120-manual.pdf"
+    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=13591"
   },
   {
     id: "topflite-p51",
@@ -269,7 +270,7 @@ export const aircrafts = [
     manufacturer: "Top Flite",
     image: "p51.jpg",
     description: "Top Flite Gold Edition P-51D Mustang. High-fidelity build-up kit design, recognized for its scale outlines, high-speed stability, and iconic bubble canopy.",
-    manualUrl: "https://manuals.hobbico.com/top/topa0110-manual.pdf"
+    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=12783"
   }
 ];
 

@@ -35,6 +35,7 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   }
 
   const t = throttle / 100; // 0 to 1
+  const engines = aircraft.enginesCount || 1;
 
   // 1. Calculate Full Throttle Current Load Factor based on Propeller Size, Motor KV, Battery Cells, and Blades count
   const blades = propeller.blades || 2;
@@ -107,11 +108,11 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   }
 
   // 7. Performance Predictions
-  // Thrust (calibrated to 6.63 lbs thrust for default, matching 0.78 ratio on 8.5 lbs plane)
+  // Thrust (calibrated to 10.5 lbs thrust for default, matching 1.24 ratio on 8.5 lbs plane)
   const bladesThrustMultiplier = blades === 3 ? 1.20 : blades === 4 ? 1.36 : 1.0;
   let thrust = 0;
   if (t > 0) {
-    thrust = 6.63 * Math.pow(propeller.diameter / 15.0, 3) * Math.sqrt(propeller.pitch / 10.0) * Math.pow(rpm / 8740.0, 2) * bladesThrustMultiplier;
+    thrust = 10.5 * Math.pow(propeller.diameter / 15.0, 3) * Math.sqrt(propeller.pitch / 10.0) * Math.pow(rpm / 8740.0, 2) * bladesThrustMultiplier * engines;
   }
   const thrustToWeight = aircraft.flyingWeight > 0 ? (thrust / aircraft.flyingWeight) : 0;
 
@@ -146,9 +147,10 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
     // average current in normal flight is lower than static bench current
     const avgCurrentRatioMin = 0.55; // aggressive mixed throttle
     const avgCurrentRatioMax = 0.35; // gentle cruising
+    const totalAmps = amps * engines;
     
-    flightTimeMin = Math.round((capAh / (amps * avgCurrentRatioMin)) * 60);
-    flightTimeMax = Math.round((capAh / (amps * avgCurrentRatioMax)) * 60);
+    flightTimeMin = Math.round((capAh / (totalAmps * avgCurrentRatioMin)) * 60);
+    flightTimeMax = Math.round((capAh / (totalAmps * avgCurrentRatioMax)) * 60);
     
     // clamp values to realistic ranges
     flightTimeMin = Math.max(Math.min(flightTimeMin, 15), 3);
@@ -162,7 +164,7 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   const escLoad = Math.round((amps / esc.maxAmps) * 100);
   // Battery load (calibrated: 78.6A on 5Ah 45C = 61% load against practical limit)
   const batMaxAmps = (battery.capacity / 1000) * battery.cRating * 0.57;
-  const batteryLoad = Math.round((amps / batMaxAmps) * 100);
+  const batteryLoad = Math.round(((amps * engines) / batMaxAmps) * 100);
 
   // Status Strings
   let overallStatus = "GOOD";
@@ -181,9 +183,9 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
 
   return {
     rpm: Math.round(rpm),
-    amps: parseFloat(amps.toFixed(1)),
+    amps: parseFloat((amps * engines).toFixed(1)),
     volts: parseFloat(volts.toFixed(1)),
-    watts: Math.round(watts),
+    watts: Math.round(watts * engines),
     efficiency,
     temp: Math.round(temp),
     thrustToWeight: parseFloat(thrustToWeight.toFixed(2)),

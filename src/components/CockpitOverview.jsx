@@ -177,6 +177,22 @@ export default function CockpitOverview({
   const [saveMessage, setSaveMessage] = useState("");
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [adjustedEmptyWeight, setAdjustedEmptyWeight] = useState(null);
+
+  // Reset custom weight adjustments on aircraft change
+  useEffect(() => {
+    setAdjustedEmptyWeight(null);
+  }, [selectedAircraft]);
+
+  const activeEmptyWeight = adjustedEmptyWeight !== null ? adjustedEmptyWeight : selectedAircraft.emptyWeight;
+  const batteryWeightLbs = (selectedBattery.weight || 0) / 453.59;
+  const calculatedFlyingWeight = activeEmptyWeight + batteryWeightLbs;
+
+  const dynamicAircraft = {
+    ...selectedAircraft,
+    emptyWeight: activeEmptyWeight,
+    flyingWeight: calculatedFlyingWeight
+  };
 
   const [savedConfigs, setSavedConfigs] = useState(() => {
     try {
@@ -283,7 +299,7 @@ export default function CockpitOverview({
 
   // Calculate outputs
   const specs = calculateSpecs({
-    aircraft: selectedAircraft,
+    aircraft: dynamicAircraft,
     motor: selectedMotor,
     esc: selectedEsc,
     battery: selectedBattery,
@@ -356,7 +372,7 @@ export default function CockpitOverview({
     let csv = "Throttle (%),Current (A),Voltage (V),Power (W),RPM,Thrust (lb),Thrust-to-Weight,Efficiency (%),Temp (C)\n";
     for (let t = 0; t <= 100; t += 10) {
       const s = calculateSpecs({
-        aircraft: selectedAircraft,
+        aircraft: dynamicAircraft,
         motor: selectedMotor,
         esc: selectedEsc,
         battery: selectedBattery,
@@ -381,8 +397,10 @@ export default function CockpitOverview({
     report += `         RC POWER BENCH PRO DIAGNOSTICS REPORT\n`;
     report += `==================================================\n\n`;
     report += `DATE: ${new Date().toLocaleString()}\n`;
-    report += `AIRCRAFT: ${selectedAircraft.name.replace(/★/g, "").trim()} (${selectedAircraft.manufacturer})\n`;
-    report += `CLASS: ${selectedAircraft.class}\n\n`;
+    report += `AIRCRAFT: ${dynamicAircraft.name.replace(/★/g, "").trim()} (${dynamicAircraft.manufacturer})\n`;
+    report += `CLASS: ${dynamicAircraft.class}\n`;
+    report += `AIRFRAME WEIGHT: ${dynamicAircraft.emptyWeight.toFixed(2)} lbs\n`;
+    report += `TOTAL FLYING WEIGHT: ${dynamicAircraft.flyingWeight.toFixed(2)} lbs\n\n`;
     
     report += `--- SYSTEM CONFIGURATION ---\n`;
     report += `MOTOR: ${selectedMotor.name} (${selectedMotor.kv} KV)\n`;
@@ -781,12 +799,46 @@ export default function CockpitOverview({
                     <td className="val">{selectedAircraft.wingArea} sq in</td>
                   </tr>
                   <tr>
-                    <td className="label">Empty Weight</td>
-                    <td className="val">{selectedAircraft.emptyWeight.toFixed(1)} lb</td>
+                    <td className="label">Airframe Wt (No Bat)</td>
+                    <td className="val" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                      <input 
+                        type="number" 
+                        step="0.05"
+                        min="0.5"
+                        max="35"
+                        value={adjustedEmptyWeight !== null ? adjustedEmptyWeight : selectedAircraft.emptyWeight} 
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val)) setAdjustedEmptyWeight(val);
+                        }}
+                        className="retro-input"
+                        style={{ 
+                          width: '45px', 
+                          padding: '1px 3px', 
+                          fontSize: '10.5px', 
+                          textAlign: 'right', 
+                          height: '16px', 
+                          margin: 0, 
+                          color: '#fff', 
+                          backgroundColor: '#120e0c',
+                          border: '1px solid var(--color-panel-border)',
+                          borderRadius: '2px'
+                        }}
+                      />
+                      <span>lb</span>
+                    </td>
                   </tr>
                   <tr>
-                    <td className="label">Flying Weight</td>
-                    <td className="val">{selectedAircraft.flyingWeight.toFixed(1)} lb</td>
+                    <td className="label">Battery Weight</td>
+                    <td className="val" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '10px' }}>
+                      +{batteryWeightLbs.toFixed(2)} lb ({selectedBattery.weight}g)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Total Flying Weight</td>
+                    <td className="val" style={{ color: 'var(--color-green)', fontWeight: 'bold' }}>
+                      {calculatedFlyingWeight.toFixed(2)} lb
+                    </td>
                   </tr>
                   <tr>
                     <td className="label">Power Range</td>
@@ -1196,7 +1248,7 @@ export default function CockpitOverview({
                   unit="RATIO" 
                   warningThreshold={150} 
                   dangerThreshold={180}
-                  size={110} 
+                  size={92} 
                 />
               </div>
             </div>
@@ -1212,7 +1264,7 @@ export default function CockpitOverview({
               </div>
               <div className="card-content" style={{ padding: '4px 8px' }}>
                 <PowerCurveChart 
-                  aircraft={selectedAircraft}
+                  aircraft={dynamicAircraft}
                   motor={selectedMotor}
                   esc={selectedEsc}
                   battery={selectedBattery}
@@ -1425,8 +1477,14 @@ export default function CockpitOverview({
                     const recEsc = escs.find(e => e.id === recSetup.escId) || selectedEsc;
                     const recBattery = batteries.find(b => b.id === recSetup.batteryId) || selectedBattery;
                     const recPropeller = propellers.find(p => p.id === recSetup.propellerId) || selectedPropeller;
+                    const stockBatteryWeightLbs = (recBattery.weight || 0) / 453.59;
+                    const stockDynamicAircraft = {
+                      ...selectedAircraft,
+                      emptyWeight: activeEmptyWeight,
+                      flyingWeight: activeEmptyWeight + stockBatteryWeightLbs
+                    };
                     const stockSpecs = calculateSpecs({
-                      aircraft: selectedAircraft,
+                      aircraft: stockDynamicAircraft,
                       motor: recMotor,
                       esc: recEsc,
                       battery: recBattery,
@@ -1437,14 +1495,24 @@ export default function CockpitOverview({
                     const savedConfig = savedConfigs.find(c => c.id === selectedSavedConfigId) || savedConfigs[0];
                     let savedSpecs = null;
                     let sAc = null, sM = null, sE = null, sB = null, sP = null;
+                    let savedDynamicAircraft = null;
                     if (savedConfig) {
                       sAc = aircrafts.find(a => a.id === savedConfig.aircraftId) || selectedAircraft;
                       sM = motors.find(m => m.id === savedConfig.motorId) || selectedMotor;
                       sE = escs.find(e => e.id === savedConfig.escId) || selectedEsc;
                       sB = batteries.find(b => b.id === savedConfig.batteryId) || selectedBattery;
                       sP = propellers.find(p => p.id === savedConfig.propellerId) || selectedPropeller;
+                      
+                      const sBatteryWeightLbs = (sB.weight || 0) / 453.59;
+                      const sEmptyWeight = sAc.id === selectedAircraft.id ? activeEmptyWeight : sAc.emptyWeight;
+                      savedDynamicAircraft = {
+                        ...sAc,
+                        emptyWeight: sEmptyWeight,
+                        flyingWeight: sEmptyWeight + sBatteryWeightLbs
+                      };
+
                       savedSpecs = calculateSpecs({
-                        aircraft: sAc,
+                        aircraft: savedDynamicAircraft,
                         motor: sM,
                         esc: sE,
                         battery: sB,
@@ -1455,6 +1523,8 @@ export default function CockpitOverview({
 
                     const rows = [
                       { label: "Aircraft", cur: selectedAircraft.name.replace(/★/g, "").trim(), stk: selectedAircraft.name.replace(/★/g, "").trim(), sav: sAc ? sAc.name.replace(/★/g, "").trim() : "-" },
+                      { label: "Airframe Wt", cur: activeEmptyWeight.toFixed(2) + " lb", stk: selectedAircraft.emptyWeight.toFixed(2) + " lb", sav: savedDynamicAircraft ? savedDynamicAircraft.emptyWeight.toFixed(2) + " lb" : "-" },
+                      { label: "Flying Wt", cur: calculatedFlyingWeight.toFixed(2) + " lb", stk: stockDynamicAircraft.flyingWeight.toFixed(2) + " lb", sav: savedDynamicAircraft ? savedDynamicAircraft.flyingWeight.toFixed(2) + " lb" : "-" },
                       { label: "Motor", cur: selectedMotor.brand + " " + selectedMotor.kv + "KV", stk: recMotor.brand + " " + recMotor.kv + "KV", sav: sM ? sM.brand + " " + sM.kv + "KV" : "-" },
                       { label: "ESC", cur: selectedEsc.brand + " " + selectedEsc.maxAmps + "A", stk: recEsc.brand + " " + recEsc.maxAmps + "A", sav: sE ? sE.brand + " " + sE.maxAmps + "A" : "-" },
                       { label: "Battery", cur: selectedBattery.cells + "S " + selectedBattery.capacity + "mAh", stk: recBattery.cells + "S " + recBattery.capacity + "mAh", sav: sB ? sB.cells + "S " + sB.capacity + "mAh" : "-" },
