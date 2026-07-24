@@ -80,7 +80,7 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ background: '#120e0c', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
         <defs>
           <linearGradient id="ampsGlow" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="var(--color-red)" stopOpacity="0.4" />
@@ -166,7 +166,7 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
 
         {/* Comparison Data Box (Bottom Right Empty Space) */}
         <g transform={`translate(${width - padding.right - 120}, ${height - padding.bottom - 54})`}>
-          <rect width="115" height="50" fill="rgba(18, 14, 12, 0.92)" stroke="var(--color-panel-border)" strokeWidth="1" rx="2" />
+          <rect width="115" height="50" fill="rgba(19, 23, 27, 0.92)" stroke="var(--color-panel-border)" strokeWidth="1" rx="2" />
           <text x="6" y="10" fill="var(--color-amber-dim)" fontSize="8" fontWeight="bold">VS STOCK BASELINE</text>
           
           <text x="6" y="22" fill="rgba(255,255,255,0.4)" fontSize="9">STOCK:</text>

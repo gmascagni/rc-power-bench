@@ -285,7 +285,7 @@ export default function CockpitOverview({
     return propeller2b;
   };
 
-  // Calculate outputs
+  // Calculate outputs at active throttle
   const specs = calculateSpecs({
     aircraft: dynamicAircraft,
     motor: selectedMotor,
@@ -293,6 +293,25 @@ export default function CockpitOverview({
     battery: selectedBattery,
     propeller: selectedPropeller,
     throttle: throttle
+  });
+
+  // Calculate full throttle and cruise benchmarks for setup bounds
+  const fullSpecs = calculateSpecs({
+    aircraft: dynamicAircraft,
+    motor: selectedMotor,
+    esc: selectedEsc,
+    battery: selectedBattery,
+    propeller: selectedPropeller,
+    throttle: 100
+  });
+
+  const cruiseSpecs = calculateSpecs({
+    aircraft: dynamicAircraft,
+    motor: selectedMotor,
+    esc: selectedEsc,
+    battery: selectedBattery,
+    propeller: selectedPropeller,
+    throttle: 70
   });
 
   // Apply Recommended Setup
@@ -539,20 +558,20 @@ export default function CockpitOverview({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <svg width="180" height="50" viewBox="0 0 180 50">
               {/* Wing Left */}
-              <path d="M40,25 C20,13 10,16 2,21 C12,27 25,27 38,25 C28,29 18,31 8,31 C20,35 32,33 40,31" fill="#731b1b" stroke="#8e6840" strokeWidth="1" />
+              <path d="M40,25 C20,13 10,16 2,21 C12,27 25,27 38,25 C28,29 18,31 8,31 C20,35 32,33 40,31" fill="#731b1b" stroke="#5a6778" strokeWidth="1" />
               {/* Wing Right */}
-              <path d="M140,25 C160,13 170,16 178,21 C168,27 155,27 142,25 C152,29 162,31 172,31 C160,35 148,33 140,31" fill="#731b1b" stroke="#8e6840" strokeWidth="1" />
+              <path d="M140,25 C160,13 170,16 178,21 C168,27 155,27 142,25 C152,29 162,31 172,31 C160,35 148,33 140,31" fill="#731b1b" stroke="#5a6778" strokeWidth="1" />
               {/* Gear wheel backing */}
-              <circle cx="90" cy="22" r="16" fill="#1b120f" stroke="#8e6840" strokeWidth="2.5" />
-              <circle cx="90" cy="22" r="12" fill="none" stroke="#e2bd89" strokeWidth="1" strokeDasharray="3,3" />
+              <circle cx="90" cy="22" r="16" fill="#161a1f" stroke="#5a6778" strokeWidth="2.5" />
+              <circle cx="90" cy="22" r="12" fill="none" stroke="#8fa0b5" strokeWidth="1" strokeDasharray="3,3" />
               {/* Inside Crosslines */}
-              <path d="M90,6 L90,38 M74,22 L106,22" stroke="#8e6840" strokeWidth="1.5" />
+              <path d="M90,6 L90,38 M74,22 L106,22" stroke="#5a6778" strokeWidth="1.5" />
               {/* Red Star in Center */}
               <path d="M90,13 L93,20 L100,20 L95,24 L97,31 L90,27 L83,31 L85,24 L80,20 L87,20 Z" fill="#d13535" stroke="#fff" strokeWidth="0.5" />
               {/* Logo Texts */}
-              <text x="90" y="7" fill="#ffc97a" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="var(--font-serif)" letterSpacing="0.5">RC POWER BENCH</text>
-              <rect x="79" y="34" width="22" height="9" rx="2" fill="#291a13" stroke="#8e6840" strokeWidth="1" />
-              <text x="90" y="41.5" fill="#ffb347" fontSize="7.5" fontWeight="bold" textAnchor="middle">PRO</text>
+              <text x="90" y="7" fill="#e3edf7" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="var(--font-serif)" letterSpacing="0.5">RC POWER BENCH</text>
+              <rect x="79" y="34" width="22" height="9" rx="2" fill="#242a32" stroke="#5a6778" strokeWidth="1" />
+              <text x="90" y="41.5" fill="#63b3ed" fontSize="7.5" fontWeight="bold" textAnchor="middle">PRO</text>
             </svg>
           </div>
 
@@ -607,7 +626,7 @@ export default function CockpitOverview({
                 No Clouds Too High
               </div>
             </div>
-            <div style={{ position: 'relative', width: '52px', height: '52px', border: '2.5px solid #8e6840', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 10px rgba(0,0,0,0.8)' }}>
+            <div style={{ position: 'relative', width: '52px', height: '52px', border: '2.5px solid #5a6778', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 10px rgba(0,0,0,0.8)' }}>
               <img src={pinupPilot} alt="Pinup Aviator" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
@@ -1044,29 +1063,25 @@ export default function CockpitOverview({
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Voltage Range:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.voltageRange : `${selectedBattery.cells}S`}
+                      {selectedBattery.cells}S ({(selectedBattery.cells * 3.7).toFixed(1)}V - {(selectedBattery.cells * 4.2).toFixed(1)}V)
                     </span>
                   </div>
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Power Range:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.powerRange : `${Math.round(specs.watts * 0.75)} - ${specs.watts} W`}
+                      {Math.round(cruiseSpecs.watts)} - {fullSpecs.watts} W
                     </span>
                   </div>
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Speed Est:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.speedEstimate : `${specs.topSpeed} MPH / ${specs.pitchSpeed} MPH Pitch`}
+                      {fullSpecs.topSpeed} MPH / {fullSpecs.pitchSpeed} MPH Pitch
                     </span>
                   </div>
                   <div className="flex-between">
                     <span style={{ color: 'var(--color-amber-dim)' }}>Amps Range:</span>
                     <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {activeSetupType === 'safe' ? '40 - 50 A' :
-                       activeSetupType === 'scale' ? '70 - 80 A' :
-                       activeSetupType === 'aggressive' ? '80 - 95 A' :
-                       activeSetupType === 'extreme' ? '110 - 120 A' :
-                       `${Math.round(specs.amps * 0.75)} - ${Math.round(specs.amps)} A`}
+                      {Math.round(cruiseSpecs.amps)} - {Math.round(fullSpecs.amps)} A
                     </span>
                   </div>
                 </div>
@@ -1288,7 +1303,7 @@ export default function CockpitOverview({
                 position: 'relative',
                 height: '240px',
                 width: '60px',
-                background: 'linear-gradient(90deg, #150f0c 0%, #2b1f1a 50%, #150f0c 100%)',
+                background: 'linear-gradient(90deg, #12161a 0%, #252c35 50%, #12161a 100%)',
                 border: '3px solid var(--color-panel-border)',
                 borderRadius: '30px',
                 display: 'flex',

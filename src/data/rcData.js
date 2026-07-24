@@ -1146,10 +1146,10 @@ export const recommendedSetups = {
     propellerId: "apc-18x10e",
     notes: {
       voltageRange: "10S - 12S",
-      powerRange: "3000 - 3200 W",
+      powerRange: "5000 - 8100 W",
       speedEstimate: "120 - 145 MPH",
       behavior: "Unlimited heavy lift vertical performance, maximum speed, highest thermal load.",
-      warning: "High Amp draw (120A+ at 12S). Extreme warning: check system temperature continuously!"
+      warning: "Extreme Amp draw (180A+ at 12S). High thermal warning: check system temperature continuously!"
     }
   }
 };

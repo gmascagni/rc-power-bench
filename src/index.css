@@ -2,15 +2,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Special+Elite&family=Oswald:wght@500;700&family=Alex+Brush&display=swap');
 
 :root {
-  --color-bg: #0c0806;
-  --color-panel-bg: #1d110b;
-  --color-panel-border: #8e6840; /* Polished Brass */
-  --color-panel-header: #291a13;
+  --color-bg: #121519;
+  --color-panel-bg: #20262d;
+  --color-panel-border: #5a6778; /* Machined Aircraft Aluminum / Gunmetal Steel */
+  --color-panel-header: #2b323c;
   
-  /* White High-Contrast Dial Theme (Default/Backlight OFF) */
-  --color-amber: #e0e0e0; 
-  --color-amber-dim: #8c8c8c;
-  --color-amber-glow: rgba(255, 255, 255, 0.08);
+  /* Cool Aluminum Steel Accent Theme */
+  --color-amber: #e3edf7; 
+  --color-amber-dim: #8fa0b5;
+  --color-amber-glow: rgba(227, 237, 247, 0.18);
   
   --color-red: #d13535;
   --color-red-dim: #731b1b;
@@ -26,10 +26,10 @@
 }
 
 .crt-effect {
-  /* Warm Vacuum-Tube Amber Theme (Backlight ON) */
-  --color-amber: #f0b459; 
-  --color-amber-dim: #996e33;
-  --color-amber-glow: rgba(240, 180, 89, 0.35);
+  /* High-Tech Tactical Backlight Theme (Backlight ON) */
+  --color-amber: #63b3ed; 
+  --color-amber-dim: #3182ce;
+  --color-amber-glow: rgba(99, 179, 237, 0.35);
 }
 
 * {
@@ -41,11 +41,10 @@
 body {
   background-color: var(--color-bg);
   background-image: 
-    radial-gradient(circle at 50% 50%, #1c130f 0%, #070403 100%),
-    radial-gradient(rgba(0, 0, 0, 0.35) 15%, transparent 20%),
-    radial-gradient(rgba(0, 0, 0, 0.35) 15%, transparent 20%);
-  background-size: 100% 100%, 8px 8px, 8px 8px;
-  background-position: 0 0, 0 0, 4px 4px;
+    radial-gradient(circle at 50% 30%, #1e242b 0%, #0d1013 100%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px, 24px 24px;
   color: var(--color-amber);
   font-family: var(--font-mono);
   font-size: 14px;
@@ -54,13 +53,13 @@ body {
   min-height: 100vh;
 }
 
-/* Custom Scrollbar for Retro Feel */
+/* Custom Scrollbar for Aircraft Cockpit Console */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #170b07;
+  background: #14181c;
   border-left: 1px solid var(--color-panel-border);
 }
 ::-webkit-scrollbar-thumb {
@@ -101,18 +100,19 @@ body {
   z-index: 9998;
 }
 
-/* Panel Designs (Brushed metal / riveted style) */
+/* Panel Designs (Brushed gunmetal / riveted aluminum airplane skin style) */
 .metal-panel {
-  background-color: #1a0f0a;
+  background-color: #20262d;
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 60%),
-    linear-gradient(135deg, #1d120d 0%, #110805 100%);
-  border: 2px solid #8e6840; /* Polished Brass */
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 65%),
+    linear-gradient(145deg, #2c333c 0%, #1e232a 50%, #171b20 100%);
+  border: 2px solid #5a6778; /* Machined Aircraft Aluminum */
   box-shadow: 
-    inset 0 0 0 1.5px #e2bd89, /* Gold inner border line */
-    inset 0 0 12px rgba(0, 0, 0, 0.95),
-    0 10px 22px rgba(0, 0, 0, 0.75);
-  border-radius: 6px;
+    inset 0 1px 0 rgba(255, 255, 255, 0.45), /* Top metallic bevel reflection */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+    inset 0 0 16px rgba(0, 0, 0, 0.75),
+    0 10px 25px rgba(0, 0, 0, 0.85);
+  border-radius: 4px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -120,8 +120,8 @@ body {
 
 /* Panel Headers */
 .panel-header {
-  background-color: var(--color-panel-header);
-  border-bottom: 2px solid var(--color-panel-border);
+  background: linear-gradient(180deg, #323a45 0%, #20262e 100%);
+  border-bottom: 2px solid #5a6778;
   padding: 8px 12px;
   display: flex;
   align-items: center;
@@ -129,6 +129,8 @@ body {
   font-family: var(--font-mono);
   font-weight: bold;
   letter-spacing: 1px;
+  color: #e3edf7;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .panel-header .badge {
@@ -138,20 +140,40 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1px solid var(--color-amber);
+  background: linear-gradient(145deg, #434d5c, #22272f);
+  border: 1px solid #7e8d9f;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.6);
   font-size: 11px;
+  color: #fff;
   margin-right: 4px;
 }
 
-/* Rivets */
+/* Photorealistic Aircraft Panel Rivets */
 .rivet {
-  width: 6px;
-  height: 6px;
-  background: radial-gradient(circle at 2px 2px, #6e5648, #2a1f1a);
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #d8e2ec 20%, #7e8f9e 60%, #3e4854 85%, #1d2228 100%);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset -1px -1px 1px rgba(0, 0, 0, 0.7);
   position: absolute;
   z-index: 10;
+}
+
+/* Central bucked pin indent inside the rivet */
+.rivet::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #2b323b 0%, #15191d 100%);
+  box-shadow: inset 0.5px 0.5px 1px rgba(0, 0, 0, 0.9), 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.4);
 }
 
 .rivet.top-left { top: 6px; left: 6px; }
@@ -161,21 +183,25 @@ body {
 
 /* Screws */
 .screw {
-  width: 10px;
-  height: 10px;
-  background: radial-gradient(circle at 3px 3px, #7c6254, #1a120f);
+  width: 11px;
+  height: 11px;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #cfd9e5 20%, #6e7d8e 65%, #2a313a 100%);
   border-radius: 50%;
   position: absolute;
-  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow: 
+    0 2px 3px rgba(0, 0, 0, 0.85),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.7),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.8);
 }
 .screw::after {
   content: "";
   position: absolute;
-  top: 4px;
-  left: 1px;
+  top: 4.5px;
+  left: 1.5px;
   width: 8px;
   height: 2px;
-  background-color: #120e0c;
+  background-color: #12161a;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.8);
   transform: rotate(45deg);
 }
 
@@ -194,20 +220,20 @@ body {
   text-shadow: 0 0 8px var(--color-green-glow);
 }
 
-/* Retro Vintage Buttons */
+/* Retro Vintage / Aircraft Buttons */
 .btn-retro {
-  background: linear-gradient(#4d3527, #24150d);
-  border: 1.5px solid #8e6840; /* Polished Brass */
-  color: #ffc97a;
+  background: linear-gradient(180deg, #424c58 0%, #222830 100%);
+  border: 1.5px solid #637182;
+  color: #dce6f0;
   padding: 8px 16px;
   font-family: var(--font-mono);
   font-weight: bold;
   cursor: pointer;
   border-radius: 4px;
   box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 2px 4px rgba(0,0,0,0.6);
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -1px 0 rgba(0,0,0,0.4),
+    0 2px 5px rgba(0,0,0,0.7);
   transition: all 0.15s ease-in-out;
   display: inline-flex;
   align-items: center;
@@ -217,10 +243,12 @@ body {
 }
 
 .btn-retro:hover {
-  background: linear-gradient(#5d4130, #301d12);
+  background: linear-gradient(180deg, #515d6c 0%, #2c343f 100%);
   color: #fff;
-  border-color: #e2bd89; /* Gold */
-  box-shadow: 0 0 12px rgba(226, 189, 137, 0.35);
+  border-color: #9bb0c7;
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 0 12px rgba(155, 176, 199, 0.35);
 }
 
 .btn-retro:active {
@@ -229,10 +257,10 @@ body {
 }
 
 .btn-retro.active {
-  background: linear-gradient(#c59d59, #6d4b1a);
-  border-color: #ffd699;
+  background: linear-gradient(180deg, #2b6cb0 0%, #1a497a 100%);
+  border-color: #63b3ed;
   color: #fff;
-  box-shadow: 0 0 12px rgba(197, 157, 89, 0.5);
+  box-shadow: 0 0 12px rgba(99, 179, 237, 0.5);
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
@@ -308,7 +336,7 @@ body {
 
 .retro-table td {
   padding: 6px 0;
-  border-bottom: 1px dashed rgba(56, 44, 36, 0.5);
+  border-bottom: 1px dashed rgba(90, 103, 120, 0.4);
   font-size: 13px;
 }
 
@@ -330,26 +358,27 @@ body {
 
 /* Inputs and Forms */
 .retro-input, .retro-select {
-  background-color: #120e0c;
-  border: 1px solid var(--color-panel-border);
+  background-color: #13171b;
+  border: 1px solid #485463;
   color: var(--color-amber);
   padding: 8px;
   font-family: var(--font-mono);
   border-radius: 3px;
   width: 100%;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
 }
 
 .retro-input:focus, .retro-select:focus {
   outline: none;
-  border-color: var(--color-amber);
-  box-shadow: 0 0 8px var(--color-amber-glow);
+  border-color: #8bb0d6;
+  box-shadow: 0 0 8px rgba(139, 176, 214, 0.4);
 }
 
 /* Navigation bar */
 .nav-bar {
   display: flex;
-  background-color: #1a1310;
-  border-top: 2px solid var(--color-panel-border);
+  background: linear-gradient(180deg, #232930 0%, #14181c 100%);
+  border-top: 2px solid #525f70;
   position: sticky;
   bottom: 0;
   width: 100%;
@@ -358,13 +387,14 @@ body {
   gap: 8px;
   justify-content: space-between;
   overflow-x: auto;
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.6);
 }
 
 .nav-item {
   flex: 1;
   min-width: 100px;
-  background: linear-gradient(#2a1f1a, #150f0c);
-  border: 1px solid var(--color-panel-border);
+  background: linear-gradient(180deg, #353d48 0%, #1e2329 100%);
+  border: 1px solid #4a5666;
   color: var(--color-amber-dim);
   padding: 10px 8px;
   text-align: center;
@@ -378,18 +408,19 @@ body {
   gap: 4px;
   font-size: 11px;
   text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
 .nav-item:hover {
   color: var(--color-amber);
-  border-color: var(--color-amber-dim);
+  border-color: #8da2ba;
 }
 
 .nav-item.active {
-  background: linear-gradient(#731b1b, #300a0a);
+  background: linear-gradient(180deg, #b82e2e 0%, #5e1414 100%);
   border-color: var(--color-red);
   color: #fff;
-  box-shadow: 0 0 10px var(--color-red-glow);
+  box-shadow: 0 0 12px var(--color-red-glow), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
 .nav-item.active svg {

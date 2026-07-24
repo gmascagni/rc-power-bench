@@ -126,8 +126,8 @@ export function CircularGauge({
         <defs>
           {/* Circular dial gradient */}
           <radialGradient id="dialGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="70%" stopColor="#1c1512" />
-            <stop offset="100%" stopColor="#0e0a08" />
+            <stop offset="70%" stopColor="#181d24" />
+            <stop offset="100%" stopColor="#0d1014" />
           </radialGradient>
           {/* Glass glare gradient */}
           <linearGradient id="glassReflection" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -144,7 +144,7 @@ export function CircularGauge({
 
         {/* Outer Bezel (Metal effect) */}
         <circle cx={center} cy={center} r={58} fill="url(#dialGrad)" stroke="var(--color-panel-border)" strokeWidth="3" />
-        <circle cx={center} cy={center} r={56} fill="none" stroke="#2e221b" strokeWidth="1" />
+        <circle cx={center} cy={center} r={56} fill="none" stroke="#333c48" strokeWidth="1" />
 
         {/* Backlight ambient glow circle */}
         <circle cx={center} cy={center} r={46} fill="none" stroke={textColor} strokeWidth="0.75" strokeOpacity="0.12" style={{ filter: `drop-shadow(0 0 3px ${glowColor})` }} />
@@ -180,7 +180,7 @@ export function CircularGauge({
         {renderedScaleLabels}
 
         {/* Center Hub */}
-        <circle cx={center} cy={center} r={10} fill="#110d0b" stroke="var(--color-panel-border)" strokeWidth="1.5" />
+        <circle cx={center} cy={center} r={10} fill="#13171b" stroke="var(--color-panel-border)" strokeWidth="1.5" />
 
         {/* Glowing Needle */}
         <g transform={`rotate(${needleAngle} ${center} ${center})`}>
