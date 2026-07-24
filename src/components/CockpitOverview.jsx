@@ -9,16 +9,12 @@ import pinupPilot from '../assets/pinup-pilot.jpg';
 
 import motorSpektrum from '../assets/motor_spektrum.jpg';
 import motorElectric from '../assets/motor_electric.jpg';
-import motorGas from '../assets/motor_gas.jpg';
-import motorGlow from '../assets/motor_glow.jpg';
 
 import escSpektrum from '../assets/esc_spektrum.jpg';
 import escElectric from '../assets/esc_electric.jpg';
-import escServo from '../assets/esc_servo.jpg';
 
 import batterySpektrum from '../assets/battery_spektrum.jpg';
 import batteryLipo from '../assets/battery_lipo.jpg';
-import batteryGas from '../assets/battery_gas.jpg';
 
 import propeller2b from '../assets/propeller_2b.jpg';
 
@@ -274,23 +270,14 @@ export default function CockpitOverview({
 
   // Helper functions to get active component images dynamically based on brand/type
   const getMotorImage = () => {
-    if (selectedMotor.isGasOrGlow) {
-      return selectedMotor.engineType === 'gas' ? motorGas : motorGlow;
-    }
     return selectedMotor.brand === 'Spektrum' ? motorSpektrum : motorElectric;
   };
 
   const getEscImage = () => {
-    if (selectedMotor.isGasOrGlow) {
-      return escServo; // throttle servo governs combustion engines
-    }
     return selectedEsc.brand === 'Spektrum' ? escSpektrum : escElectric;
   };
 
   const getBatteryImage = () => {
-    if (selectedMotor.isGasOrGlow) {
-      return batteryGas; // fuel tank acts as battery energy equivalent
-    }
     return selectedBattery.brand.includes('Spektrum') ? batterySpektrum : batteryLipo;
   };
 
@@ -946,10 +933,10 @@ export default function CockpitOverview({
                   </div>
                   <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      {selectedMotor.isGasOrGlow ? `Power: ${selectedMotor.horsepower} HP (${selectedMotor.displacement})` : `Mod: ${selectedMotor.model}`}
+                      Mod: {selectedMotor.model}
                     </div>
                     <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      {selectedMotor.isGasOrGlow ? `Fuel: ${selectedMotor.voltageSupported}` : `Volt: ${selectedMotor.voltageSupported.replace(" LiPo", "")}`}
+                      Volt: {(selectedMotor.voltageSupported || "").replace(" LiPo", "")}
                     </div>
                   </div>
                 </div>
@@ -975,10 +962,10 @@ export default function CockpitOverview({
                   </div>
                   <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      {selectedMotor.isGasOrGlow ? "Servo: Standard Size" : `Mod: ${selectedEsc.model}`}
+                      Mod: {selectedEsc.model}
                     </div>
                     <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      {selectedMotor.isGasOrGlow ? "Signal: PWM Servo Throttle" : `Volt: ${selectedEsc.voltageSupported.replace(" LiPo", "")}`}
+                      Volt: {(selectedEsc.voltageSupported || "").replace(" LiPo", "")}
                     </div>
                   </div>
                 </div>
@@ -1004,10 +991,10 @@ export default function CockpitOverview({
                   </div>
                   <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347' }}>
-                      {selectedMotor.isGasOrGlow ? "Fuel Capacity" : `${selectedBattery.cells}S Pack`}
+                      {selectedBattery.cells}S Pack
                     </div>
                     <div>
-                      {selectedMotor.isGasOrGlow ? `Tank: ${selectedMotor.fuelCapacityOz} oz` : `Cap: ${selectedBattery.capacity}mAh`}
+                      Cap: {selectedBattery.capacity}mAh
                     </div>
                   </div>
                 </div>

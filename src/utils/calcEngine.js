@@ -55,40 +55,21 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   let watts = 0;
   let rpm = 0;
 
-  if (motor.isGasOrGlow) {
-    const idleRpm = 1800;
-    const refDiameter = motor.refDiameter || 18;
-    const refPitch = motor.refPitch || 8;
-    const refLoad = Math.pow(refDiameter, 3) * refPitch;
-    const load = Math.pow(propeller.diameter, 3) * propeller.pitch * Math.sqrt(blades / 2);
-    
-    if (t > 0) {
-      // Calculate realistic RPM governed by propeller load
-      rpm = Math.round(Math.min(idleRpm + t * (motor.maxRpm - idleRpm) * Math.pow(refLoad / load, 0.35), motor.maxRpm * 1.15));
-      watts = Math.round(motor.horsepower * 746 * t);
-      
-      // Map to equivalent electrical statistics for conversion reference
-      const eqCells = motor.eqCells || 6;
-      volts = Math.max(eqCells * 3.7 - (t * 2.0), eqCells * 3.3);
-      amps = Math.round(watts / volts);
-    }
-  } else {
-    // Standard electric outrunner/inrunner equations
-    if (t > 0) {
-      amps = Math.pow(t, 2) * I_full + motor.noLoadCurrent;
-    }
-    const batteryIR = battery.cells * battery.internalResistance;
-    const escIR = esc.resistance;
-    const totalIR = batteryIR + escIR;
-    const vRest = battery.cells * 3.964;
-    volts = vRest;
-    if (amps > 0) {
-      volts = Math.max(vRest - amps * totalIR, battery.cells * 3.0);
-    }
-    watts = volts * amps;
-    if (t > 0) {
-      rpm = t * motor.kv * volts * (0.835 - 0.19 * (amps - motor.noLoadCurrent) / I_full);
-    }
+  // Standard electric outrunner/inrunner equations
+  if (t > 0) {
+    amps = Math.pow(t, 2) * I_full + motor.noLoadCurrent;
+  }
+  const batteryIR = battery.cells * battery.internalResistance;
+  const escIR = esc.resistance;
+  const totalIR = batteryIR + escIR;
+  const vRest = battery.cells * 3.964;
+  volts = vRest;
+  if (amps > 0) {
+    volts = Math.max(vRest - amps * totalIR, battery.cells * 3.0);
+  }
+  watts = volts * amps;
+  if (t > 0) {
+    rpm = t * motor.kv * volts * (0.835 - 0.19 * (amps - motor.noLoadCurrent) / I_full);
   }
 
   // 5. System Efficiency (%)
@@ -130,19 +111,9 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
 
   // Flight Time (minutes)
   // For electric: Capacity is in mAh.
-  // For gas/glow: Run time on typical fuel tank (capacity in oz).
   let flightTimeMin = 0;
   let flightTimeMax = 0;
-  if (motor.isGasOrGlow) {
-    if (t > 0) {
-      const baseTime = motor.engineType === 'gas' ? 14 : 10;
-      flightTimeMin = Math.round(baseTime * (0.85 / Math.sqrt(t)));
-      flightTimeMax = Math.round(baseTime * (1.30 / Math.sqrt(t)));
-      // Clamp values to realistic ranges
-      flightTimeMin = Math.max(Math.min(flightTimeMin, 25), 6);
-      flightTimeMax = Math.max(Math.min(flightTimeMax, 35), flightTimeMin + 3);
-    }
-  } else if (amps > 0) {
+  if (amps > 0) {
     const capAh = battery.capacity / 1000;
     // average current in normal flight is lower than static bench current
     const avgCurrentRatioMin = 0.55; // aggressive mixed throttle
