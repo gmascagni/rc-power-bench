@@ -184,6 +184,9 @@ export default function CockpitOverview({
   const activeEmptyWeight = adjustedEmptyWeight !== null ? adjustedEmptyWeight : selectedAircraft.emptyWeight;
   const batteryWeightLbs = (selectedBattery.weight || 0) / 453.59;
   const calculatedFlyingWeight = activeEmptyWeight + batteryWeightLbs;
+  const stockFlyingWeight = selectedAircraft.flyingWeight;
+  const weightDelta = calculatedFlyingWeight - stockFlyingWeight;
+  const weightDeltaPct = stockFlyingWeight > 0 ? ((weightDelta / stockFlyingWeight) * 100).toFixed(1) : "0.0";
 
   const dynamicAircraft = {
     ...selectedAircraft,
@@ -842,9 +845,26 @@ export default function CockpitOverview({
                     </td>
                   </tr>
                   <tr>
-                    <td className="label">Total Flying Weight</td>
+                    <td className="label">Stock Flying Wt</td>
+                    <td className="val" style={{ color: 'var(--color-amber-dim)' }}>
+                      {stockFlyingWeight.toFixed(2)} lb
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Modified Flying Wt</td>
                     <td className="val" style={{ color: 'var(--color-green)', fontWeight: 'bold' }}>
                       {calculatedFlyingWeight.toFixed(2)} lb
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Weight Difference</td>
+                    <td className="val" style={{ 
+                      fontWeight: 'bold', 
+                      color: weightDelta > 0.01 ? '#ffb347' : weightDelta < -0.01 ? 'var(--color-green)' : '#fff' 
+                    }}>
+                      {weightDelta > 0.01 ? `+${weightDelta.toFixed(2)} lb (+${weightDeltaPct}%)` : 
+                       weightDelta < -0.01 ? `${weightDelta.toFixed(2)} lb (${weightDeltaPct}%)` : 
+                       `0.00 lb (MATCH)`}
                     </td>
                   </tr>
                   <tr>
