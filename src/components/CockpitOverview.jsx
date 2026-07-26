@@ -868,6 +868,12 @@ export default function CockpitOverview({
                     </td>
                   </tr>
                   <tr>
+                    <td className="label">Suggested CG</td>
+                    <td className="val" style={{ color: '#ffb347', fontWeight: 'bold' }}>
+                      {selectedAircraft.suggestedCg || "4.25 in (108 mm)"}
+                    </td>
+                  </tr>
+                  <tr>
                     <td className="label">Power Range</td>
                     <td className="val">{selectedAircraft.powerRangeMin} - {selectedAircraft.powerRangeMax} W</td>
                   </tr>

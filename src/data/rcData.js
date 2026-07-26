@@ -12,6 +12,7 @@ export const aircrafts = [
     powerRangeMax: 1800,
     manufacturer: "Hangar 9",
     image: "p51.jpg",
+    suggestedCg: "4.25 in (108 mm)",
     description: "North American P-51D Mustang. Famous long-range WWII escort fighter featuring Allied Normandy invasion stripes. High speed and excellent aerodynamics.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2375-Manual.pdf"
   },
@@ -28,6 +29,7 @@ export const aircrafts = [
     powerRangeMax: 1900,
     manufacturer: "Top Flite",
     image: "corsair.jpg",
+    suggestedCg: "4.50 in (114 mm)",
     description: "Chance Vought F4U Corsair. Carrier-capable fighter bomber. Known for its distinct inverted gull wings and dark navy blue paint scheme.",
     manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=11649"
   },
@@ -44,6 +46,7 @@ export const aircrafts = [
     powerRangeMax: 1700,
     manufacturer: "Kyosho",
     image: "spitfire.jpg",
+    suggestedCg: "4.75 in (120 mm)",
     description: "Supermarine Spitfire. The iconic British interceptor of the Battle of Britain. Featuring Normandy invasion stripes painted on elliptical wings.",
     manualUrl: null
   },
@@ -60,6 +63,7 @@ export const aircrafts = [
     powerRangeMax: 1800,
     manufacturer: "Seagull Models",
     image: "bf109.jpg",
+    suggestedCg: "3.75 in (95 mm)",
     description: "Messerschmitt Bf 109. The backbone of the German Luftwaffe. Fast climber, compact design with standard desert/woodland camouflage.",
     manualUrl: null
   },
@@ -76,6 +80,7 @@ export const aircrafts = [
     powerRangeMax: 1900,
     manufacturer: "ESM",
     image: "fw190.jpg",
+    suggestedCg: "4.00 in (102 mm)",
     description: "Focke-Wulf Fw 190 'Shrike'. Heavily armed radial-engine German warbird. High roll rate, structural strength, and distinct dark green camo patterns.",
     manualUrl: null
   },
@@ -92,6 +97,7 @@ export const aircrafts = [
     powerRangeMax: 2000,
     manufacturer: "Hangar 9",
     image: "p47.jpg",
+    suggestedCg: "4.75 in (120 mm)",
     description: "Republic P-47 Thunderbolt 'Jug'. Large, heavy, and extremely rugged escort fighter. Featuring broad black and white Normandy stripes.",
     manualUrl: null
   },
@@ -108,6 +114,7 @@ export const aircrafts = [
     powerRangeMax: 1800,
     manufacturer: "Seagull Models",
     image: "p47.jpg",
+    suggestedCg: "4.50 in (115 mm)",
     description: "Seagull Models P-47D Thunderbolt 'Snafu'. Classic 60-size stand-off scale warbird. Finished in Olive Drab with yellow nose cowl and black/white invasion stripes.",
     manualUrl: "https://www.legendhobby.com/manuals/SEA207%20P-47D%20SNAFU%2063inch.pdf"
   },
@@ -124,6 +131,7 @@ export const aircrafts = [
     powerRangeMax: 1800,
     manufacturer: "Seagull Models",
     image: "hurricane.jpg",
+    suggestedCg: "4.25 in (108 mm)",
     description: "Hawker Hurricane. British single-seat fighter. Rugged build, historical battle veteran of RAF campaigns with Normandy recognition stripes.",
     manualUrl: null
   },
@@ -140,6 +148,7 @@ export const aircrafts = [
     powerRangeMax: 1600,
     manufacturer: "Seagull Models",
     image: "zero.jpg",
+    suggestedCg: "4.00 in (102 mm)",
     description: "Mitsubishi A6M Zero. Japanese long-range carrier fighter. Famous for its light grey-green paint and extreme dogfighting agility.",
     manualUrl: null
   },
@@ -156,13 +165,14 @@ export const aircrafts = [
     powerRangeMax: 2500,
     manufacturer: "ESM / Seagull",
     image: "p38.jpg",
+    suggestedCg: "3.75 in (95 mm)",
     description: "Lockheed P-38 Lightning. Twin-engine heavy fighter with a twin-boom design and central nacelle. Marked with bold Normandy stripes for D-Day operations.",
     manualUrl: null,
     enginesCount: 2
   },
   {
     id: "f6f-hellcat",
-    name: "F6F HELLCAT",
+    name: "HANGAR 9 F6F HELLCAT",
     class: "60-CLASS",
     wingspan: 64,
     length: 53,
@@ -173,8 +183,9 @@ export const aircrafts = [
     powerRangeMax: 1900,
     manufacturer: "Hangar 9",
     image: "hellcat.jpg",
+    suggestedCg: "5.25 in (134 mm)",
     description: "Grumman F6F Hellcat. Rugged carrier fighter that dominated Pacific skies. Finished in deep midnight blue sea camo.",
-    manualUrl: null
+    manualUrl: "https://www.manualslib.com/manual/1000624/Hangar-9-F6f-Hellcat-60.html"
   },
   {
     id: "f8f-bearcat",
@@ -189,6 +200,7 @@ export const aircrafts = [
     powerRangeMax: 2000,
     manufacturer: "Seagull Models",
     image: "bearcat.jpg",
+    suggestedCg: "4.25 in (108 mm)",
     description: "Grumman F8F Bearcat. High-performance, late-war interceptor with extreme climb speed. Finished in glossy US Navy blue.",
     manualUrl: null
   },
@@ -205,6 +217,7 @@ export const aircrafts = [
     powerRangeMax: 1600,
     manufacturer: "Phoenix Model",
     image: "wildcat.jpg",
+    suggestedCg: "3.75 in (95 mm)",
     description: "Grumman F4F Wildcat. Early WWII US Navy carrier fighter. Known for its rugged build, boxy wings, and early war blue-grey over light grey camo.",
     manualUrl: null
   },
@@ -221,6 +234,7 @@ export const aircrafts = [
     powerRangeMax: 1500,
     manufacturer: "E-flite",
     image: "p51.jpg",
+    suggestedCg: "4.90 in (124 mm)",
     description: "E-flite 1.5m P-51D Mustang. Sport-scale warbird featuring Smart electronics, functional flaps, and retractable landing gear.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01250-Manual-EN.pdf"
   },
@@ -237,6 +251,7 @@ export const aircrafts = [
     powerRangeMax: 1500,
     manufacturer: "E-flite",
     image: "fw190.jpg",
+    suggestedCg: "4.50 in (114 mm)",
     description: "E-flite 1.5m Fw 190A (referenced as BF-190). Heavy sport-scale fighter with scale radial engine cowl and wide-track retractable gear.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01350-Manual-EN.pdf"
   },
@@ -253,6 +268,7 @@ export const aircrafts = [
     powerRangeMax: 900,
     manufacturer: "E-flite",
     image: "corsair.jpg",
+    suggestedCg: "3.15 in (80 mm)",
     description: "E-flite 1.2m F4U Corsair. Highly detailed sport-scale model featuring functioning 3-blade prop drive and retractable landing gear.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL12000-Manual-EN.pdf"
   },
@@ -269,6 +285,7 @@ export const aircrafts = [
     powerRangeMax: 2000,
     manufacturer: "Top Flite",
     image: "p40.jpg",
+    suggestedCg: "4.25 in (108 mm)",
     description: "Curtiss P-40 Warhawk. The workhorse WWII fighter famous for the Flying Tigers shark mouth nose art. Rugged airframe with unique landing gear twist rotation.",
     manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=13591"
   },
@@ -285,6 +302,7 @@ export const aircrafts = [
     powerRangeMax: 2000,
     manufacturer: "Top Flite",
     image: "p51.jpg",
+    suggestedCg: "4.50 in (114 mm)",
     description: "Top Flite Gold Edition P-51D Mustang. High-fidelity build-up kit design, recognized for its scale outlines, high-speed stability, and iconic bubble canopy.",
     manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=12783"
   }
@@ -432,16 +450,16 @@ const rawMotors = [
     type: "Brushless Outrunner"
   },
   {
-    id: "badass-4530-650",
-    name: "BADASS 4530 650KV",
-    model: "BA-4530-650",
+    id: "badass-4530-750",
+    name: "BADASS 4530 750KV",
+    model: "BA-4530-750",
     brand: "BadAss",
-    kv: 650,
+    kv: 750,
     weight: 580,
-    maxCurrent: 140,
-    maxPower: 3300,
-    internalResistance: 0.007,
-    noLoadCurrent: 2.8,
+    maxCurrent: 145,
+    maxPower: 3400,
+    internalResistance: 0.006,
+    noLoadCurrent: 3.1,
     voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
     type: "Brushless Outrunner"
   },
