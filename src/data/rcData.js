@@ -948,6 +948,60 @@ export const batteries = [
 
 export const propellers = [
   {
+    id: "apc-13x6e",
+    name: "APC 13 x 6E",
+    diameter: 13,
+    pitch: 6,
+    type: "Electric",
+    blades: 2,
+    kProp: 0.95
+  },
+  {
+    id: "apc-13x8e",
+    name: "APC 13 x 8E",
+    diameter: 13,
+    pitch: 8,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.00
+  },
+  {
+    id: "apc-13x10e",
+    name: "APC 13 x 10E",
+    diameter: 13,
+    pitch: 10,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.06
+  },
+  {
+    id: "apc-13x12e",
+    name: "APC 13 x 12E",
+    diameter: 13,
+    pitch: 12,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.10
+  },
+  {
+    id: "ma-13x8-3",
+    name: "Master Airscrew 3-Blade 13 x 8",
+    diameter: 13,
+    pitch: 8,
+    type: "3-Blade Scale",
+    blades: 3,
+    kProp: 1.02
+  },
+  {
+    id: "eflite-13x9-3",
+    name: "E-flite 3-Blade 13 x 9",
+    diameter: 13,
+    pitch: 9,
+    type: "3-Blade Scale",
+    blades: 3,
+    kProp: 1.05
+  },
+  {
     id: "apc-14x12e",
     name: "APC 14 x 12E",
     diameter: 14,
