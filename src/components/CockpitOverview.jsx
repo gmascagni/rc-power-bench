@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CircularGauge, HorizontalBarGauge } from './Gauges';
 import PowerCurveChart from './PowerCurveChart';
-import { calculateSpecs } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells } from '../utils/calcEngine';
 import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } from '../data/rcData';
 import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
@@ -220,13 +220,18 @@ export default function CockpitOverview({
     let bestCombo = null;
 
     for (const m of motors) {
-      for (const p of propellers) {
-        for (const e of escs) {
-          for (const b of batteries) {
-            const cells = b.cells;
-            if (cells > 6 && e.voltageSupported && e.voltageSupported.includes("6S LiPo")) continue;
-            if (cells > 8 && e.voltageSupported && e.voltageSupported.includes("8S LiPo")) continue;
-            
+      const maxMotorCells = getMaxCells(m.voltageSupported);
+      const minMotorCells = getMinCells(m.voltageSupported);
+
+      for (const e of escs) {
+        const maxEscCells = getMaxCells(e.voltageSupported);
+        const minEscCells = getMinCells(e.voltageSupported);
+
+        for (const b of batteries) {
+          if (b.cells > maxMotorCells || b.cells < minMotorCells) continue;
+          if (b.cells > maxEscCells || b.cells < minEscCells) continue;
+
+          for (const p of propellers) {
             const s = calculateSpecs({
               aircraft: selectedAircraft,
               motor: m,
@@ -236,8 +241,13 @@ export default function CockpitOverview({
               throttle: 100
             });
 
-            // Ensure physical safety bounds are preserved to prevent unrealistic blowups
-            const isSafe = s.amps <= e.maxAmps * 1.1 && s.amps <= m.maxCurrent * 1.15;
+            // Ensure physical safety bounds are strictly preserved
+            const propRpmLimit = 190000 / p.diameter;
+            const isSafe = 
+              s.amps <= m.maxCurrent && 
+              s.amps <= e.maxAmps && 
+              s.watts <= m.maxPower &&
+              s.rpm <= propRpmLimit;
             
             if (isSafe && s.pitchSpeed > bestPitchSpeed) {
               bestPitchSpeed = s.pitchSpeed;
@@ -636,8 +646,28 @@ export default function CockpitOverview({
         </div>
       </header>
 
-      {/* Main Dashboard Layout */}
-      <div className="dashboard-grid" style={{ position: 'relative' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        {/* Prominent Simulation Disclaimer Bar */}
+        <div style={{
+          backgroundColor: '#1b1712',
+          border: '1px solid #7c5d2b',
+          borderRadius: '4px',
+          padding: '8px 12px',
+          marginBottom: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '10.5px',
+          color: '#ffb347',
+          lineHeight: '1.3'
+        }}>
+          <AlertTriangle size={18} style={{ flexShrink: 0, color: '#ffb347' }} />
+          <div>
+            <strong>DISCLAIMER & NOTICE:</strong> All values, specs, thrust ratios, and setup predictions are estimated simulation models based on standardized aerodynamic formulas and nominal manufacturer specifications. Actual in-flight performance, current draw, and thermal limits vary based on ambient conditions, battery health, and ESC timing. <em>Always perform static bench testing with a Watt meter before flight.</em>
+          </div>
+        </div>
+
+        <div className="dashboard-grid" style={{ position: 'relative' }}>
         {/* Faint transparent selected airplane watermark background */}
         <div style={{
           position: 'absolute',
@@ -1627,6 +1657,7 @@ export default function CockpitOverview({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

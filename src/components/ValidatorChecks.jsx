@@ -1,5 +1,5 @@
 import React from 'react';
-import { calculateSpecs } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells } from '../utils/calcEngine';
 import { ShieldAlert, AlertTriangle, CheckCircle, Flame, BatteryCharging, Zap } from 'lucide-react';
 
 export default function ValidatorChecks({
@@ -31,7 +31,18 @@ export default function ValidatorChecks({
     remedy: escSafe ? null : escMarginal ? "Avoid prolonged full-throttle flights beyond 10-15 seconds." : "High risk of ESC thermal destruction. Upgrade to a larger ESC (minimum 100A+)."
   });
 
-  // 2. Motor Power check
+  // 2. Motor Continuous Current check
+  const motorCurrentSafe = specs.amps <= selectedMotor.maxCurrent;
+  const motorCurrentMarginal = specs.amps > selectedMotor.maxCurrent && specs.amps <= selectedMotor.maxCurrent * 1.15;
+  const motorOverloadPct = selectedMotor.maxCurrent > 0 ? Math.round(((specs.amps / selectedMotor.maxCurrent) - 1) * 100) : 0;
+  checks.push({
+    title: "MOTOR CONTINUOUS CURRENT LIMIT",
+    description: `Current draw: ${specs.amps}A vs Motor max continuous limit: ${selectedMotor.maxCurrent}A`,
+    status: motorCurrentSafe ? 'pass' : motorCurrentMarginal ? 'warning' : 'fail',
+    remedy: motorCurrentSafe ? null : motorCurrentMarginal ? "Motor will run warm. Limit continuous full-throttle operation." : `Severe motor overload! Current draw exceeds motor rating by +${motorOverloadPct}%. Downsize propeller diameter/pitch or lower cell count to prevent winding burnout.`
+  });
+
+  // 3. Motor Power check
   const motorWattsSafe = specs.watts <= selectedMotor.maxPower;
   const motorWattsMarginal = specs.watts > selectedMotor.maxPower && specs.watts <= selectedMotor.maxPower * 1.2;
   checks.push({
@@ -41,7 +52,18 @@ export default function ValidatorChecks({
     remedy: motorWattsSafe ? null : motorWattsMarginal ? "Monitor motor core temperature. Improve cowled cooling airflow." : "Windings will overheat and burn. Decrease propeller diameter or pitch, or decrease battery voltage (cells)."
   });
 
-  // 3. Battery Discharge C-Rate check
+  // 4. Motor Voltage Rating check
+  const maxMotorCells = getMaxCells(selectedMotor.voltageSupported);
+  const minMotorCells = getMinCells(selectedMotor.voltageSupported);
+  const voltageSafe = selectedBattery.cells >= minMotorCells && selectedBattery.cells <= maxMotorCells;
+  checks.push({
+    title: "MOTOR VOLTAGE RATING",
+    description: `Selected Battery: ${selectedBattery.cells}S vs Motor Rated Voltage: ${selectedMotor.voltageSupported}`,
+    status: voltageSafe ? 'pass' : 'fail',
+    remedy: voltageSafe ? null : `Voltage out of spec! Selected ${selectedBattery.cells}S battery is outside motor rated range (${selectedMotor.voltageSupported}). Select a battery matching motor cell specs.`
+  });
+
+  // 5. Battery Discharge C-Rate check
   const maxBatAmps = (selectedBattery.capacity / 1000) * selectedBattery.cRating;
   const batterySafe = specs.amps <= maxBatAmps * 0.8;
   const batteryMarginal = specs.amps > maxBatAmps * 0.8 && specs.amps <= maxBatAmps;
@@ -52,7 +74,7 @@ export default function ValidatorChecks({
     remedy: batterySafe ? null : batteryMarginal ? "Battery cells will run warm. Ensure adequate venting." : "Severe risk of battery puffing, swelling or thermal runaway. Choose a battery pack with higher capacity or C-rating."
   });
 
-  // 4. Thrust-to-Weight Flight Capability Check
+  // 6. Thrust-to-Weight Flight Capability Check
   const thrustSufficient = specs.thrustToWeight >= 0.7;
   const thrustExcellent = specs.thrustToWeight >= 0.95;
   checks.push({
@@ -62,7 +84,7 @@ export default function ValidatorChecks({
     remedy: thrustExcellent ? null : thrustSufficient ? "Flyable, scale performance. Takeoff run will require length." : "Insufficient power. The warbird may struggle to fly or stall on climb. Increase battery voltage or propeller size."
   });
 
-  // 5. RPM propeller speed limits
+  // 7. RPM propeller speed limits
   const propLimit = 190000 / selectedPropeller.diameter; // Standard APC E RPM limit formula
   const rpmSafe = specs.rpm <= propLimit;
   checks.push({

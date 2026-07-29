@@ -1,6 +1,7 @@
 /**
  * Physics-based RC Power Bench Calculation Engine
- * Calibrated to match the benchmark configuration numbers:
+ * Calibrated to match standard aerodynamic prop power laws (P = K * D^4 * P * RPM^3)
+ * Benchmark reference configuration:
  * P-51D 60-Class, SunnySky X4120 600KV, 6S 5000mAh 45C, Hobbywing 120A, APC 15x10E
  * at 100% throttle:
  * - RPM: 8740 RPM
@@ -11,6 +12,31 @@
  * - Temp: 48 C
  * - Thrust-to-Weight: 0.78
  */
+
+export function getMaxCells(voltageSupportedStr) {
+  if (!voltageSupportedStr) return 6;
+  const str = String(voltageSupportedStr).toUpperCase();
+  if (str.includes("12S")) return 12;
+  if (str.includes("10S")) return 10;
+  if (str.includes("8S")) return 8;
+  if (str.includes("6S")) return 6;
+  if (str.includes("5S")) return 5;
+  if (str.includes("4S")) return 4;
+  if (str.includes("3S")) return 3;
+  return 6;
+}
+
+export function getMinCells(voltageSupportedStr) {
+  if (!voltageSupportedStr) return 2;
+  const str = String(voltageSupportedStr).toUpperCase();
+  if (str.includes("10S")) return 10;
+  if (str.includes("8S")) return 8;
+  if (str.includes("6S")) return 6;
+  if (str.includes("5S")) return 5;
+  if (str.includes("4S")) return 4;
+  if (str.includes("3S")) return 3;
+  return 2;
+}
 
 export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throttle }) {
   if (!aircraft || !motor || !esc || !battery || !propeller) {
@@ -42,38 +68,36 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   const bladesLoadMultiplier = blades === 3 ? 1.34 : blades === 4 ? 1.62 : 1.0;
   
   const dFactor = Math.pow(propeller.diameter / 15.0, 4.2);
-  const pFactor = propeller.pitch / 10.0;
-  const kvFactor = Math.pow(motor.kv / 600.0, 2.2);
-  const cellFactor = Math.pow(battery.cells / 6.0, 3.2);
+  const pFactor = Math.pow(propeller.pitch / 10.0, 1.35);
+  const kvFactor = Math.pow(motor.kv / 600.0, 2.8);
+  const cellFactor = Math.pow(battery.cells / 6.0, 3.0);
   const kProp = propeller.kProp || 1.0;
 
-  const I_full = 77.0 * dFactor * pFactor * kvFactor * cellFactor * kProp * bladesLoadMultiplier;
+  const I_full = 78.6 * dFactor * pFactor * kvFactor * cellFactor * kProp * bladesLoadMultiplier;
 
-  // Current, Voltage, Power, and RPM Calculations
-  let amps = 0;
-  let volts = battery.cells * 3.964;
-  let watts = 0;
-  let rpm = 0;
-
-  // Standard electric outrunner/inrunner equations
-  if (t > 0) {
-    amps = Math.pow(t, 2) * I_full + motor.noLoadCurrent;
-  }
+  // Battery resting voltage & IR drop under load
   const batteryIR = battery.cells * battery.internalResistance;
   const escIR = esc.resistance;
   const totalIR = batteryIR + escIR;
   const vRest = battery.cells * 3.964;
-  volts = vRest;
-  if (amps > 0) {
-    volts = Math.max(vRest - amps * totalIR, battery.cells * 3.0);
-  }
-  watts = volts * amps;
+
+  let amps = 0;
+  let volts = vRest;
+  let watts = 0;
+  let rpm = 0;
+
   if (t > 0) {
-    rpm = t * motor.kv * volts * (0.835 - 0.19 * (amps - motor.noLoadCurrent) / I_full);
+    amps = Math.pow(t, 2) * I_full + motor.noLoadCurrent;
+    volts = Math.max(vRest - amps * totalIR, battery.cells * 3.0);
+    watts = volts * amps;
+    
+    // Loaded RPM under aerodynamic drag
+    const loadRatio = I_full / Math.max(motor.maxCurrent, 40);
+    const rpmFactor = Math.max(0.84 - 0.15 * Math.max(loadRatio - 0.7, 0), 0.45);
+    rpm = t * motor.kv * volts * rpmFactor;
   }
 
   // 5. System Efficiency (%)
-  // Standard efficiency curve peaking at ~80-85% depending on load vs max current
   let efficiency = 0;
   if (t > 0) {
     const loadRatio = amps / motor.maxCurrent;
@@ -82,14 +106,12 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   }
 
   // 6. Temperature (C)
-  // Rises with current and throttle. Calibrated to 48C at 100% on default setup
   let temp = 25; // ambient temp
   if (t > 0) {
     temp = 25 + 23 * Math.pow(t, 2) * Math.pow(amps / 78.6, 1.3) * (motor.maxCurrent / 80.0);
   }
 
   // 7. Performance Predictions
-  // Thrust (calibrated to 10.5 lbs thrust for default, matching 1.24 ratio on 8.5 lbs plane)
   const bladesThrustMultiplier = blades === 3 ? 1.20 : blades === 4 ? 1.36 : 1.0;
   let thrust = 0;
   if (t > 0) {
@@ -98,42 +120,32 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
   const thrustToWeight = aircraft.flyingWeight > 0 ? (thrust / aircraft.flyingWeight) : 0;
 
   // Pitch Speed (MPH)
-  // Standard theoretical pitch speed formula: RPM * pitch / 1056
-  // Propeller unloads in flight (RPM rises by ~20% compared to static static bench testing)
   const flightRpm = rpm * 1.20;
   const pitchSpeed = rpm > 0 ? Math.round(flightRpm * propeller.pitch / 1056) : 0;
 
   // Top Speed estimate in level flight (MPH)
-  // Aerodynamic drag prevents plane from exceeding pitch speed.
-  // Loaded top speed is typical 74% - 90% of pitch speed, scaling with thrust-to-weight ratio.
   const efficiencyFactor = Math.min(0.74 + 0.12 * Math.min(thrustToWeight, 1.5), 0.90);
   const topSpeed = rpm > 0 ? Math.round(pitchSpeed * efficiencyFactor) : 0;
 
   // Flight Time (minutes)
-  // For electric: Capacity is in mAh.
   let flightTimeMin = 0;
   let flightTimeMax = 0;
   if (amps > 0) {
     const capAh = battery.capacity / 1000;
-    // average current in normal flight is lower than static bench current
-    const avgCurrentRatioMin = 0.55; // aggressive mixed throttle
-    const avgCurrentRatioMax = 0.35; // gentle cruising
+    const avgCurrentRatioMin = 0.55;
+    const avgCurrentRatioMax = 0.35;
     const totalAmps = amps * engines;
     
     flightTimeMin = Math.round((capAh / (totalAmps * avgCurrentRatioMin)) * 60);
     flightTimeMax = Math.round((capAh / (totalAmps * avgCurrentRatioMax)) * 60);
     
-    // clamp values to realistic ranges
     flightTimeMin = Math.max(Math.min(flightTimeMin, 15), 3);
     flightTimeMax = Math.max(Math.min(flightTimeMax, 25), flightTimeMin + 2);
   }
 
-  // 8. Load percentages
-  // Motor load (calibrated so 78.6A on 80A max is 72% using 1.35x safety burst margin)
-  const motorLoad = Math.round((amps / (motor.maxCurrent * 1.35)) * 100);
-  // ESC load
+  // 8. Load percentages (100% load = reaching motor max continuous current rating)
+  const motorLoad = Math.round((amps / motor.maxCurrent) * 100);
   const escLoad = Math.round((amps / esc.maxAmps) * 100);
-  // Battery load (calibrated: 78.6A on 5Ah 45C = 61% load against practical limit)
   const batMaxAmps = (battery.capacity / 1000) * battery.cRating * 0.57;
   const batteryLoad = Math.round(((amps * engines) / batMaxAmps) * 100);
 
