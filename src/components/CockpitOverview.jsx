@@ -281,71 +281,64 @@ export default function CockpitOverview({
     }
   };
 
-  // Auto-Optimizer: Find the ideal safe propeller & battery for any selected motor alone
-  const getOptimalSetupForMotor = (motorToOptimize) => {
-    if (!motorToOptimize) return null;
+  // Auto-Optimizer: Find the ideal safe propeller for selected motor on user's selected battery
+  const getOptimalPropForMotorAndBattery = (motorToOptimize, activeBattery, activeEsc) => {
+    if (!motorToOptimize || !activeBattery) return null;
 
+    let bestScore = -1;
+    let bestProp = null;
+
+    // Check if battery cell count is within motor supported limits
     const maxMotorCells = getMaxCells(motorToOptimize.voltageSupported);
     const minMotorCells = getMinCells(motorToOptimize.voltageSupported);
 
-    let bestScore = -1;
-    let bestCombo = null;
+    if (activeBattery.cells > maxMotorCells || activeBattery.cells < minMotorCells) {
+      return { prop: null, error: `Selected battery (${activeBattery.cells}S) is outside motor's supported voltage range (${motorToOptimize.voltageSupported}).` };
+    }
 
-    for (const b of batteries) {
-      if (b.cells > maxMotorCells || b.cells < minMotorCells) continue;
+    const escToUse = activeEsc || escs[0];
 
-      for (const e of escs) {
-        const maxEscCells = getMaxCells(e.voltageSupported);
-        const minEscCells = getMinCells(e.voltageSupported);
-        if (b.cells > maxEscCells || b.cells < minEscCells) continue;
+    for (const p of propellers) {
+      const s = calculateSpecs({
+        aircraft: dynamicAircraft,
+        motor: motorToOptimize,
+        esc: escToUse,
+        battery: activeBattery,
+        propeller: p,
+        throttle: 100
+      });
 
-        for (const p of propellers) {
-          const s = calculateSpecs({
-            aircraft: dynamicAircraft,
-            motor: motorToOptimize,
-            esc: e,
-            battery: b,
-            propeller: p,
-            throttle: 100
-          });
+      const propRpmLimit = 190000 / p.diameter;
+      
+      // Strict 100% continuous safety bounds for motor and ESC
+      const isSafe = 
+        s.amps <= motorToOptimize.maxCurrent &&
+        s.amps <= escToUse.maxAmps &&
+        s.watts <= motorToOptimize.maxPower &&
+        s.rpm <= propRpmLimit &&
+        s.thrustToWeight >= 0.65;
 
-          const propRpmLimit = 190000 / p.diameter;
-          
-          // Strict 100% continuous safety bounds for motor and ESC
-          const isSafe = 
-            s.amps <= motorToOptimize.maxCurrent &&
-            s.amps <= e.maxAmps &&
-            s.watts <= motorToOptimize.maxPower &&
-            s.rpm <= propRpmLimit &&
-            s.thrustToWeight >= 0.65;
-
-          if (isSafe) {
-            // Optimal score balances thrust-to-weight ratio and pitch speed
-            const score = (s.thrustToWeight * 2.0) + (s.pitchSpeed / 50.0);
-            if (score > bestScore) {
-              bestScore = score;
-              bestCombo = {
-                esc: e,
-                battery: b,
-                propeller: p,
-                specs: s
-              };
-            }
-          }
+      if (isSafe) {
+        // Score balances thrust-to-weight ratio and pitch speed
+        const score = (s.thrustToWeight * 2.0) + (s.pitchSpeed / 50.0);
+        if (score > bestScore) {
+          bestScore = score;
+          bestProp = p;
         }
       }
     }
-    return bestCombo;
+
+    return { prop: bestProp, error: bestProp ? null : `No safe propeller found for ${motorToOptimize.name} on ${activeBattery.cells}S without overloading motor continuous current.` };
   };
 
   const handleAutoTuneForMotor = () => {
-    const bestCombo = getOptimalSetupForMotor(selectedMotor);
-    if (bestCombo) {
-      if (bestCombo.propeller) setSelectedPropeller(bestCombo.propeller);
-      if (bestCombo.battery) setSelectedBattery(bestCombo.battery);
-      if (bestCombo.esc) setSelectedEsc(bestCombo.esc);
+    const result = getOptimalPropForMotorAndBattery(selectedMotor, selectedBattery, selectedEsc);
+    if (result && result.prop) {
+      setSelectedPropeller(result.prop);
       setThrottle(100);
       setActiveSetupType("motor-tuned");
+    } else if (result && result.error) {
+      alert(result.error);
     }
   };
 
@@ -900,9 +893,9 @@ export default function CockpitOverview({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#ffb347' }}>⚙</span>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#ffb347' }}>AUTO-MATCH MOTOR PROP</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#ffb347' }}>AUTO-MATCH PROP ({selectedBattery.cells}S)</div>
                       <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.45)' }}>
-                        Optimized for {selectedMotor.brand} {selectedMotor.model}
+                        Ideal prop for {selectedMotor.model} on {selectedBattery.cells}S
                       </div>
                     </div>
                   </div>
@@ -1209,7 +1202,7 @@ export default function CockpitOverview({
                       gap: '6px'
                     }}
                   >
-                    <span>⚡ AUTO-MATCH OPTIMAL PROP & BATTERY FOR {selectedMotor.name}</span>
+                    <span>⚡ AUTO-MATCH RECOMMENDED PROP FOR {selectedMotor.name} ON {selectedBattery.cells}S</span>
                   </button>
                 </div>
               </div>
