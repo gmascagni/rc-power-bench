@@ -404,7 +404,7 @@ const rawMotors = [
     maxPower: 2400,
     internalResistance: 0.012,
     noLoadCurrent: 2.1,
-    voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
+    voltageSupported: "4S - 6S LiPo (14.8V - 22.2V)",
     type: "Brushless Outrunner"
   },
   {
@@ -418,7 +418,7 @@ const rawMotors = [
     maxPower: 4000,
     internalResistance: 0.015,
     noLoadCurrent: 1.4,
-    voltageSupported: "10S - 12S LiPo (37.0V - 44.4V)",
+    voltageSupported: "5S - 12S LiPo (18.5V - 44.4V)",
     type: "Brushless Outrunner"
   },
   {
@@ -432,7 +432,7 @@ const rawMotors = [
     maxPower: 3800,
     internalResistance: 0.010,
     noLoadCurrent: 1.8,
-    voltageSupported: "8S - 10S LiPo (29.6V - 37.0V)",
+    voltageSupported: "5S - 10S LiPo (18.5V - 37.0V)",
     type: "Brushless Outrunner"
   },
   {
@@ -446,7 +446,7 @@ const rawMotors = [
     maxPower: 3600,
     internalResistance: 0.008,
     noLoadCurrent: 2.3,
-    voltageSupported: "6S - 8S LiPo (22.2V - 29.6V)",
+    voltageSupported: "5S - 8S LiPo (18.5V - 29.6V)",
     type: "Brushless Outrunner"
   },
   {
@@ -460,7 +460,7 @@ const rawMotors = [
     maxPower: 3400,
     internalResistance: 0.006,
     noLoadCurrent: 3.1,
-    voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
+    voltageSupported: "4S - 6S LiPo (14.8V - 22.2V)",
     type: "Brushless Outrunner"
   },
   {
