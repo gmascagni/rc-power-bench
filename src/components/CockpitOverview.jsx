@@ -659,7 +659,7 @@ export default function CockpitOverview({
               ★ {selectedAircraft.name} ★
             </h1>
             <div className="flex-center gap-12" style={{ marginTop: '2px' }}>
-              <span style={{ fontSize: '12px', color: '#ffb347', fontWeight: 'bold', letterSpacing: '1.5px' }}>{selectedAircraft.class} ARF REFERENCE</span>
+              <span style={{ fontSize: '12px', color: '#ffb347', fontWeight: 'bold', letterSpacing: '1.5px' }}>{selectedAircraft.class} ARF CONFIGURATOR</span>
               <span style={{ color: 'var(--color-panel-border)' }}>|</span>
               <span style={{ fontFamily: 'var(--font-script)', fontSize: '18px', color: '#ffc97a', letterSpacing: '1px' }}>Fly Fast. Fly Hard. Keep 'Em Flying!</span>
             </div>
