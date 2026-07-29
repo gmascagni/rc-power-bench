@@ -1,7 +1,7 @@
 export const aircrafts = [
   {
     id: "p51d-mustang",
-    name: "P-51D MUSTANG",
+    name: "HANGAR 9 P-51D MUSTANG",
     class: "60-CLASS",
     wingspan: 63,
     length: 56,
@@ -18,7 +18,7 @@ export const aircrafts = [
   },
   {
     id: "f4u-corsair",
-    name: "F4U CORSAIR",
+    name: "TOP FLITE F4U CORSAIR",
     class: "60-CLASS",
     wingspan: 65,
     length: 53,
@@ -35,7 +35,7 @@ export const aircrafts = [
   },
   {
     id: "spitfire-mk9",
-    name: "SPITFIRE MK.IX",
+    name: "KYOSHO SPITFIRE MK.IX",
     class: "60-CLASS",
     wingspan: 64,
     length: 55,
@@ -52,7 +52,7 @@ export const aircrafts = [
   },
   {
     id: "bf109",
-    name: "MESSERSCHMITT BF 109",
+    name: "SEAGULL MESSERSCHMITT BF 109",
     class: "60-CLASS",
     wingspan: 61,
     length: 57,
@@ -69,7 +69,7 @@ export const aircrafts = [
   },
   {
     id: "fw190",
-    name: "FOCKE-WULF FW 190",
+    name: "ESM FOCKE-WULF FW 190",
     class: "60-CLASS",
     wingspan: 60,
     length: 54,
@@ -86,7 +86,7 @@ export const aircrafts = [
   },
   {
     id: "p47d-thunderbolt",
-    name: "P-47D THUNDERBOLT",
+    name: "HANGAR 9 P-47D THUNDERBOLT",
     class: "60-CLASS",
     wingspan: 67,
     length: 58,
@@ -120,7 +120,7 @@ export const aircrafts = [
   },
   {
     id: "hurricane",
-    name: "HAWKER HURRICANE",
+    name: "SEAGULL HAWKER HURRICANE",
     class: "60-CLASS",
     wingspan: 62,
     length: 52,
@@ -137,7 +137,7 @@ export const aircrafts = [
   },
   {
     id: "zero",
-    name: "MITSUBISHI A6M ZERO",
+    name: "SEAGULL MITSUBISHI A6M ZERO",
     class: "60-CLASS",
     wingspan: 64,
     length: 51,
@@ -154,7 +154,7 @@ export const aircrafts = [
   },
   {
     id: "p38-lightning",
-    name: "P-38 LIGHTNING",
+    name: "ESM P-38 LIGHTNING",
     class: "60-CLASS",
     wingspan: 74,
     length: 52,
@@ -189,7 +189,7 @@ export const aircrafts = [
   },
   {
     id: "f8f-bearcat",
-    name: "F8F BEARCAT",
+    name: "SEAGULL F8F BEARCAT",
     class: "60-CLASS",
     wingspan: 60,
     length: 52,
@@ -206,7 +206,7 @@ export const aircrafts = [
   },
   {
     id: "f4f-wildcat",
-    name: "F4F WILDCAT",
+    name: "PHOENIX F4F WILDCAT",
     class: "60-CLASS",
     wingspan: 58,
     length: 49,

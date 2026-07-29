@@ -319,8 +319,8 @@ export default function CockpitOverview({
         s.thrustToWeight >= 0.65;
 
       if (isSafe) {
-        // Score balances thrust-to-weight ratio and pitch speed
-        const score = (s.thrustToWeight * 2.0) + (s.pitchSpeed / 50.0);
+        // Score strictly optimized for MAX PITCH SPEED within safe motor thermal limits
+        const score = (s.pitchSpeed * 10.0) + s.thrustToWeight;
         if (score > bestScore) {
           bestScore = score;
           bestProp = p;
