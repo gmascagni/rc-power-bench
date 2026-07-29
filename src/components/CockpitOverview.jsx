@@ -17,6 +17,8 @@ import batterySpektrum from '../assets/battery_spektrum.jpg';
 import batteryLipo from '../assets/battery_lipo.jpg';
 
 import propeller2b from '../assets/propeller_2b.jpg';
+import propeller3b from '../assets/propeller_3b.jpg';
+import propeller4b from '../assets/propeller_4b.jpg';
 
 
 function renderNoseArt(planeId) {
@@ -356,6 +358,8 @@ export default function CockpitOverview({
   };
 
   const getPropellerImage = () => {
+    if (selectedPropeller.blades === 3) return propeller3b;
+    if (selectedPropeller.blades === 4) return propeller4b;
     return propeller2b;
   };
 
