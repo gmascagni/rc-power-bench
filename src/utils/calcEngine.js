@@ -14,28 +14,19 @@
  */
 
 export function getMaxCells(voltageSupportedStr) {
-  if (!voltageSupportedStr) return 6;
-  const str = String(voltageSupportedStr).toUpperCase();
-  if (str.includes("12S")) return 12;
-  if (str.includes("10S")) return 10;
-  if (str.includes("8S")) return 8;
-  if (str.includes("6S")) return 6;
-  if (str.includes("5S")) return 5;
-  if (str.includes("4S")) return 4;
-  if (str.includes("3S")) return 3;
-  return 6;
+  if (!voltageSupportedStr) return 12;
+  const matches = String(voltageSupportedStr).match(/(\d+)S/gi);
+  if (!matches || matches.length === 0) return 12;
+  const numbers = matches.map(m => parseInt(m.replace(/S/i, ""), 10));
+  return Math.max(...numbers);
 }
 
 export function getMinCells(voltageSupportedStr) {
   if (!voltageSupportedStr) return 2;
-  const str = String(voltageSupportedStr).toUpperCase();
-  if (str.includes("10S")) return 10;
-  if (str.includes("8S")) return 8;
-  if (str.includes("6S")) return 6;
-  if (str.includes("5S")) return 5;
-  if (str.includes("4S")) return 4;
-  if (str.includes("3S")) return 3;
-  return 2;
+  const matches = String(voltageSupportedStr).match(/(\d+)S/gi);
+  if (!matches || matches.length === 0) return 2;
+  const numbers = matches.map(m => parseInt(m.replace(/S/i, ""), 10));
+  return Math.min(...numbers);
 }
 
 export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throttle }) {
