@@ -1082,12 +1082,12 @@ export default function CockpitOverview({
                 {/* Motor Select */}
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>MOTOR</div>
+                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>MOTOR</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
                       <img src={getMotorImage()} alt="Brushless Motor" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
+                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedMotor.id}
                       onChange={(e) => {
@@ -1098,7 +1098,7 @@ export default function CockpitOverview({
                       {motors.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
+                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       Mod: {selectedMotor.model}
                     </div>
@@ -1111,12 +1111,12 @@ export default function CockpitOverview({
                 {/* ESC Select */}
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>ESC</div>
+                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>ESC</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
                       <img src={getEscImage()} alt="Electronic Speed Controller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
+                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedEsc.id}
                       onChange={(e) => {
@@ -1127,7 +1127,7 @@ export default function CockpitOverview({
                       {escs.map(escItem => <option key={escItem.id} value={escItem.id}>{escItem.name}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
+                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       Mod: {selectedEsc.model}
                     </div>
@@ -1140,12 +1140,12 @@ export default function CockpitOverview({
                 {/* Battery Select */}
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>BATTERY</div>
+                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>BATTERY</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
                       <img src={getBatteryImage()} alt="LiPo Battery" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
+                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedBattery.id}
                       onChange={(e) => {
@@ -1156,7 +1156,7 @@ export default function CockpitOverview({
                       {batteries.map(b => <option key={b.id} value={b.id}>{b.name.replace(" LIPO", "")}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
+                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347' }}>
                       {selectedBattery.cells}S Pack
                     </div>
@@ -1169,12 +1169,12 @@ export default function CockpitOverview({
                 {/* Propeller Select */}
                 <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '8px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>PROPELLER</div>
+                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>PROPELLER</div>
                     <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
                       <img src={getPropellerImage()} alt="Propeller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '9px', padding: '2px', width: '100%' }} 
+                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedPropeller.id}
                       onChange={(e) => {
@@ -1185,22 +1185,22 @@ export default function CockpitOverview({
                       {propellers.map(p => <option key={p.id} value={p.id}>{p.name.replace("APC ", "")}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.2' }}>
+                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
                     <div style={{ fontWeight: 'bold', color: '#ffb347' }}>Size: {selectedPropeller.diameter}&quot;x{selectedPropeller.pitch}&quot;</div>
                     <div>Type: {selectedPropeller.type}</div>
                   </div>
                 </div>
 
                 {/* Motor Auto-Tune Action Bar */}
-                <div style={{ padding: '6px', borderTop: '1px solid var(--color-panel-border)', backgroundColor: 'rgba(255, 179, 71, 0.04)', borderRadius: '0 0 3px 3px' }}>
+                <div style={{ gridColumn: '1 / -1', padding: '6px', borderTop: '1px solid var(--color-panel-border)', backgroundColor: 'rgba(255, 179, 71, 0.04)', borderRadius: '0 0 3px 3px' }}>
                   <button
                     onClick={handleAutoTuneForMotor}
                     className="btn-retro"
                     style={{
                       width: '100%',
                       justifyContent: 'center',
-                      padding: '6px 10px',
-                      fontSize: '10px',
+                      padding: '7px 10px',
+                      fontSize: '11.5px',
                       fontWeight: 'bold',
                       borderColor: activeSetupType === 'motor-tuned' ? '#ffb347' : 'var(--color-panel-border)',
                       color: '#ffb347',
