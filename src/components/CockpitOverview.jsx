@@ -281,6 +281,74 @@ export default function CockpitOverview({
     }
   };
 
+  // Auto-Optimizer: Find the ideal safe propeller & battery for any selected motor alone
+  const getOptimalSetupForMotor = (motorToOptimize) => {
+    if (!motorToOptimize) return null;
+
+    const maxMotorCells = getMaxCells(motorToOptimize.voltageSupported);
+    const minMotorCells = getMinCells(motorToOptimize.voltageSupported);
+
+    let bestScore = -1;
+    let bestCombo = null;
+
+    for (const b of batteries) {
+      if (b.cells > maxMotorCells || b.cells < minMotorCells) continue;
+
+      for (const e of escs) {
+        const maxEscCells = getMaxCells(e.voltageSupported);
+        const minEscCells = getMinCells(e.voltageSupported);
+        if (b.cells > maxEscCells || b.cells < minEscCells) continue;
+
+        for (const p of propellers) {
+          const s = calculateSpecs({
+            aircraft: dynamicAircraft,
+            motor: motorToOptimize,
+            esc: e,
+            battery: b,
+            propeller: p,
+            throttle: 100
+          });
+
+          const propRpmLimit = 190000 / p.diameter;
+          
+          // Strict 100% continuous safety bounds for motor and ESC
+          const isSafe = 
+            s.amps <= motorToOptimize.maxCurrent &&
+            s.amps <= e.maxAmps &&
+            s.watts <= motorToOptimize.maxPower &&
+            s.rpm <= propRpmLimit &&
+            s.thrustToWeight >= 0.65;
+
+          if (isSafe) {
+            // Optimal score balances thrust-to-weight ratio and pitch speed
+            const score = (s.thrustToWeight * 2.0) + (s.pitchSpeed / 50.0);
+            if (score > bestScore) {
+              bestScore = score;
+              bestCombo = {
+                esc: e,
+                battery: b,
+                propeller: p,
+                specs: s
+              };
+            }
+          }
+        }
+      }
+    }
+    return bestCombo;
+  };
+
+  const handleAutoTuneForMotor = () => {
+    const bestCombo = getOptimalSetupForMotor(selectedMotor);
+    if (bestCombo) {
+      if (bestCombo.propeller) setSelectedPropeller(bestCombo.propeller);
+      if (bestCombo.battery) setSelectedBattery(bestCombo.battery);
+      if (bestCombo.esc) setSelectedEsc(bestCombo.esc);
+      setThrottle(100);
+      setActiveSetupType("motor-tuned");
+    }
+  };
+
   // Helper functions to get active component images dynamically based on brand/type
   const getMotorImage = () => {
     return selectedMotor.brand === 'Spektrum' ? motorSpektrum : motorElectric;
@@ -816,6 +884,30 @@ export default function CockpitOverview({
                     <div className={`status-lamp ${activeSetupType === 'fastest' ? 'red' : 'red off'}`} />
                   </button>
                 )}
+
+                <button 
+                  onClick={handleAutoTuneForMotor}
+                  className={`btn-retro ${activeSetupType === 'motor-tuned' ? 'active' : ''}`}
+                  style={{ 
+                    justifyContent: 'space-between', 
+                    padding: '6px 12px', 
+                    fontSize: '11px',
+                    borderColor: activeSetupType === 'motor-tuned' ? '#ffb347' : 'rgba(255, 179, 71, 0.4)',
+                    boxShadow: activeSetupType === 'motor-tuned' ? '0 0 10px rgba(255, 179, 71, 0.4)' : 'none',
+                    marginTop: '6px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#ffb347' }}>⚙</span>
+                    <div style={{ textAlign: 'left' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#ffb347' }}>AUTO-MATCH MOTOR PROP</div>
+                      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.45)' }}>
+                        Optimized for {selectedMotor.brand} {selectedMotor.model}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`status-lamp ${activeSetupType === 'motor-tuned' ? 'green' : 'green off'}`} />
+                </button>
               </div>
             </div>
 
@@ -1099,6 +1191,27 @@ export default function CockpitOverview({
                   </div>
                 </div>
 
+                {/* Motor Auto-Tune Action Bar */}
+                <div style={{ padding: '6px', borderTop: '1px solid var(--color-panel-border)', backgroundColor: 'rgba(255, 179, 71, 0.04)', borderRadius: '0 0 3px 3px' }}>
+                  <button
+                    onClick={handleAutoTuneForMotor}
+                    className="btn-retro"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      padding: '6px 10px',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      borderColor: activeSetupType === 'motor-tuned' ? '#ffb347' : 'var(--color-panel-border)',
+                      color: '#ffb347',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>⚡ AUTO-MATCH OPTIMAL PROP & BATTERY FOR {selectedMotor.name}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
