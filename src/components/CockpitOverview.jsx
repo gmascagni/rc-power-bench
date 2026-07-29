@@ -1179,7 +1179,7 @@ export default function CockpitOverview({
                         if (item) { setSelectedPropeller(item); setActiveSetupType(null); }
                       }}
                     >
-                      {propellers.map(p => <option key={p.id} value={p.id}>{p.name.replace("APC ", "")}</option>)}
+                      {propellers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
                   <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
