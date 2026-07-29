@@ -1280,10 +1280,25 @@ export default function CockpitOverview({
                   </span>
                 </div>
 
-                <div className="flex-between" style={{ marginBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '4px' }}>
-                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>CURRENT DRAW</span>
-                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--color-red)', textShadow: '0 0 8px var(--color-red-glow)', fontFamily: 'var(--font-mono)' }}>{specs.amps} A</span>
-                </div>
+                {(() => {
+                  const currentRatio = specs.amps / Math.max(selectedMotor.maxCurrent, 1);
+                  let drawColor = "var(--color-green)";
+                  let drawGlow = "0 0 8px var(--color-green-glow)";
+                  if (currentRatio > 1.0) {
+                    drawColor = "var(--color-red)";
+                    drawGlow = "0 0 8px var(--color-red-glow)";
+                  } else if (currentRatio >= 0.85) {
+                    drawColor = "#ffc107";
+                    drawGlow = "0 0 8px rgba(255, 193, 7, 0.5)";
+                  }
+
+                  return (
+                    <div className="flex-between" style={{ marginBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '4px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>CURRENT DRAW</span>
+                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: drawColor, textShadow: drawGlow, fontFamily: 'var(--font-mono)' }}>{specs.amps} A</span>
+                    </div>
+                  );
+                })()}
 
                 <HorizontalBarGauge label="Motor Load" value={specs.motorLoad} percentage={specs.motorLoad} />
                 <HorizontalBarGauge label="ESC Load" value={specs.escLoad} percentage={specs.escLoad} />
