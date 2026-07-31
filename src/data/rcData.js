@@ -305,6 +305,23 @@ export const aircrafts = [
     suggestedCg: "4.50 in (114 mm)",
     description: "Top Flite Gold Edition P-51D Mustang. High-fidelity build-up kit design, recognized for its scale outlines, high-speed stability, and iconic bubble canopy.",
     manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=12783"
+  },
+  {
+    id: "hangar9-p40b-50",
+    name: "HANGAR 9 P-40B WARHAWK .50",
+    class: "50-CLASS",
+    wingspan: 55.5,
+    length: 48,
+    wingArea: 572,
+    emptyWeight: 5.8,
+    flyingWeight: 7.2,
+    powerRangeMin: 800,
+    powerRangeMax: 1650,
+    manufacturer: "Hangar 9",
+    image: "p40.jpg",
+    suggestedCg: "3.00 in (76 mm) gear in / 2.38 in (60 mm) gear out",
+    description: "Hangar 9 P-40B Warhawk .50 ARF. Classic WWII Flying Tigers fighter featuring rotating retracts, scale camouflage, and compact 50-class airframe.",
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2595-Manual.pdf"
   }
 ];
 
@@ -363,6 +380,20 @@ const rawMotors = [
     internalResistance: 0.012,
     noLoadCurrent: 1.9,
     voltageSupported: "5S - 8S LiPo (18.5V - 29.6V)",
+    type: "Brushless Outrunner"
+  },
+  {
+    id: "eflite-power52",
+    name: "E-FLITE POWER 52 590KV",
+    model: "EFLM4052A",
+    brand: "E-flite",
+    kv: 590,
+    weight: 346,
+    maxCurrent: 65,
+    maxPower: 1650,
+    internalResistance: 0.016,
+    noLoadCurrent: 2.3,
+    voltageSupported: "4S - 6S LiPo (14.8V - 22.2V)",
     type: "Brushless Outrunner"
   },
   {
