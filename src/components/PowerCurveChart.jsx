@@ -134,23 +134,6 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
           );
         })}
 
-        {/* Legend */}
-        <g transform="translate(12, 12)">
-          {/* Selected curves */}
-          <line x1="0" y1="0" x2="12" y2="0" stroke="var(--color-red)" strokeWidth="2.5" />
-          <text x="16" y="3.5" fill="var(--color-red)" fontSize="10" fontWeight="bold">MOD AMPS</text>
-          
-          <line x1="85" y1="0" x2="97" y2="0" stroke="var(--color-amber)" strokeWidth="2.5" />
-          <text x="101" y="3.5" fill="var(--color-amber)" fontSize="10" fontWeight="bold">MOD WATTS</text>
-
-          {/* Recommended stock baseline curves */}
-          <line x1="180" y1="0" x2="192" y2="0" stroke="var(--color-red)" strokeWidth="1.5" strokeDasharray="3,2" strokeOpacity="0.5" />
-          <text x="196" y="3.5" fill="var(--color-red)" fillOpacity="0.65" fontSize="10" fontWeight="bold">STOCK AMPS</text>
-
-          <line x1="275" y1="0" x2="287" y2="0" stroke="var(--color-amber)" strokeWidth="1.5" strokeDasharray="3,2" strokeOpacity="0.5" />
-          <text x="291" y="3.5" fill="var(--color-amber)" fillOpacity="0.65" fontSize="10" fontWeight="bold">STOCK WATTS</text>
-        </g>
-
         {/* Axis Labels */}
         <text x={padding.left - 28} y={padding.top - 5} fill="var(--color-red)" fontSize="11" fontWeight="bold">AMPS</text>
         <text x={width - padding.right + 2} y={padding.top - 5} fill="var(--color-amber)" fontSize="11" fontWeight="bold">WATTS</text>
@@ -206,6 +189,69 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
           </g>
         )}
       </svg>
+
+      {/* Legend & System Summary Container Under Chart */}
+      <div style={{ marginTop: '8px', padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+        
+        {/* Line 1: Chart Legend with Battery Voltage */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '16px', fontSize: '11px', fontWeight: 'bold', borderBottom: '1px dashed var(--color-panel-border)', paddingBottom: '6px', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ display: 'inline-block', width: '14px', height: '3px', background: 'var(--color-red)', boxShadow: '0 0 4px var(--color-red-glow)' }}></span>
+            <span style={{ color: 'var(--color-red)' }}>MOD AMPS ({battery.cells}S / {(battery.cells * 3.7).toFixed(1)}V)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ display: 'inline-block', width: '14px', height: '3px', background: 'var(--color-amber)', boxShadow: '0 0 4px var(--color-amber-glow)' }}></span>
+            <span style={{ color: 'var(--color-amber)' }}>MOD WATTS ({battery.cells}S / {(battery.cells * 3.7).toFixed(1)}V)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7 }}>
+            <span style={{ display: 'inline-block', width: '14px', height: '0', borderTop: '2px dashed var(--color-red)' }}></span>
+            <span style={{ color: 'var(--color-red)' }}>STOCK AMPS ({recBattery.cells}S / {(recBattery.cells * 3.7).toFixed(1)}V)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7 }}>
+            <span style={{ display: 'inline-block', width: '14px', height: '0', borderTop: '2px dashed var(--color-amber)' }}></span>
+            <span style={{ color: 'var(--color-amber)' }}>STOCK WATTS ({recBattery.cells}S / {(recBattery.cells * 3.7).toFixed(1)}V)</span>
+          </div>
+        </div>
+
+        {/* Line 2: Color-Scaled Summary Line (Voltage / Motor / Amp Draw) */}
+        {(() => {
+          const activeAmps = currentPt.amps > 0 ? currentPt.amps : data[data.length - 1].amps;
+          const currentRatio = activeAmps / Math.max(motor.maxCurrent, 1);
+          let ampColor = "var(--color-green)";
+          let ampGlow = "0 0 8px var(--color-green-glow)";
+          let statusLabel = "SAFE";
+          
+          if (currentRatio > 1.0) {
+            ampColor = "var(--color-red)";
+            ampGlow = "0 0 8px var(--color-red-glow)";
+            statusLabel = "OVERLOAD";
+          } else if (currentRatio >= 0.85) {
+            ampColor = "#ffc107";
+            ampGlow = "0 0 8px rgba(255, 193, 7, 0.5)";
+            statusLabel = "HIGH LOAD";
+          }
+
+          return (
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mono)', gap: '8px' }}>
+              <div>
+                <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>VOLTAGE: </span>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>{battery.cells}S ({(battery.cells * 3.7).toFixed(1)}V)</span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>MOTOR: </span>
+                <span style={{ color: '#ffc97a', fontWeight: 'bold' }}>{motor.name}</span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>CURRENT DRAW: </span>
+                <span style={{ color: ampColor, textShadow: ampGlow, fontWeight: 'bold', fontSize: '12px' }}>
+                  {activeAmps} A [{statusLabel}]
+                </span>
+              </div>
+            </div>
+          );
+        })()}
+
+      </div>
     </div>
   );
 }
