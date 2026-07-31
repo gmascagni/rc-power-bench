@@ -147,26 +147,6 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
         <path d={wattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 2.5px var(--color-amber-glow))' }} />
         <path d={ampsPath} fill="none" stroke="var(--color-red)" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 2.5px var(--color-red-glow))' }} />
 
-        {/* Comparison Data Box (Bottom Right Empty Space) */}
-        <g transform={`translate(${width - padding.right - 128}, ${height - padding.bottom - 58})`}>
-          <rect width="124" height="54" fill="rgba(19, 23, 27, 0.94)" stroke="var(--color-panel-border)" strokeWidth="1" rx="2" />
-          <text x="6" y="11" fill="var(--color-amber-dim)" fontSize="9.5" fontWeight="bold">VS STOCK BASELINE</text>
-          
-          <text x="6" y="24" fill="rgba(255,255,255,0.4)" fontSize="10.5">STOCK:</text>
-          <text x="118" y="24" fill="rgba(255,255,255,0.6)" fontSize="10.5" textAnchor="end" style={{ fontFamily: 'var(--font-mono)' }}>
-            {Math.round(stockPt.watts)}W / {Math.round(stockPt.amps)}A
-          </text>
-          
-          <text x="6" y="37" fill="var(--color-amber)" fontSize="10.5" fontWeight="bold">MODIFIED:</text>
-          <text x="118" y="37" fill="var(--color-amber)" fontSize="10.5" fontWeight="bold" textAnchor="end" style={{ fontFamily: 'var(--font-mono)' }}>
-            {Math.round(currentPt.watts)}W / {Math.round(currentPt.amps)}A
-          </text>
-
-          <text x="6" y="48" fill={wattsDelta >= 0 ? "var(--color-green)" : "var(--color-red)"} fontSize="9.5" fontWeight="bold">
-            {wattsDelta >= 0 ? `+${wattsDelta}W (+${wattsPct}%)` : `${wattsDelta}W (${wattsPct}%)`}
-          </text>
-        </g>
-
         {/* Vertical Throttle Indicator Cursor Line */}
         {currentThrottle > 0 && (
           <g>
@@ -191,29 +171,42 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
       </svg>
 
       {/* Legend & System Summary Container Under Chart */}
-      <div style={{ marginTop: '8px', padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+      <div style={{ marginTop: '6px', padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
         
-        {/* Line 1: Chart Legend with Battery Voltage */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '16px', fontSize: '13px', fontWeight: 'bold', borderBottom: '1px dashed var(--color-panel-border)', paddingBottom: '6px', marginBottom: '6px' }}>
+        {/* Line 1: Compact 2x2 Grid Legend with Battery Voltage */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '11.5px', fontWeight: 'bold', borderBottom: '1px dashed var(--color-panel-border)', paddingBottom: '6px', marginBottom: '6px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ display: 'inline-block', width: '16px', height: '3.5px', background: 'var(--color-red)', boxShadow: '0 0 4px var(--color-red-glow)' }}></span>
+            <span style={{ display: 'inline-block', width: '14px', height: '3px', background: 'var(--color-red)', boxShadow: '0 0 4px var(--color-red-glow)' }}></span>
             <span style={{ color: 'var(--color-red)' }}>MOD AMPS ({battery.cells}S / {(battery.cells * 3.7).toFixed(1)}V)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ display: 'inline-block', width: '16px', height: '3.5px', background: 'var(--color-amber)', boxShadow: '0 0 4px var(--color-amber-glow)' }}></span>
+            <span style={{ display: 'inline-block', width: '14px', height: '3px', background: 'var(--color-amber)', boxShadow: '0 0 4px var(--color-amber-glow)' }}></span>
             <span style={{ color: 'var(--color-amber)' }}>MOD WATTS ({battery.cells}S / {(battery.cells * 3.7).toFixed(1)}V)</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7 }}>
-            <span style={{ display: 'inline-block', width: '16px', height: '0', borderTop: '2.5px dashed var(--color-red)' }}></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.75 }}>
+            <span style={{ display: 'inline-block', width: '14px', height: '0', borderTop: '2px dashed var(--color-red)' }}></span>
             <span style={{ color: 'var(--color-red)' }}>STOCK AMPS ({recBattery.cells}S / {(recBattery.cells * 3.7).toFixed(1)}V)</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7 }}>
-            <span style={{ display: 'inline-block', width: '16px', height: '0', borderTop: '2.5px dashed var(--color-amber)' }}></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.75 }}>
+            <span style={{ display: 'inline-block', width: '14px', height: '0', borderTop: '2px dashed var(--color-amber)' }}></span>
             <span style={{ color: 'var(--color-amber)' }}>STOCK WATTS ({recBattery.cells}S / {(recBattery.cells * 3.7).toFixed(1)}V)</span>
           </div>
         </div>
 
-        {/* Line 2: Color-Scaled Summary Line (Voltage / Motor / Amp Draw) */}
+        {/* Line 2: Stock Comparison Baseline Readout */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mono)', borderBottom: '1px dashed var(--color-panel-border)', paddingBottom: '5px', marginBottom: '6px' }}>
+          <div>
+            <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>VS STOCK BASELINE: </span>
+            <span style={{ color: 'rgba(255,255,255,0.6)' }}>STOCK: {Math.round(stockPt.watts)}W/{Math.round(stockPt.amps)}A</span>
+            <span style={{ margin: '0 6px', color: 'var(--color-panel-border)' }}>|</span>
+            <span style={{ color: 'var(--color-amber)', fontWeight: 'bold' }}>MOD: {Math.round(currentPt.watts)}W/{Math.round(currentPt.amps)}A</span>
+          </div>
+          <div style={{ fontWeight: 'bold', color: wattsDelta >= 0 ? "var(--color-green)" : "var(--color-red)" }}>
+            {wattsDelta >= 0 ? `+${wattsDelta}W (+${wattsPct}%)` : `${wattsDelta}W (${wattsPct}%)`}
+          </div>
+        </div>
+
+        {/* Line 3: Color-Scaled System Status (Voltage / Motor / Amp Draw) */}
         {(() => {
           const activeAmps = currentPt.amps > 0 ? currentPt.amps : data[data.length - 1].amps;
           const currentRatio = activeAmps / Math.max(motor.maxCurrent, 1);
@@ -232,7 +225,7 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
           }
 
           return (
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', fontSize: '12.5px', fontFamily: 'var(--font-mono)', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px', fontFamily: 'var(--font-mono)', gap: '6px' }}>
               <div>
                 <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>VOLTAGE: </span>
                 <span style={{ color: '#fff', fontWeight: 'bold' }}>{battery.cells}S ({(battery.cells * 3.7).toFixed(1)}V)</span>
@@ -243,7 +236,7 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
               </div>
               <div>
                 <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>CURRENT DRAW: </span>
-                <span style={{ color: ampColor, textShadow: ampGlow, fontWeight: 'bold', fontSize: '13.5px' }}>
+                <span style={{ color: ampColor, textShadow: ampGlow, fontWeight: 'bold', fontSize: '12.5px' }}>
                   {activeAmps} A [{statusLabel}]
                 </span>
               </div>
