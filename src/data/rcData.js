@@ -338,6 +338,34 @@ const rawMotors = [
     type: "Brushless Outrunner"
   },
   {
+    id: "rimfire-120",
+    name: "RIMFIRE 1.20 450KV",
+    model: "GPMG4770-450KV",
+    brand: "Great Planes",
+    kv: 450,
+    weight: 400,
+    maxCurrent: 85,
+    maxPower: 2300,
+    internalResistance: 0.014,
+    noLoadCurrent: 1.8,
+    voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
+    type: "Brushless Outrunner"
+  },
+  {
+    id: "rimfire-130",
+    name: "RIMFIRE 1.30 450KV",
+    model: "GPMG4795-450KV",
+    brand: "Great Planes",
+    kv: 450,
+    weight: 440,
+    maxCurrent: 90,
+    maxPower: 2500,
+    internalResistance: 0.012,
+    noLoadCurrent: 1.9,
+    voltageSupported: "5S - 8S LiPo (18.5V - 29.6V)",
+    type: "Brushless Outrunner"
+  },
+  {
     id: "eflite-power60",
     name: "E-FLITE POWER 60 470KV",
     model: "EFLM4060B-470KV",
@@ -475,6 +503,48 @@ const rawMotors = [
     internalResistance: 0.015,
     noLoadCurrent: 1.5,
     voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
+    type: "Brushless Outrunner"
+  },
+  {
+    id: "spektrum-5055-650",
+    name: "SPEKTRUM AVIAN 5055 650KV",
+    model: "SPMXAM4725",
+    brand: "Spektrum",
+    kv: 650,
+    weight: 395,
+    maxCurrent: 90,
+    maxPower: 1900,
+    internalResistance: 0.012,
+    noLoadCurrent: 1.9,
+    voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
+    type: "Brushless Outrunner"
+  },
+  {
+    id: "spektrum-5065-450",
+    name: "SPEKTRUM AVIAN 5065 450KV",
+    model: "SPMXAM4740",
+    brand: "Spektrum",
+    kv: 450,
+    weight: 490,
+    maxCurrent: 90,
+    maxPower: 2200,
+    internalResistance: 0.013,
+    noLoadCurrent: 1.7,
+    voltageSupported: "5S - 8S LiPo (18.5V - 29.6V)",
+    type: "Brushless Outrunner"
+  },
+  {
+    id: "spektrum-4260-480",
+    name: "SPEKTRUM AVIAN 4260 480KV",
+    model: "SPMXAM4710",
+    brand: "Spektrum",
+    kv: 480,
+    weight: 280,
+    maxCurrent: 70,
+    maxPower: 1400,
+    internalResistance: 0.018,
+    noLoadCurrent: 1.5,
+    voltageSupported: "4S - 6S LiPo (14.8V - 22.2V)",
     type: "Brushless Outrunner"
   },
   {
@@ -1011,13 +1081,31 @@ export const propellers = [
     kProp: 1.10
   },
   {
-    id: "apc-15x12e",
-    name: "APC 15 x 12E",
+    id: "apc-15x6e",
+    name: "APC 15 x 6E",
     diameter: 15,
-    pitch: 12,
+    pitch: 6,
     type: "Electric",
     blades: 2,
-    kProp: 1.12
+    kProp: 0.92
+  },
+  {
+    id: "apc-15x7e",
+    name: "APC 15 x 7E",
+    diameter: 15,
+    pitch: 7,
+    type: "Electric",
+    blades: 2,
+    kProp: 0.95
+  },
+  {
+    id: "apc-15x8e",
+    name: "APC 15 x 8E",
+    diameter: 15,
+    pitch: 8,
+    type: "Electric",
+    blades: 2,
+    kProp: 0.98
   },
   {
     id: "apc-15x10e",
@@ -1029,13 +1117,13 @@ export const propellers = [
     kProp: 1.05
   },
   {
-    id: "apc-15x8e",
-    name: "APC 15 x 8E",
+    id: "apc-15x12e",
+    name: "APC 15 x 12E",
     diameter: 15,
-    pitch: 8,
+    pitch: 12,
     type: "Electric",
     blades: 2,
-    kProp: 0.98
+    kProp: 1.12
   },
   {
     id: "apc-16x10e",
