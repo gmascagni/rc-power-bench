@@ -310,19 +310,26 @@ export default function CockpitOverview({
         throttle: 100
       });
 
+      // Scale propeller diameter suitability for aircraft class
+      const minDiameterForClass = 
+        dynamicAircraft.class === '60-CLASS' ? (p.blades >= 3 ? 14.0 : 15.0) :
+        dynamicAircraft.class === '50-CLASS' ? 14.0 :
+        dynamicAircraft.class === '1.5M CLASS' ? 13.0 : 12.0;
+
       const propRpmLimit = 190000 / p.diameter;
       
       // Strict 100% continuous safety bounds for motor and ESC
       const isSafe = 
+        p.diameter >= minDiameterForClass &&
         s.amps <= motorToOptimize.maxCurrent &&
         s.amps <= escToUse.maxAmps &&
         s.watts <= motorToOptimize.maxPower &&
         s.rpm <= propRpmLimit &&
-        s.thrustToWeight >= 0.65;
+        s.thrustToWeight >= 0.70;
 
       if (isSafe) {
         // Score strictly optimized for MAX PITCH SPEED within safe motor thermal limits
-        const score = (s.pitchSpeed * 10.0) + s.thrustToWeight;
+        const score = (s.pitchSpeed * 10.0) + (s.thrustToWeight * 5.0);
         if (score > bestScore) {
           bestScore = score;
           bestProp = p;
