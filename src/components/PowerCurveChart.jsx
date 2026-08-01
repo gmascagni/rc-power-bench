@@ -6,12 +6,12 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   // Generate selected data points
   const data = generatePowerCurve(aircraft, motor, esc, battery, propeller);
 
-  // Retrieve stock recommended setup components (Scale Performance baseline)
-  const recSetup = recommendedSetups.scale;
-  const recMotor = motors.find(m => m.id === recSetup.motorId) || motor;
-  const recEsc = escs.find(e => e.id === recSetup.escId) || esc;
-  const recBattery = batteries.find(b => b.id === recSetup.batteryId) || battery;
-  const recPropeller = propellers.find(p => p.id === recSetup.propellerId) || propeller;
+  // Retrieve manufacturer recommended stock setup components for the selected aircraft
+  const stockConfig = aircraft?.stockSetup || recommendedSetups.scale;
+  const recMotor = motors.find(m => m.id === stockConfig.motorId) || motor;
+  const recEsc = escs.find(e => e.id === stockConfig.escId) || esc;
+  const recBattery = batteries.find(b => b.id === stockConfig.batteryId) || battery;
+  const recPropeller = propellers.find(p => p.id === stockConfig.propellerId) || propeller;
 
   // Generate recommended data points
   const recData = generatePowerCurve(aircraft, recMotor, recEsc, recBattery, recPropeller);

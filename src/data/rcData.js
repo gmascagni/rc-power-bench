@@ -14,7 +14,8 @@ export const aircrafts = [
     image: "p51.jpg",
     suggestedCg: "4.25 in (108 mm)",
     description: "North American P-51D Mustang. Famous long-range WWII escort fighter featuring Allied Normandy invasion stripes. High speed and excellent aerodynamics.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2375-Manual.pdf"
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2375-Manual.pdf",
+    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-120a" }
   },
   {
     id: "f4u-corsair",
@@ -31,7 +32,8 @@ export const aircrafts = [
     image: "corsair.jpg",
     suggestedCg: "4.50 in (114 mm)",
     description: "Chance Vought F4U Corsair. Carrier-capable fighter bomber. Known for its distinct inverted gull wings and dark navy blue paint scheme.",
-    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=11649"
+    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=11649",
+    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "castle-phoenix-100" }
   },
   {
     id: "spitfire-mk9",
@@ -48,7 +50,8 @@ export const aircrafts = [
     image: "spitfire.jpg",
     suggestedCg: "4.75 in (120 mm)",
     description: "Supermarine Spitfire. The iconic British interceptor of the Battle of Britain. Featuring Normandy invasion stripes painted on elliptical wings.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-15x10e", escId: "hobbywing-120a" }
   },
   {
     id: "bf109",
@@ -65,7 +68,8 @@ export const aircrafts = [
     image: "bf109.jpg",
     suggestedCg: "3.75 in (95 mm)",
     description: "Messerschmitt Bf 109. The backbone of the German Luftwaffe. Fast climber, compact design with standard desert/woodland camouflage.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-120a" }
   },
   {
     id: "fw190",
@@ -82,7 +86,8 @@ export const aircrafts = [
     image: "fw190.jpg",
     suggestedCg: "4.00 in (102 mm)",
     description: "Focke-Wulf Fw 190 'Shrike'. Heavily armed radial-engine German warbird. High roll rate, structural strength, and distinct dark green camo patterns.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "leopard-5065", batteryId: "6s-5000mah-45c", propellerId: "apc-15x10e", escId: "castle-phoenix-100" }
   },
   {
     id: "p47d-thunderbolt",
@@ -99,7 +104,8 @@ export const aircrafts = [
     image: "p47.jpg",
     suggestedCg: "4.75 in (120 mm)",
     description: "Republic P-47 Thunderbolt 'Jug'. Large, heavy, and extremely rugged escort fighter. Featuring broad black and white Normandy stripes.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a" }
   },
   {
     id: "seagull-p47-60",
@@ -116,7 +122,8 @@ export const aircrafts = [
     image: "p47.jpg",
     suggestedCg: "4.50 in (115 mm)",
     description: "Seagull Models P-47D Thunderbolt 'Snafu'. Classic 60-size stand-off scale warbird. Finished in Olive Drab with yellow nose cowl and black/white invasion stripes.",
-    manualUrl: "https://www.legendhobby.com/manuals/SEA207%20P-47D%20SNAFU%2063inch.pdf"
+    manualUrl: "https://www.legendhobby.com/manuals/SEA207%20P-47D%20SNAFU%2063inch.pdf",
+    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-120a" }
   },
   {
     id: "hurricane",
@@ -133,7 +140,8 @@ export const aircrafts = [
     image: "hurricane.jpg",
     suggestedCg: "4.25 in (108 mm)",
     description: "Hawker Hurricane. British single-seat fighter. Rugged build, historical battle veteran of RAF campaigns with Normandy recognition stripes.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "ma-15x7-3", escId: "hobbywing-120a" }
   },
   {
     id: "zero",
@@ -150,7 +158,8 @@ export const aircrafts = [
     image: "zero.jpg",
     suggestedCg: "4.00 in (102 mm)",
     description: "Mitsubishi A6M Zero. Japanese long-range carrier fighter. Famous for its light grey-green paint and extreme dogfighting agility.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-120a" }
   },
   {
     id: "p38-lightning",
@@ -168,7 +177,8 @@ export const aircrafts = [
     suggestedCg: "3.75 in (95 mm)",
     description: "Lockheed P-38 Lightning. Twin-engine heavy fighter with a twin-boom design and central nacelle. Marked with bold Normandy stripes for D-Day operations.",
     manualUrl: null,
-    enginesCount: 2
+    enginesCount: 2,
+    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-14x10e", escId: "hobbywing-120a" }
   },
   {
     id: "f6f-hellcat",
@@ -185,7 +195,8 @@ export const aircrafts = [
     image: "hellcat.jpg",
     suggestedCg: "5.25 in (134 mm)",
     description: "Grumman F6F Hellcat. Rugged carrier fighter that dominated Pacific skies. Finished in deep midnight blue sea camo.",
-    manualUrl: "https://www.manualslib.com/manual/1000624/Hangar-9-F6f-Hellcat-60.html"
+    manualUrl: "https://www.manualslib.com/manual/1000624/Hangar-9-F6f-Hellcat-60.html",
+    stockSetup: { motorId: "badass-4530-730", batteryId: "6s-5000mah-45c", propellerId: "apc-13x10e", escId: "castle-phoenix-100" }
   },
   {
     id: "f8f-bearcat",
@@ -202,7 +213,8 @@ export const aircrafts = [
     image: "bearcat.jpg",
     suggestedCg: "4.25 in (108 mm)",
     description: "Grumman F8F Bearcat. High-performance, late-war interceptor with extreme climb speed. Finished in glossy US Navy blue.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "leopard-5065", batteryId: "6s-5000mah-45c", propellerId: "apc-15x10e", escId: "hobbywing-120a" }
   },
   {
     id: "f4f-wildcat",
@@ -219,7 +231,8 @@ export const aircrafts = [
     image: "wildcat.jpg",
     suggestedCg: "3.75 in (95 mm)",
     description: "Grumman F4F Wildcat. Early WWII US Navy carrier fighter. Known for its rugged build, boxy wings, and early war blue-grey over light grey camo.",
-    manualUrl: null
+    manualUrl: null,
+    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "castle-phoenix-100" }
   },
   {
     id: "eflite-p51-1.5m",
@@ -236,7 +249,8 @@ export const aircrafts = [
     image: "p51.jpg",
     suggestedCg: "4.90 in (124 mm)",
     description: "E-flite 1.5m P-51D Mustang. Sport-scale warbird featuring Smart electronics, functional flaps, and retractable landing gear.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01250-Manual-EN.pdf"
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01250-Manual-EN.pdf",
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-13x9-3", escId: "spektrum-avian-100" }
   },
   {
     id: "eflite-bf190-1.5m",
@@ -253,7 +267,8 @@ export const aircrafts = [
     image: "fw190.jpg",
     suggestedCg: "4.50 in (114 mm)",
     description: "E-flite 1.5m Fw 190A (referenced as BF-190). Heavy sport-scale fighter with scale radial engine cowl and wide-track retractable gear.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01350-Manual-EN.pdf"
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01350-Manual-EN.pdf",
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-13x9-3", escId: "spektrum-avian-100" }
   },
   {
     id: "eflite-corsair-1.2m",
@@ -270,7 +285,8 @@ export const aircrafts = [
     image: "corsair.jpg",
     suggestedCg: "3.15 in (80 mm)",
     description: "E-flite 1.2m F4U Corsair. Highly detailed sport-scale model featuring functioning 3-blade prop drive and retractable landing gear.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL12000-Manual-EN.pdf"
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL12000-Manual-EN.pdf",
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "4s-5000mah-30c", propellerId: "eflite-12x8-3", escId: "hobbywing-60a" }
   },
   {
     id: "topflite-p40",
@@ -287,7 +303,8 @@ export const aircrafts = [
     image: "p40.jpg",
     suggestedCg: "4.25 in (108 mm)",
     description: "Curtiss P-40 Warhawk. The workhorse WWII fighter famous for the Flying Tigers shark mouth nose art. Rugged airframe with unique landing gear twist rotation.",
-    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=13591"
+    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=13591",
+    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "castle-phoenix-100" }
   },
   {
     id: "topflite-p51",
@@ -304,7 +321,8 @@ export const aircrafts = [
     image: "p51.jpg",
     suggestedCg: "4.50 in (114 mm)",
     description: "Top Flite Gold Edition P-51D Mustang. High-fidelity build-up kit design, recognized for its scale outlines, high-speed stability, and iconic bubble canopy.",
-    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=12783"
+    manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=12783",
+    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-120a" }
   },
   {
     id: "hangar9-p40b-50",
@@ -321,7 +339,8 @@ export const aircrafts = [
     image: "p40.jpg",
     suggestedCg: "3.00 in (76 mm) gear in / 2.38 in (60 mm) gear out",
     description: "Hangar 9 P-40B Warhawk .50 ARF. Classic WWII Flying Tigers fighter featuring rotating retracts, scale camouflage, and compact 50-class airframe.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2595-Manual.pdf"
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2595-Manual.pdf",
+    stockSetup: { motorId: "eflite-power52", batteryId: "5s-5000mah-45c", propellerId: "apc-14x10e", escId: "hobbywing-80a" }
   }
 ];
 
