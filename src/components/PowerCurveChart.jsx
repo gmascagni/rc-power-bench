@@ -7,22 +7,22 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   const data = generatePowerCurve(aircraft, motor, esc, battery, propeller);
 
   // Retrieve manufacturer recommended stock setup components for the selected aircraft
-  const stockConfig = aircraft?.stockSetup || recommendedSetups.scale;
-  const recMotor = motors.find(m => m.id === stockConfig.motorId) || motor;
-  const recEsc = escs.find(e => e.id === stockConfig.escId) || esc;
-  const recBattery = batteries.find(b => b.id === stockConfig.batteryId) || battery;
-  const recPropeller = propellers.find(p => p.id === stockConfig.propellerId) || propeller;
+  const stockConfig = aircraft?.stockSetup || recommendedSetups?.scale || {};
+  const recMotor = motors.find(m => m.id === stockConfig.motorId) || motor || motors[0];
+  const recEsc = escs.find(e => e.id === stockConfig.escId) || esc || escs[0];
+  const recBattery = batteries.find(b => b.id === stockConfig.batteryId) || battery || batteries[0];
+  const recPropeller = propellers.find(p => p.id === stockConfig.propellerId) || propeller || propellers[0];
 
   // Generate recommended data points
   const recData = generatePowerCurve(aircraft, recMotor, recEsc, recBattery, recPropeller);
 
   // Retrieve saved model / benchmark setup (Fastest / Speed Run or Auto-Tuned prop)
-  const optSetup = recommendedSetups.fastest;
-  const optMotor = motor;
-  const optEsc = esc;
-  const optBattery = battery;
+  const optSetup = recommendedSetups?.fastest || {};
+  const optMotor = motor || motors[0];
+  const optEsc = esc || escs[0];
+  const optBattery = battery || batteries[0];
   // Select optimal speed prop for motor & battery if active prop differs, or fastest setup prop
-  const optPropeller = propellers.find(p => p.id === optSetup.propellerId) || propeller;
+  const optPropeller = propellers.find(p => p.id === optSetup.propellerId) || propeller || propellers[0];
 
   // Generate benchmark data points
   const optData = generatePowerCurve(aircraft, optMotor, optEsc, optBattery, optPropeller);
