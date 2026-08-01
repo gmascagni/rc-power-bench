@@ -16,10 +16,21 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   // Generate recommended data points
   const recData = generatePowerCurve(aircraft, recMotor, recEsc, recBattery, recPropeller);
 
-  // Dimensions of SVG
-  const width = 480;
-  const height = 180;
-  const padding = { top: 18, right: 35, bottom: 25, left: 35 };
+  // Retrieve saved model / benchmark setup (Fastest / Speed Run or Auto-Tuned prop)
+  const optSetup = recommendedSetups.fastest;
+  const optMotor = motor;
+  const optEsc = esc;
+  const optBattery = battery;
+  // Select optimal speed prop for motor & battery if active prop differs, or fastest setup prop
+  const optPropeller = propellers.find(p => p.id === optSetup.propellerId) || propeller;
+
+  // Generate benchmark data points
+  const optData = generatePowerCurve(aircraft, optMotor, optEsc, optBattery, optPropeller);
+
+  // Dimensions of SVG (Enlarged chart canvas)
+  const width = 500;
+  const height = 230;
+  const padding = { top: 24, right: 42, bottom: 32, left: 42 };
 
   // Scale functions
   const getX = (throttle) => {
@@ -70,11 +81,25 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
     }
   });
 
+  // Generate path strings for benchmark setup
+  let optWattsPath = "";
+  optData.forEach((p, idx) => {
+    const x = getX(p.throttle);
+    const yW = getYWatts(p.watts);
+
+    if (idx === 0) {
+      optWattsPath += `M ${x} ${yW}`;
+    } else {
+      optWattsPath += ` L ${x} ${yW}`;
+    }
+  });
+
   // Calculate current throttle position for the vertical indicator line
   const cursorX = getX(currentThrottle);
   const targetThrottle = Math.round(currentThrottle / 5) * 5;
   const currentPt = data.find(p => p.throttle === targetThrottle) || { watts: 0, amps: 0 };
   const stockPt = recData.find(p => p.throttle === targetThrottle) || { watts: 0, amps: 0 };
+  const optPt = optData.find(p => p.throttle === targetThrottle) || { watts: 0, amps: 0 };
   const wattsDelta = Math.round(currentPt.watts - stockPt.watts);
   const wattsPct = stockPt.watts > 0 ? Math.round((wattsDelta / stockPt.watts) * 100) : 0;
 
@@ -108,9 +133,9 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
                 strokeDasharray="2,4" 
               />
               {/* Amps label (Left) */}
-              <text x={padding.left - 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="12.5" fontWeight="bold" textAnchor="end">{val}</text>
-              {/* Watts label (Right, maps 150A -> 5000W, so 30A -> 1000W) */}
-              <text x={width - padding.right + 6} y={y + 3.5} fill="var(--color-amber-dim)" fontSize="12.5" fontWeight="bold" textAnchor="start">{Math.round(val * 5000 / 150)}</text>
+              <text x={padding.left - 6} y={y + 4} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="end">{val}</text>
+              {/* Watts label (Right, maps 150A -> 5000W) */}
+              <text x={width - padding.right + 6} y={y + 4} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="start">{Math.round(val * 5000 / 150)}</text>
             </g>
           );
         })}
@@ -129,23 +154,26 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
                 strokeWidth="1" 
                 strokeDasharray="2,4" 
               />
-              <text x={x} y={height - padding.bottom + 16} fill="var(--color-amber-dim)" fontSize="12.5" fontWeight="bold" textAnchor="middle">{val}</text>
+              <text x={x} y={height - padding.bottom + 17} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="middle">{val}</text>
             </g>
           );
         })}
 
         {/* Axis Labels */}
-        <text x={padding.left - 28} y={padding.top - 5} fill="var(--color-red)" fontSize="13" fontWeight="bold">AMPS</text>
-        <text x={width - padding.right + 2} y={padding.top - 5} fill="var(--color-amber)" fontSize="13" fontWeight="bold">WATTS</text>
-        <text x={width / 2} y={height - 2} fill="var(--color-amber-dim)" fontSize="13.5" textAnchor="middle" fontWeight="bold" style={{ letterSpacing: '1px' }}>THROTTLE %</text>
+        <text x={padding.left - 30} y={padding.top - 6} fill="var(--color-red)" fontSize="14.5" fontWeight="bold">AMPS</text>
+        <text x={width - padding.right + 2} y={padding.top - 6} fill="var(--color-amber)" fontSize="14.5" fontWeight="bold">WATTS</text>
+        <text x={width / 2} y={height - 2} fill="var(--color-amber-dim)" fontSize="14.5" textAnchor="middle" fontWeight="bold" style={{ letterSpacing: '1px' }}>THROTTLE %</text>
 
         {/* Stock Recommended Curves (Dashed & Faded) */}
-        <path d={recWattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="1.5" strokeDasharray="4,3" strokeOpacity="0.45" />
-        <path d={recAmpsPath} fill="none" stroke="var(--color-red)" strokeWidth="1.5" strokeDasharray="4,3" strokeOpacity="0.45" />
+        <path d={recWattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="1.8" strokeDasharray="5,3" strokeOpacity="0.45" />
+        <path d={recAmpsPath} fill="none" stroke="var(--color-red)" strokeWidth="1.8" strokeDasharray="5,3" strokeOpacity="0.45" />
+
+        {/* Saved Benchmark Curve (Cyan Dot-Dash) */}
+        <path d={optWattsPath} fill="none" stroke="var(--color-cyan)" strokeWidth="1.8" strokeDasharray="6,3,2,3" strokeOpacity="0.55" />
 
         {/* Current Selected Curves (Solid & Glowing) */}
-        <path d={wattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 2.5px var(--color-amber-glow))' }} />
-        <path d={ampsPath} fill="none" stroke="var(--color-red)" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 2.5px var(--color-red-glow))' }} />
+        <path d={wattsPath} fill="none" stroke="var(--color-amber)" strokeWidth="2.8" style={{ filter: 'drop-shadow(0 0 3px var(--color-amber-glow))' }} />
+        <path d={ampsPath} fill="none" stroke="var(--color-red)" strokeWidth="2.8" style={{ filter: 'drop-shadow(0 0 3px var(--color-red-glow))' }} />
 
         {/* Vertical Throttle Indicator Cursor Line */}
         {currentThrottle > 0 && (
@@ -160,53 +188,36 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
               style={{ filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8))' }} 
             />
             {/* Modified dots */}
-            <circle cx={cursorX} cy={getYAmps(currentPt.amps)} r="3.5" fill="var(--color-red)" stroke="#fff" strokeWidth="1" />
-            <circle cx={cursorX} cy={getYWatts(currentPt.watts)} r="3.5" fill="var(--color-amber)" stroke="#fff" strokeWidth="1" />
+            <circle cx={cursorX} cy={getYAmps(currentPt.amps)} r="4" fill="var(--color-red)" stroke="#fff" strokeWidth="1" />
+            <circle cx={cursorX} cy={getYWatts(currentPt.watts)} r="4" fill="var(--color-amber)" stroke="#fff" strokeWidth="1" />
             
             {/* Stock dots (Faded border circles) */}
-            <circle cx={cursorX} cy={getYAmps(stockPt.amps)} r="3" fill="none" stroke="var(--color-red)" strokeWidth="1" opacity="0.7" />
-            <circle cx={cursorX} cy={getYWatts(stockPt.watts)} r="3" fill="none" stroke="var(--color-amber)" strokeWidth="1" opacity="0.7" />
+            <circle cx={cursorX} cy={getYAmps(stockPt.amps)} r="3.5" fill="none" stroke="var(--color-red)" strokeWidth="1.2" opacity="0.75" />
+            <circle cx={cursorX} cy={getYWatts(stockPt.watts)} r="3.5" fill="none" stroke="var(--color-amber)" strokeWidth="1.2" opacity="0.75" />
           </g>
         )}
       </svg>
 
-      {/* Legend & System Summary Container Under Chart */}
-      <div style={{ marginTop: '6px', padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+      {/* 3-Setup Comprehensive Comparison Panel Under Power Curve */}
+      <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         
-        {/* Line 1: Compact 2x2 Grid Legend with Battery Voltage */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '11.5px', fontWeight: 'bold', borderBottom: '1px dashed var(--color-panel-border)', paddingBottom: '6px', marginBottom: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ display: 'inline-block', width: '14px', height: '3px', background: 'var(--color-red)', boxShadow: '0 0 4px var(--color-red-glow)' }}></span>
-            <span style={{ color: 'var(--color-red)' }}>MOD AMPS ({battery.cells}S / {(battery.cells * 3.7).toFixed(1)}V)</span>
+        {/* Setup 1: Stock ARF Baseline */}
+        <div style={{ padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ display: 'inline-block', width: '16px', height: '0', borderTop: '2.5px dashed var(--color-red)' }}></span>
+              <span style={{ color: 'var(--color-red)' }}>1. STOCK ARF BASELINE SETUP</span>
+            </div>
+            <span style={{ color: 'var(--color-amber-dim)', fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
+              {Math.round(stockPt.watts)} W / {Math.round(stockPt.amps)} A @ 100% THROTTLE
+            </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ display: 'inline-block', width: '14px', height: '3px', background: 'var(--color-amber)', boxShadow: '0 0 4px var(--color-amber-glow)' }}></span>
-            <span style={{ color: 'var(--color-amber)' }}>MOD WATTS ({battery.cells}S / {(battery.cells * 3.7).toFixed(1)}V)</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.75 }}>
-            <span style={{ display: 'inline-block', width: '14px', height: '0', borderTop: '2px dashed var(--color-red)' }}></span>
-            <span style={{ color: 'var(--color-red)' }}>STOCK AMPS ({recBattery.cells}S / {(recBattery.cells * 3.7).toFixed(1)}V)</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.75 }}>
-            <span style={{ display: 'inline-block', width: '14px', height: '0', borderTop: '2px dashed var(--color-amber)' }}></span>
-            <span style={{ color: 'var(--color-amber)' }}>STOCK WATTS ({recBattery.cells}S / {(recBattery.cells * 3.7).toFixed(1)}V)</span>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', fontFamily: 'var(--font-mono)', lineHeight: '1.4' }}>
+            <span style={{ color: '#fff', fontWeight: 'bold' }}>{recBattery.cells}S ({(recBattery.cells * 3.7).toFixed(1)}V)</span> | <span style={{ color: '#ffc97a' }}>{recMotor.name}</span> | <span style={{ color: '#63b3ed' }}>{recPropeller.name}</span> | <span>{recEsc.name}</span>
           </div>
         </div>
 
-        {/* Line 2: Stock Comparison Baseline Readout */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mono)', borderBottom: '1px dashed var(--color-panel-border)', paddingBottom: '5px', marginBottom: '6px' }}>
-          <div>
-            <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>VS STOCK BASELINE: </span>
-            <span style={{ color: 'rgba(255,255,255,0.6)' }}>STOCK: {Math.round(stockPt.watts)}W/{Math.round(stockPt.amps)}A</span>
-            <span style={{ margin: '0 6px', color: 'var(--color-panel-border)' }}>|</span>
-            <span style={{ color: 'var(--color-amber)', fontWeight: 'bold' }}>MOD: {Math.round(currentPt.watts)}W/{Math.round(currentPt.amps)}A</span>
-          </div>
-          <div style={{ fontWeight: 'bold', color: wattsDelta >= 0 ? "var(--color-green)" : "var(--color-red)" }}>
-            {wattsDelta >= 0 ? `+${wattsDelta}W (+${wattsPct}%)` : `${wattsDelta}W (${wattsPct}%)`}
-          </div>
-        </div>
-
-        {/* Line 3: Color-Scaled System Status (Voltage / Motor / Amp Draw) */}
+        {/* Setup 2: Current Workbench Setup (Active Selected) */}
         {(() => {
           const activeAmps = currentPt.amps > 0 ? currentPt.amps : data[data.length - 1].amps;
           const currentRatio = activeAmps / Math.max(motor.maxCurrent, 1);
@@ -225,24 +236,38 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
           }
 
           return (
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px', fontFamily: 'var(--font-mono)', gap: '6px' }}>
-              <div>
-                <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>VOLTAGE: </span>
-                <span style={{ color: '#fff', fontWeight: 'bold' }}>{battery.cells}S ({(battery.cells * 3.7).toFixed(1)}V)</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>MOTOR: </span>
-                <span style={{ color: '#ffc97a', fontWeight: 'bold' }}>{motor.name}</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>CURRENT DRAW: </span>
-                <span style={{ color: ampColor, textShadow: ampGlow, fontWeight: 'bold', fontSize: '12.5px' }}>
-                  {activeAmps} A [{statusLabel}]
+            <div style={{ padding: '8px 10px', background: 'rgba(255, 179, 71, 0.05)', borderRadius: '4px', border: '1px solid #ffb347' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', fontWeight: 'bold', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ display: 'inline-block', width: '16px', height: '3.5px', background: 'var(--color-amber)', boxShadow: '0 0 5px var(--color-amber-glow)' }}></span>
+                  <span style={{ color: 'var(--color-amber)' }}>2. CURRENT WORKBENCH SETUP (SELECTED)</span>
+                </div>
+                <span style={{ color: ampColor, textShadow: ampGlow, fontSize: '13px', fontFamily: 'var(--font-mono)' }}>
+                  {Math.round(currentPt.watts)} W / {activeAmps} A [{statusLabel}]
                 </span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-mono)', lineHeight: '1.4' }}>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>{battery.cells}S ({(battery.cells * 3.7).toFixed(1)}V)</span> | <span style={{ color: '#ffc97a', fontWeight: 'bold' }}>{motor.name}</span> | <span style={{ color: '#63b3ed', fontWeight: 'bold' }}>{propeller.name}</span> | <span>{esc.name}</span>
               </div>
             </div>
           );
         })()}
+
+        {/* Setup 3: Saved Model / Speed Tuned Setup */}
+        <div style={{ padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: 'var(--color-cyan)', fontWeight: 'bold' }}>━ · </span>
+              <span style={{ color: 'var(--color-cyan)' }}>3. SAVED MODEL / BENCHMARK TUNED SETUP</span>
+            </div>
+            <span style={{ color: wattsDelta >= 0 ? "var(--color-green)" : "var(--color-red)", fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
+              {wattsDelta >= 0 ? `+${wattsDelta}W (+${wattsPct}%) VS STOCK` : `${wattsDelta}W (${wattsPct}%) VS STOCK`}
+            </span>
+          </div>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', fontFamily: 'var(--font-mono)', lineHeight: '1.4' }}>
+            <span style={{ color: '#fff', fontWeight: 'bold' }}>{optBattery.cells}S ({(optBattery.cells * 3.7).toFixed(1)}V)</span> | <span style={{ color: '#ffc97a' }}>{optMotor.name}</span> | <span style={{ color: '#63b3ed' }}>{optPropeller.name}</span> | <span>{optEsc.name}</span>
+          </div>
+        </div>
 
       </div>
     </div>
