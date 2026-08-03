@@ -14,6 +14,7 @@ import CockpitOverview from './components/CockpitOverview';
 import AircraftDatabase from './components/AircraftDatabase';
 import ComponentDatabases from './components/ComponentDatabases';
 import CalculatorEngine from './components/CalculatorEngine';
+import AirplaneCalculator from './components/AirplaneCalculator';
 import ValidatorChecks from './components/ValidatorChecks';
 import SettingsOptions from './components/SettingsOptions';
 import { aircrafts, motors, escs, batteries, propellers } from './data/rcData';
@@ -105,6 +106,21 @@ function App() {
         );
       case 'calculator':
         return <CalculatorEngine />;
+      case 'plane-calculator':
+        return (
+          <AirplaneCalculator 
+            selectedAircraft={selectedAircraft}
+            setSelectedAircraft={setSelectedAircraft}
+            setSelectedMotor={setSelectedMotor}
+            setSelectedEsc={setSelectedEsc}
+            setSelectedBattery={setSelectedBattery}
+            setSelectedPropeller={setSelectedPropeller}
+            setThrottle={setThrottle}
+            setActiveTab={setActiveTab}
+            customFleet={customFleet}
+            setCustomFleet={setCustomFleet}
+          />
+        );
       case 'validator':
         return (
           <ValidatorChecks
@@ -204,12 +220,21 @@ function App() {
         </button>
 
         <button 
+          onClick={() => setActiveTab('plane-calculator')} 
+          className={`nav-item ${activeTab === 'plane-calculator' ? 'active' : ''}`}
+        >
+          <Plane size={16} />
+          <span>AIRPLANE CALC</span>
+          <span style={{ fontSize: '8px', opacity: 0.6 }}>CALCULATOR</span>
+        </button>
+
+        <button 
           onClick={() => setActiveTab('calculator')} 
           className={`nav-item ${activeTab === 'calculator' ? 'active' : ''}`}
         >
           <Calculator size={16} />
-          <span>CALCULATOR</span>
-          <span style={{ fontSize: '8px', opacity: 0.6 }}>ENGINE</span>
+          <span>POWER SYS CALC</span>
+          <span style={{ fontSize: '8px', opacity: 0.6 }}>CALCULATOR</span>
         </button>
 
         <button 

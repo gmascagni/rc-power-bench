@@ -37,7 +37,7 @@ export default function CalculatorEngine() {
         <div className="screw" style={{ bottom: '8px', right: '8px' }}></div>
 
         <div className="panel-header">
-          ★ CUSTOM ENGINE BENCH (MANUAL OVERRIDE CALCULATOR)
+          ★ POWER SYSTEM CALCULATOR ENGINE (MANUAL OVERRIDE BENCH)
         </div>
 
         <div className="card-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px', padding: '16px' }}>
