@@ -183,6 +183,16 @@ export default function CockpitOverview({
   const [customWeight, setCustomWeight] = useState(8.5);
   const [customWingArea, setCustomWingArea] = useState(720);
   const [planeSearchQuery, setPlaneSearchQuery] = useState("");
+  const [customFleet, setCustomFleet] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rc_custom_fleet');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const allAircrafts = [...aircrafts, ...customFleet];
   const [adjustedEmptyWeight, setAdjustedEmptyWeight] = useState(null);
 
   // Reset custom weight adjustments on aircraft change
@@ -776,18 +786,55 @@ export default function CockpitOverview({
           
           <div className="card-content" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {/* Custom Aircraft Selector */}
-            <select 
-              className="retro-select" 
-              value={selectedAircraft.id} 
-              onChange={(e) => {
-                const ac = aircrafts.find(item => item.id === e.target.value);
-                if (ac) setSelectedAircraft(ac);
-              }}
-            >
-              {aircrafts.map(ac => (
-                <option key={ac.id} value={ac.id}>{ac.name}</option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <select 
+                className="retro-select" 
+                value={selectedAircraft.id} 
+                onChange={(e) => {
+                  const ac = allAircrafts.find(item => item.id === e.target.value);
+                  if (ac) setSelectedAircraft(ac);
+                }}
+              >
+                {allAircrafts.map(ac => (
+                  <option key={ac.id} value={ac.id}>{ac.name}</option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => setIsCustomPlaneOpen(true)}
+                className="btn-retro"
+                style={{
+                  fontSize: '10px',
+                  padding: '6px',
+                  borderColor: 'var(--color-cyan)',
+                  color: 'var(--color-cyan)',
+                  justifyContent: 'center',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✈️ BUILD / SEARCH CUSTOM AIRPLANE
+              </button>
+
+              {/* User Input Model Disclaimer Banner */}
+              {selectedAircraft.isUserInputModel && (
+                <div style={{
+                  backgroundColor: 'rgba(255, 179, 71, 0.1)',
+                  border: '1px solid #ffb347',
+                  borderRadius: '3.5px',
+                  padding: '6px 8px',
+                  fontSize: '9.5px',
+                  color: 'var(--color-amber)',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  lineHeight: '1.3'
+                }}>
+                  <AlertTriangle size={14} style={{ flexShrink: 0, color: '#ffb347' }} />
+                  <span>DISCLAIMER: USER INPUT MODEL - Calculations based on user-defined airframe specs.</span>
+                </div>
+              )}
+            </div>
 
             {/* Aircraft Photo View */}
             <div style={{ 
@@ -1969,21 +2016,88 @@ export default function CockpitOverview({
                       </div>
                     </div>
 
-                    {/* Action Button: Apply to Workbench */}
-                    <button
-                      className="btn-retro btn-red-launcher"
-                      style={{ padding: '10px', fontSize: '12px', width: '100%', justifyContent: 'center', marginTop: '4px' }}
-                      onClick={() => {
-                        if (recs.matchingMotor) setSelectedMotor(recs.matchingMotor);
-                        if (recs.matchingBattery) setSelectedBattery(recs.matchingBattery);
-                        if (recs.matchingEsc) setSelectedEsc(recs.matchingEsc);
-                        if (recs.matchingProp) setSelectedPropeller(recs.matchingProp);
-                        setThrottle(100);
-                        setIsCustomPlaneOpen(false);
-                      }}
-                    >
-                      <span>⚡ APPLY RECOMMENDED SETUP TO WORKBENCH</span>
-                    </button>
+                    {/* User Input Model Disclaimer Banner */}
+                    <div style={{
+                      backgroundColor: 'rgba(255, 179, 71, 0.1)',
+                      border: '1px solid #ffb347',
+                      borderRadius: '4px',
+                      padding: '8px 10px',
+                      fontSize: '10px',
+                      color: 'var(--color-amber)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      lineHeight: '1.35'
+                    }}>
+                      <AlertTriangle size={16} style={{ flexShrink: 0, color: '#ffb347' }} />
+                      <div>
+                        <strong>DISCLAIMER & NOTICE (USER INPUT MODEL):</strong> Power system recommendations, cell counts, and thrust calculations are estimated based on your custom user-entered airframe specs.
+                      </div>
+                    </div>
+
+                    {/* Action Buttons: Add Aircraft to Database & Apply Setup */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                      <button
+                        className="btn-retro btn-red-launcher"
+                        style={{ padding: '10px 8px', fontSize: '11px', justifyContent: 'center' }}
+                        onClick={() => {
+                          const newPlane = {
+                            id: `custom-plane-${Date.now()}`,
+                            name: `[USER INPUT MODEL] ${customName.toUpperCase()}`,
+                            class: parseFloat(customWeight) >= 7.0 ? "60-CLASS" : "50-CLASS",
+                            wingspan: parseFloat(customWingspan),
+                            length: parseFloat(customLength),
+                            wingArea: parseFloat(customWingArea),
+                            emptyWeight: Math.max(parseFloat(customWeight) - 1.1, 1.0),
+                            flyingWeight: parseFloat(customWeight),
+                            powerRangeMin: recs.minWatts,
+                            powerRangeMax: recs.maxWatts,
+                            manufacturer: "User Input Model",
+                            image: "p51.jpg",
+                            isUserInputModel: true,
+                            suggestedCg: "Scale CG per builder manual",
+                            description: `Custom user-input model: ${customName}. ${customWingspan}" Wingspan, ${customLength}" Length, ${customWeight} lbs Flying Weight.`,
+                            stockSetup: {
+                              motorId: recs.matchingMotor.id,
+                              batteryId: recs.matchingBattery.id,
+                              propellerId: recs.matchingProp.id,
+                              escId: recs.matchingEsc.id
+                            }
+                          };
+
+                          const updatedFleet = [...customFleet, newPlane];
+                          setCustomFleet(updatedFleet);
+                          localStorage.setItem('rc_custom_fleet', JSON.stringify(updatedFleet));
+
+                          setSelectedAircraft(newPlane);
+                          if (recs.matchingMotor) setSelectedMotor(recs.matchingMotor);
+                          if (recs.matchingBattery) setSelectedBattery(recs.matchingBattery);
+                          if (recs.matchingEsc) setSelectedEsc(recs.matchingEsc);
+                          if (recs.matchingProp) setSelectedPropeller(recs.matchingProp);
+                          setThrottle(100);
+                          setIsCustomPlaneOpen(false);
+                          setSaveMessage(`ADDED ${newPlane.name} TO DATABASE`);
+                          setTimeout(() => setSaveMessage(""), 3000);
+                        }}
+                      >
+                        <span>➕ ADD TO FLEET DATABASE & APPLY</span>
+                      </button>
+
+                      <button
+                        className="btn-retro"
+                        style={{ padding: '10px 8px', fontSize: '11px', justifyContent: 'center', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)' }}
+                        onClick={() => {
+                          if (recs.matchingMotor) setSelectedMotor(recs.matchingMotor);
+                          if (recs.matchingBattery) setSelectedBattery(recs.matchingBattery);
+                          if (recs.matchingEsc) setSelectedEsc(recs.matchingEsc);
+                          if (recs.matchingProp) setSelectedPropeller(recs.matchingProp);
+                          setThrottle(100);
+                          setIsCustomPlaneOpen(false);
+                        }}
+                      >
+                        <span>⚡ APPLY SETUP TO WORKBENCH ONLY</span>
+                      </button>
+                    </div>
                   </div>
                 );
               })()}
