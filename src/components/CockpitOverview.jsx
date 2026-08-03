@@ -183,6 +183,19 @@ export default function CockpitOverview({
   const [customWeight, setCustomWeight] = useState(8.5);
   const [customWingArea, setCustomWingArea] = useState(720);
   const [planeSearchQuery, setPlaneSearchQuery] = useState("");
+  
+  // Aircraft Wizard State
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardName, setWizardName] = useState("Custom Warbird .60");
+  const [wizardManufacturer, setWizardManufacturer] = useState("Custom Builder");
+  const [wizardWingspan, setWizardWingspan] = useState(63);
+  const [wizardLength, setWizardLength] = useState(56);
+  const [wizardWeight, setWizardWeight] = useState(8.5);
+  const [wizardWingArea, setWizardWingArea] = useState(720);
+  const [wizardStyle, setWizardStyle] = useState("scale");
+  const [wizardTargetCells, setWizardTargetCells] = useState(6);
+  const [wizardSearchQuery, setWizardSearchQuery] = useState("");
   const [customFleet, setCustomFleet] = useState(() => {
     try {
       const saved = localStorage.getItem('rc_custom_fleet');
@@ -800,24 +813,43 @@ export default function CockpitOverview({
                 ))}
               </select>
 
-              <button
-                onClick={() => setIsCustomPlaneOpen(true)}
-                className="btn-retro"
-                style={{
-                  fontSize: '11px',
-                  height: '40px',
-                  padding: '8px 10px',
-                  background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
-                  border: '1.8px solid var(--color-cyan)',
-                  color: 'var(--color-cyan)',
-                  justifyContent: 'center',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 0 10px rgba(99, 179, 237, 0.2)'
-                }}
-              >
-                ✈️ BUILD / SEARCH CUSTOM AIRPLANE
-              </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <button
+                  onClick={() => {
+                    setWizardStep(1);
+                    setIsWizardOpen(true);
+                  }}
+                  className="btn-retro btn-red-launcher"
+                  style={{
+                    fontSize: '11px',
+                    height: '40px',
+                    padding: '8px',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  ➕ NEW MODEL (WIZARD)
+                </button>
+
+                <button
+                  onClick={() => setIsCustomPlaneOpen(true)}
+                  className="btn-retro"
+                  style={{
+                    fontSize: '11px',
+                    height: '40px',
+                    padding: '8px',
+                    background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
+                    border: '1.8px solid var(--color-cyan)',
+                    color: 'var(--color-cyan)',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  ✈️ SPEC BUILDER
+                </button>
+              </div>
 
               {/* User Input Model Disclaimer Banner */}
               {selectedAircraft.isUserInputModel && (
@@ -2107,6 +2139,298 @@ export default function CockpitOverview({
                         }}
                       >
                         <span>⚡ APPLY SETUP TO WORKBENCH ONLY</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Step-by-Step Aircraft Builder Wizard Modal */}
+      {isWizardOpen && (
+        <div className="modal-overlay" onClick={() => setIsWizardOpen(false)}>
+          <div className="modal-content metal-panel" onClick={(e) => e.stopPropagation()} style={{ border: '2.5px solid var(--color-amber)', maxWidth: '640px', width: '92%' }}>
+            <div className="rivet top-left"></div>
+            <div className="rivet top-right"></div>
+            <div className="rivet bottom-left"></div>
+            <div className="rivet bottom-right"></div>
+            
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderColor: 'var(--color-amber)' }}>
+              <div style={{ color: 'var(--color-amber)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="badge" style={{ background: 'var(--color-amber)', color: '#000' }}>🧙‍♂️</span> AIRCRAFT SPECIFICATION WIZARD (STEP {wizardStep} OF 5)
+              </div>
+              <button className="btn-retro" onClick={() => setIsWizardOpen(false)} style={{ padding: '2px 8px', fontSize: '9px' }}>CLOSE</button>
+            </div>
+
+            <div className="card-content" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              
+              {/* Wizard Step Progress Tracker */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', background: '#13171b', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--color-panel-border)', fontSize: '9.5px', fontWeight: 'bold' }}>
+                <span style={{ color: wizardStep === 1 ? 'var(--color-amber)' : wizardStep > 1 ? 'var(--color-green)' : 'rgba(255,255,255,0.4)' }}>1. IDENTIFY</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>➔</span>
+                <span style={{ color: wizardStep === 2 ? 'var(--color-amber)' : wizardStep > 2 ? 'var(--color-green)' : 'rgba(255,255,255,0.4)' }}>2. SPECS</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>➔</span>
+                <span style={{ color: wizardStep === 3 ? 'var(--color-amber)' : wizardStep > 3 ? 'var(--color-green)' : 'rgba(255,255,255,0.4)' }}>3. STYLE</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>➔</span>
+                <span style={{ color: wizardStep === 4 ? 'var(--color-amber)' : wizardStep > 4 ? 'var(--color-green)' : 'rgba(255,255,255,0.4)' }}>4. RECOMMEND</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>➔</span>
+                <span style={{ color: wizardStep === 5 ? 'var(--color-amber)' : 'rgba(255,255,255,0.4)' }}>5. SAVE</span>
+              </div>
+
+              {/* Step 1: Search or Name */}
+              {wizardStep === 1 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffc97a' }}>STEP 1: AIRCRAFT IDENTIFICATION</div>
+                  
+                  <div style={{ padding: '10px', background: '#171c22', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-cyan)' }}>🔍 SEARCH EXISTING WARBIRD DATABASE TO PRE-FILL</label>
+                    <input 
+                      type="text"
+                      className="retro-input"
+                      style={{ width: '100%', fontSize: '11px', marginTop: '4px' }}
+                      placeholder="Type plane name (e.g. Mustang, Corsair, P-40, Spitfire, Hangar 9)..."
+                      value={wizardSearchQuery}
+                      onChange={(e) => setWizardSearchQuery(e.target.value)}
+                    />
+                    {wizardSearchQuery.trim() !== "" && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px', maxHeight: '100px', overflowY: 'auto' }}>
+                        {aircrafts.filter(a => a.name.toLowerCase().includes(wizardSearchQuery.toLowerCase())).map(a => (
+                          <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 6px', background: '#222933', borderRadius: '3px', fontSize: '10px' }}>
+                            <span>{a.name} ({a.wingspan}" WS, {a.flyingWeight} lb)</span>
+                            <button className="btn-retro" style={{ fontSize: '8.5px', padding: '2px 6px' }} onClick={() => {
+                              setWizardName(a.name);
+                              setWizardManufacturer(a.manufacturer);
+                              setWizardWingspan(a.wingspan);
+                              setWizardLength(a.length);
+                              setWizardWeight(a.flyingWeight);
+                              setWizardWingArea(a.wingArea);
+                              setWizardSearchQuery("");
+                            }}>PRE-FILL SPECS</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>MODEL NAME</label>
+                      <input type="text" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={wizardName} onChange={(e) => setWizardName(e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>MANUFACTURER / BRAND</label>
+                      <input type="text" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={wizardManufacturer} onChange={(e) => setWizardManufacturer(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <button className="btn-retro btn-red-launcher" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(2)}>NEXT: DIMENSIONS & MASS ➔</button>
+                </div>
+              )}
+
+              {/* Step 2: Dimensions & Mass */}
+              {wizardStep === 2 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffc97a' }}>STEP 2: AIRFRAME DIMENSIONS & TARGET MASS</div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>WINGSPAN (INCHES)</label>
+                      <input type="number" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={wizardWingspan} onChange={(e) => setWizardWingspan(e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>FUSELAGE LENGTH (INCHES)</label>
+                      <input type="number" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={wizardLength} onChange={(e) => setWizardLength(e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>FLYING WEIGHT (LBS)</label>
+                      <input type="number" step="0.1" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={wizardWeight} onChange={(e) => setWizardWeight(e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>WING AREA (SQ INCHES)</label>
+                      <input type="number" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={wizardWingArea} onChange={(e) => setWizardWingArea(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                    <button className="btn-retro" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(1)}>⬅ BACK</button>
+                    <button className="btn-retro btn-red-launcher" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(3)}>NEXT: FLIGHT STYLE & POWER ➔</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Flight Style & Battery Target */}
+              {wizardStep === 3 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffc97a' }}>STEP 3: TARGET FLIGHT STYLE & BATTERY VOLTAGE</div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div 
+                      onClick={() => setWizardStyle("scale")}
+                      style={{ padding: '10px', borderRadius: '4px', border: wizardStyle === "scale" ? '2px solid var(--color-amber)' : '1px solid var(--color-panel-border)', background: wizardStyle === "scale" ? '#221b14' : '#13171b', cursor: 'pointer' }}
+                    >
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber)' }}>✈️ SCALE WARBIRD CRUISE</div>
+                      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>120W - 150W per lb. Authentic scale speed and scale climb performance.</div>
+                    </div>
+
+                    <div 
+                      onClick={() => setWizardStyle("aggressive")}
+                      style={{ padding: '10px', borderRadius: '4px', border: wizardStyle === "aggressive" ? '2px solid var(--color-cyan)' : '1px solid var(--color-panel-border)', background: wizardStyle === "aggressive" ? '#14222e' : '#13171b', cursor: 'pointer' }}
+                    >
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-cyan)' }}>⚡ AGGRESSIVE WARBIRD SPEED</div>
+                      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>180W - 220W per lb. Maximum speed, vertical climbs, and racing passes.</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>TARGET BATTERY VOLTAGE CLASS</label>
+                    <select className="retro-select" style={{ fontSize: '11px', marginTop: '4px' }} value={wizardTargetCells} onChange={(e) => setWizardTargetCells(parseInt(e.target.value))}>
+                      <option value={3}>3S LiPo (11.1V - Park Flyer Class)</option>
+                      <option value={4}>4S LiPo (14.8V - 50" Class)</option>
+                      <option value={5}>5S LiPo (18.5V - .46/.52 Class)</option>
+                      <option value={6}>6S LiPo (22.2V - .60 Class Scale Warbird Standard)</option>
+                      <option value={8}>8S LiPo (29.6V - 70"+ Heavy Class)</option>
+                      <option value={12}>12S LiPo (44.4V - Giant Scale Class)</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                    <button className="btn-retro" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(2)}>⬅ BACK</button>
+                    <button className="btn-retro btn-red-launcher" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(4)}>GENERATE RECOMMENDATION ➔</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Recommendations */}
+              {wizardStep === 4 && (() => {
+                const recs = getRecommendationsForAircraftSpecs({
+                  wingspan: wizardWingspan,
+                  length: wizardLength,
+                  weight: wizardWeight,
+                  wingArea: wizardWingArea,
+                  motors,
+                  batteries,
+                  escs,
+                  propellers
+                });
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-green)' }}>STEP 4: AUTOMATED POWER PACKAGE RECOMMENDATION</div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '8.5px', color: 'var(--color-amber-dim)' }}>TARGET POWER</div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{recs.minWatts}W - {recs.maxWatts}W</div>
+                      </div>
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '8.5px', color: 'var(--color-amber-dim)' }}>BATTERY</div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-amber)' }}>{wizardTargetCells}S LiPo</div>
+                      </div>
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '8.5px', color: 'var(--color-amber-dim)' }}>PROP SIZE</div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#63b3ed' }}>{recs.targetDiameter}" x {recs.targetPitch}"</div>
+                      </div>
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '8.5px', color: 'var(--color-amber-dim)' }}>REC ESC</div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-red)' }}>{recs.recEscAmps}A ESC</div>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '10px', background: 'rgba(255, 179, 71, 0.05)', borderRadius: '4px', border: '1px solid #ffb347' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber)', marginBottom: '4px' }}>🏆 MATCHED COMPONENT PACKAGE</div>
+                      <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <div>MOTOR: <strong style={{ color: '#ffc97a' }}>{recs.matchingMotor.name}</strong></div>
+                        <div>BATTERY: <strong style={{ color: '#fff' }}>{recs.matchingBattery.name}</strong></div>
+                        <div>PROPELLER: <strong style={{ color: '#63b3ed' }}>{recs.matchingProp.name}</strong></div>
+                        <div>ESC: <strong style={{ color: 'var(--color-red)' }}>{recs.matchingEsc.name}</strong></div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                      <button className="btn-retro" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(3)}>⬅ BACK</button>
+                      <button className="btn-retro btn-red-launcher" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(5)}>REVIEW & SAVE MODEL ➔</button>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Step 5: Review & Save */}
+              {wizardStep === 5 && (() => {
+                const recs = getRecommendationsForAircraftSpecs({
+                  wingspan: wizardWingspan,
+                  length: wizardLength,
+                  weight: wizardWeight,
+                  wingArea: wizardWingArea,
+                  motors,
+                  batteries,
+                  escs,
+                  propellers
+                });
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffc97a' }}>STEP 5: CONFIRM & INTEGRATE INTO AIRCRAFT DATABASE</div>
+
+                    <div style={{ padding: '10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div>AIRCRAFT: <strong>{wizardName.toUpperCase()}</strong> ({wizardManufacturer})</div>
+                      <div>SPECS: <strong>{wizardWingspan}" WS | {wizardLength}" L | {wizardWeight} lbs | {wizardWingArea} sq in</strong></div>
+                      <div>CLASS: <strong>{parseFloat(wizardWeight) >= 7.0 ? "60-CLASS WARBIRD" : "50-CLASS WARBIRD"}</strong></div>
+                    </div>
+
+                    <div style={{ backgroundColor: 'rgba(255, 179, 71, 0.1)', border: '1px solid #ffb347', borderRadius: '4px', padding: '8px 10px', fontSize: '9.5px', color: 'var(--color-amber)', display: 'flex', alignItems: 'center', gap: '8px', lineHeight: '1.35' }}>
+                      <AlertTriangle size={16} style={{ flexShrink: 0, color: '#ffb347' }} />
+                      <div><strong>DISCLAIMER & NOTICE (USER INPUT MODEL):</strong> This aircraft will be added to your active database tagged as <code>[USER INPUT MODEL]</code>.</div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                      <button className="btn-retro" style={{ padding: '8px', fontSize: '11px', justifyContent: 'center' }} onClick={() => setWizardStep(4)}>⬅ BACK</button>
+                      <button
+                        className="btn-retro btn-red-launcher"
+                        style={{ padding: '10px', fontSize: '11px', justifyContent: 'center' }}
+                        onClick={() => {
+                          const newPlane = {
+                            id: `custom-plane-${Date.now()}`,
+                            name: `[USER INPUT MODEL] ${wizardName.toUpperCase()}`,
+                            class: parseFloat(wizardWeight) >= 7.0 ? "60-CLASS" : "50-CLASS",
+                            wingspan: parseFloat(wizardWingspan),
+                            length: parseFloat(wizardLength),
+                            wingArea: parseFloat(wizardWingArea),
+                            emptyWeight: Math.max(parseFloat(wizardWeight) - 1.1, 1.0),
+                            flyingWeight: parseFloat(wizardWeight),
+                            powerRangeMin: recs.minWatts,
+                            powerRangeMax: recs.maxWatts,
+                            manufacturer: wizardManufacturer || "User Custom Model",
+                            image: "p51.jpg",
+                            isUserInputModel: true,
+                            suggestedCg: "Scale CG per builder manual",
+                            description: `Custom user-input model created via Wizard: ${wizardName}. ${wizardWingspan}" Wingspan, ${wizardLength}" Length, ${wizardWeight} lbs Flying Weight.`,
+                            stockSetup: {
+                              motorId: recs.matchingMotor.id,
+                              batteryId: recs.matchingBattery.id,
+                              propellerId: recs.matchingProp.id,
+                              escId: recs.matchingEsc.id
+                            }
+                          };
+
+                          const updatedFleet = [...customFleet, newPlane];
+                          setCustomFleet(updatedFleet);
+                          localStorage.setItem('rc_custom_fleet', JSON.stringify(updatedFleet));
+
+                          setSelectedAircraft(newPlane);
+                          if (recs.matchingMotor) setSelectedMotor(recs.matchingMotor);
+                          if (recs.matchingBattery) setSelectedBattery(recs.matchingBattery);
+                          if (recs.matchingEsc) setSelectedEsc(recs.matchingEsc);
+                          if (recs.matchingProp) setSelectedPropeller(recs.matchingProp);
+                          setThrottle(100);
+                          setIsWizardOpen(false);
+                          setSaveMessage(`ADDED ${newPlane.name} TO DATABASE`);
+                          setTimeout(() => setSaveMessage(""), 3000);
+                        }}
+                      >
+                        ➕ SAVE MODEL TO DATABASE & LOAD WORKBENCH
                       </button>
                     </div>
                   </div>
