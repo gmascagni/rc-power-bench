@@ -171,6 +171,7 @@ export default function CockpitOverview({
   setActiveSetupType,
   throttle,
   setThrottle,
+  setActiveTab = () => {},
   customFleet = [],
   setCustomFleet = () => {}
 }) {
@@ -1695,6 +1696,35 @@ export default function CockpitOverview({
                     <div style={{ fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.5px' }}>AIRPLANE SPEC BUILDER</div>
                     <div style={{ fontSize: '8.5px', color: 'rgba(99, 179, 237, 0.85)', fontFamily: 'var(--font-mono)' }}>
                       Search Models, Custom Specs & Auto-Recommend
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              {/* Airplane Calculator Tool Launcher Button */}
+              <button 
+                onClick={() => setActiveTab('plane-calculator')}
+                className="btn-retro"
+                style={{
+                  width: '100%',
+                  height: '52px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '8px 12px',
+                  background: 'linear-gradient(180deg, #222b36 0%, #11171f 100%)',
+                  border: '1.8px solid #63b3ed',
+                  color: '#63b3ed',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  boxShadow: '0 0 10px rgba(99, 179, 237, 0.15)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '18px' }}>📊</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>AIRPLANE CALCULATOR</div>
+                    <div style={{ fontSize: '8px', color: 'rgba(99, 179, 237, 0.75)', fontFamily: 'var(--font-mono)' }}>
+                      Wing Loading, WCL 3D Index & Stall Speed Engine
                     </div>
                   </div>
                 </div>
