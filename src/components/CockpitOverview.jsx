@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CircularGauge, HorizontalBarGauge } from './Gauges';
 import PowerCurveChart from './PowerCurveChart';
-import { calculateSpecs, getMaxCells, getMinCells } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells, getRecommendationsForAircraftSpecs } from '../utils/calcEngine';
 import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } from '../data/rcData';
 import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
@@ -176,6 +176,13 @@ export default function CockpitOverview({
   const [saveMessage, setSaveMessage] = useState("");
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isCustomPlaneOpen, setIsCustomPlaneOpen] = useState(false);
+  const [customName, setCustomName] = useState("Custom Warbird");
+  const [customWingspan, setCustomWingspan] = useState(63);
+  const [customLength, setCustomLength] = useState(56);
+  const [customWeight, setCustomWeight] = useState(8.5);
+  const [customWingArea, setCustomWingArea] = useState(720);
+  const [planeSearchQuery, setPlaneSearchQuery] = useState("");
   const [adjustedEmptyWeight, setAdjustedEmptyWeight] = useState(null);
 
   // Reset custom weight adjustments on aircraft change
@@ -1569,7 +1576,7 @@ export default function CockpitOverview({
             </div>
 
             {/* Run calculation button */}
-            <div style={{ padding: '0 12px 12px 12px' }}>
+            <div style={{ padding: '0 12px 12px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button 
                 onClick={runSimulation}
                 className="btn-retro btn-red-launcher"
@@ -1585,6 +1592,28 @@ export default function CockpitOverview({
                     </div>
                   </div>
                 </div>
+              </button>
+
+              {/* Airplane Spec Builder & Recommender Button */}
+              <button 
+                onClick={() => setIsCustomPlaneOpen(true)}
+                className="btn-retro"
+                style={{
+                  width: '100%',
+                  fontSize: '11px',
+                  padding: '10px 8px',
+                  background: 'linear-gradient(180deg, #1c2e3d 0%, #0f1a24 100%)',
+                  border: '1.5px solid var(--color-cyan)',
+                  color: 'var(--color-cyan)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 0 10px rgba(99, 179, 237, 0.15)'
+                }}
+              >
+                <span>✈️ AIRPLANE SPEC BUILDER & RECOMMENDER</span>
               </button>
             </div>
           </div>
@@ -1785,6 +1814,180 @@ export default function CockpitOverview({
               >
                 📄 DOWNLOAD BUILDER SPECS SHEET (.txt)
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Airplane Spec Builder & Recommender Studio Modal */}
+      {isCustomPlaneOpen && (
+        <div className="modal-overlay" onClick={() => setIsCustomPlaneOpen(false)}>
+          <div className="modal-content metal-panel" onClick={(e) => e.stopPropagation()} style={{ border: '2.5px solid var(--color-cyan)', maxWidth: '680px', width: '92%' }}>
+            <div className="rivet top-left"></div>
+            <div className="rivet top-right"></div>
+            <div className="rivet bottom-left"></div>
+            <div className="rivet bottom-right"></div>
+            <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderColor: 'var(--color-cyan)' }}>
+              <div style={{ color: 'var(--color-cyan)', fontWeight: 'bold' }}>
+                <span className="badge" style={{ background: 'var(--color-cyan)', color: '#000' }}>✈️</span> AIRPLANE SPECIFICATION BUILDER & RECOMMENDER
+              </div>
+              <button className="btn-retro" onClick={() => setIsCustomPlaneOpen(false)} style={{ padding: '2px 8px', fontSize: '9px' }}>CLOSE</button>
+            </div>
+            
+            <div className="card-content" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '80vh', overflowY: 'auto' }}>
+              
+              {/* Search & Auto-Populate Feature */}
+              <div style={{ padding: '10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-cyan)', marginBottom: '6px' }}>
+                  🔍 FIND AIRPLANE SPECS (AUTO-POPULATE DATABASE)
+                </div>
+                <input 
+                  type="text" 
+                  className="retro-input" 
+                  style={{ width: '100%', fontSize: '11px', padding: '6px' }}
+                  placeholder="Search plane by name or brand (e.g. Mustang, Corsair, P-40, Spitfire, Hellcat, Fw 190, Hangar 9)..." 
+                  value={planeSearchQuery}
+                  onChange={(e) => setPlaneSearchQuery(e.target.value)}
+                />
+
+                {planeSearchQuery.trim() !== "" && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', maxHeight: '140px', overflowY: 'auto' }}>
+                    {aircrafts.filter(a => a.name.toLowerCase().includes(planeSearchQuery.toLowerCase()) || a.manufacturer.toLowerCase().includes(planeSearchQuery.toLowerCase())).map(a => (
+                      <div 
+                        key={a.id}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', background: '#1c222b', borderRadius: '3px', border: '1px solid var(--color-panel-border)', fontSize: '10.5px' }}
+                      >
+                        <div>
+                          <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{a.name}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '8px' }}>({a.wingspan}" WS | {a.length}" L | {a.flyingWeight} lb)</span>
+                        </div>
+                        <button 
+                          className="btn-retro"
+                          style={{ fontSize: '9px', padding: '2px 8px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)' }}
+                          onClick={() => {
+                            setCustomName(a.name);
+                            setCustomWingspan(a.wingspan);
+                            setCustomLength(a.length);
+                            setCustomWeight(a.flyingWeight);
+                            setCustomWingArea(a.wingArea);
+                            setPlaneSearchQuery("");
+                          }}
+                        >
+                          ⚡ AUTO-POPULATE
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Manual Spec Input Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>MODEL NAME</label>
+                  <input type="text" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={customName} onChange={(e) => setCustomName(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>WINGSPAN (IN)</label>
+                  <input type="number" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={customWingspan} onChange={(e) => setCustomWingspan(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>FUSE LTH (IN)</label>
+                  <input type="number" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={customLength} onChange={(e) => setCustomLength(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>FLYING WT (LBS)</label>
+                  <input type="number" step="0.1" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={customWeight} onChange={(e) => setCustomWeight(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>WING AREA (SQ IN)</label>
+                  <input type="number" className="retro-input" style={{ width: '100%', fontSize: '11px' }} value={customWingArea} onChange={(e) => setCustomWingArea(e.target.value)} />
+                </div>
+              </div>
+
+              {/* Live Recommendation Engine Calculation Output */}
+              {(() => {
+                const recs = getRecommendationsForAircraftSpecs({
+                  wingspan: customWingspan,
+                  length: customLength,
+                  weight: customWeight,
+                  wingArea: customWingArea,
+                  motors,
+                  batteries,
+                  escs,
+                  propellers
+                });
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-green)', letterSpacing: '0.5px' }}>
+                      ⚡ AERODYNAMIC & POWER RECOMMENDATIONS ({customWeight} LB / {customWingspan}" WS)
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '8px' }}>
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>TARGET POWER</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#fff', fontFamily: 'var(--font-mono)' }}>{recs.minWatts}W - {recs.maxWatts}W</div>
+                        <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.5)' }}>120W - 200W per lb</div>
+                      </div>
+
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>REC BATTERY</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>{recs.targetCells}S LiPo</div>
+                        <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.5)' }}>{(recs.targetCells * 3.7).toFixed(1)}V Nominal</div>
+                      </div>
+
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>REC MOTOR KV</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#ffc97a', fontFamily: 'var(--font-mono)' }}>~{recs.targetKv} KV</div>
+                        <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.5)' }}>Outrunner Class</div>
+                      </div>
+
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>REC PROP SIZE</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#63b3ed', fontFamily: 'var(--font-mono)' }}>{recs.targetDiameter}" x {recs.targetPitch}"</div>
+                        <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.5)' }}>Thin Electric (E)</div>
+                      </div>
+
+                      <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                        <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>REC ESC RATING</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: 'var(--color-red)', fontFamily: 'var(--font-mono)' }}>{recs.recEscAmps}A ESC</div>
+                        <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.5)' }}>25% Safety Headroom</div>
+                      </div>
+                    </div>
+
+                    {/* Matching Package from Database */}
+                    <div style={{ padding: '10px', background: 'rgba(255, 179, 71, 0.05)', borderRadius: '4px', border: '1px solid #ffb347' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber)', marginBottom: '6px' }}>
+                        🏆 RECOMMENDED COMPONENT MATCHING PACKAGE
+                      </div>
+                      <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <div><span style={{ color: 'var(--color-amber-dim)' }}>MOTOR: </span><span style={{ color: '#ffc97a', fontWeight: 'bold' }}>{recs.matchingMotor.name}</span></div>
+                        <div><span style={{ color: 'var(--color-amber-dim)' }}>BATTERY: </span><span style={{ color: '#fff', fontWeight: 'bold' }}>{recs.matchingBattery.name}</span></div>
+                        <div><span style={{ color: 'var(--color-amber-dim)' }}>PROPELLER: </span><span style={{ color: '#63b3ed', fontWeight: 'bold' }}>{recs.matchingProp.name}</span></div>
+                        <div><span style={{ color: 'var(--color-amber-dim)' }}>ESC: </span><span style={{ color: 'var(--color-red)', fontWeight: 'bold' }}>{recs.matchingEsc.name}</span></div>
+                      </div>
+                    </div>
+
+                    {/* Action Button: Apply to Workbench */}
+                    <button
+                      className="btn-retro btn-red-launcher"
+                      style={{ padding: '10px', fontSize: '12px', width: '100%', justifyContent: 'center', marginTop: '4px' }}
+                      onClick={() => {
+                        if (recs.matchingMotor) setSelectedMotor(recs.matchingMotor);
+                        if (recs.matchingBattery) setSelectedBattery(recs.matchingBattery);
+                        if (recs.matchingEsc) setSelectedEsc(recs.matchingEsc);
+                        if (recs.matchingProp) setSelectedPropeller(recs.matchingProp);
+                        setThrottle(100);
+                        setIsCustomPlaneOpen(false);
+                      }}
+                    >
+                      <span>⚡ APPLY RECOMMENDED SETUP TO WORKBENCH</span>
+                    </button>
+                  </div>
+                );
+              })()}
+
             </div>
           </div>
         </div>

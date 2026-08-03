@@ -188,3 +188,75 @@ export function generatePowerCurve(aircraft, motor, esc, battery, propeller) {
   }
   return points;
 }
+
+export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, wingArea, motors = [], batteries = [], escs = [], propellers = [] }) {
+  const w = Math.max(parseFloat(weight) || 8.5, 1.0);
+  const ws = Math.max(parseFloat(wingspan) || 63, 10.0);
+  
+  // Power requirement calculation
+  const minWatts = Math.round(w * 120);
+  const scaleWatts = Math.round(w * 150);
+  const maxWatts = Math.round(w * 200);
+
+  // Target battery cell count
+  let targetCells = 6;
+  if (w < 4.0) targetCells = 3;
+  else if (w < 5.5) targetCells = 4;
+  else if (w < 7.5) targetCells = 5;
+  else if (w < 11.0) targetCells = 6;
+  else if (w < 15.0) targetCells = 8;
+  else targetCells = 12;
+
+  // Target Motor KV
+  let targetKv = 500;
+  if (targetCells === 3) targetKv = 950;
+  else if (targetCells === 4) targetKv = 800;
+  else if (targetCells === 5) targetKv = 600;
+  else if (targetCells === 6) targetKv = 500;
+  else if (targetCells === 8) targetKv = 380;
+  else targetKv = 220;
+
+  // Target Propeller Diameter & Pitch
+  let targetDiameter = Math.round(ws * 0.25);
+  if (w >= 7.0 && targetCells >= 6) {
+    targetDiameter = Math.max(targetDiameter, 15);
+  }
+  let targetPitch = Math.round(targetDiameter * 0.55);
+
+  // Target ESC Amps with 25% safety headroom
+  const targetAmps = Math.round(maxWatts / (targetCells * 3.7));
+  const recEscAmps = Math.round(targetAmps * 1.25);
+
+  // Best matching motor in database
+  const matchingMotor = motors.find(m => {
+    const maxC = getMaxCells(m.voltageSupported);
+    const minC = getMinCells(m.voltageSupported);
+    return targetCells >= minC && targetCells <= maxC && m.maxPower >= minWatts && Math.abs(m.kv - targetKv) <= 180;
+  }) || motors.find(m => m.maxPower >= minWatts) || motors[0];
+
+  // Best matching battery in database
+  const matchingBattery = batteries.find(b => b.cells === targetCells) || batteries[0];
+
+  // Best matching ESC in database
+  const matchingEsc = escs.find(e => e.maxAmps >= recEscAmps) || escs[0];
+
+  // Best matching propeller in database
+  const minPropDiameter = (w >= 7.0 && targetCells >= 6) ? 15 : 12;
+  const matchingProp = propellers.find(p => p.diameter >= minPropDiameter && Math.abs(p.diameter - targetDiameter) <= 1.5) || propellers[0];
+
+  return {
+    minWatts,
+    scaleWatts,
+    maxWatts,
+    targetCells,
+    targetKv,
+    targetDiameter,
+    targetPitch,
+    targetAmps,
+    recEscAmps,
+    matchingMotor,
+    matchingBattery,
+    matchingEsc,
+    matchingProp
+  };
+}
