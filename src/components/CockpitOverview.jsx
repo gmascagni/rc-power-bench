@@ -1984,21 +1984,21 @@ export default function CockpitOverview({
                   </button>
                 </div>
 
-                  {/* Popular Presets */}
-                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
-                    <span style={{ fontSize: '9px', color: 'var(--color-amber-dim)', alignSelf: 'center' }}>POPULAR PRESETS:</span>
-                    {['B-25', 'P-51', 'Corsair', 'P-40', 'Spitfire', 'P-47', 'Bf 109', 'Fw 190', 'B-17'].map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        className="btn-retro"
-                        style={{ fontSize: '8.5px', padding: '2px 6px', borderColor: 'var(--color-panel-border)', color: '#ffc97a' }}
-                        onClick={() => setPlaneSearchQuery(tag)}
-                      >
-                        ✈️ {tag}
-                      </button>
-                    ))}
-                  </div>
+                    {/* Quick Warbird Model Presets */}
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
+                      <span style={{ fontSize: '9px', color: 'var(--color-amber-dim)', alignSelf: 'center' }}>KIT CUTTERS & BRANDS:</span>
+                      {['B-25', 'Ziroli', 'Legend Hobby', 'National Balsa', 'Dark Horse', 'Kit Cutters', 'RC-Builder', 'Seagull', 'P-51', 'Corsair', 'P-40', 'B-17'].map(tag => (
+                        <button
+                          key={tag}
+                          type="button"
+                          className="btn-retro"
+                          style={{ fontSize: '8.5px', padding: '2px 6px', borderColor: 'var(--color-panel-border)', color: '#ffc97a' }}
+                          onClick={() => setWizardSearchQuery(tag)}
+                        >
+                          ✈️ {tag}
+                        </button>
+                      ))}
+                    </div>
 
                   {planeSearchQuery.trim() !== "" && ((query) => {
                     const cleanQuery = query.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -2314,8 +2314,8 @@ export default function CockpitOverview({
 
                     {/* Quick Warbird Model Presets */}
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
-                      <span style={{ fontSize: '9px', color: 'var(--color-amber-dim)', alignSelf: 'center' }}>POPULAR PRESETS:</span>
-                      {['B-25', 'P-51', 'Corsair', 'P-40', 'Spitfire', 'P-47', 'Bf 109', 'Fw 190', 'B-17'].map(tag => (
+                      <span style={{ fontSize: '9px', color: 'var(--color-amber-dim)', alignSelf: 'center' }}>KIT CUTTERS & BRANDS:</span>
+                      {['B-25', 'Ziroli', 'Legend Hobby', 'National Balsa', 'Dark Horse', 'Kit Cutters', 'RC-Builder', 'Seagull', 'P-51', 'Corsair', 'P-40', 'B-17'].map(tag => (
                         <button
                           key={tag}
                           type="button"
