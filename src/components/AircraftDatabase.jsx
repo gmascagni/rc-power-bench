@@ -23,6 +23,13 @@ export default function AircraftDatabase({
   const [newLength, setNewLength] = useState(56);
   const [newWeight, setNewWeight] = useState(8.5);
   const [newWingArea, setNewWingArea] = useState(720);
+  const [dbSearchQuery, setDbSearchQuery] = useState("");
+
+  const filteredAircrafts = allAircrafts.filter(ac =>
+    ac.name.toLowerCase().includes(dbSearchQuery.toLowerCase()) ||
+    ac.manufacturer.toLowerCase().includes(dbSearchQuery.toLowerCase()) ||
+    ac.class.toLowerCase().includes(dbSearchQuery.toLowerCase())
+  );
 
   // Live auto-power requirement calculations
   const weightNum = Math.max(parseFloat(newWeight) || 8.5, 0.5);
@@ -92,15 +99,36 @@ export default function AircraftDatabase({
           <span style={{ fontSize: '10px', color: 'var(--color-amber-dim)' }}>{allAircrafts.length} MODELS REGISTERED</span>
         </div>
         
-        <div className="card-content" style={{ padding: '16px' }}>
-          <div style={{ marginBottom: '16px', color: 'var(--color-amber-dim)', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Browse and load pre-configured WWII warbirds or create your own custom user-input model cards.</span>
+        <div className="card-content" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          
+          {/* Top Search & Filter Bar */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#13171b', padding: '10px', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', whiteSpace: 'nowrap' }}>🔍 SEARCH REGISTRY:</span>
+            <input 
+              type="text"
+              className="retro-input"
+              style={{ flex: 1, fontSize: '11px', padding: '6px' }}
+              placeholder="Type plane model or manufacturer (e.g. Mustang, Corsair, P-40, Hangar 9, Top Flite)..."
+              value={dbSearchQuery}
+              onChange={(e) => setDbSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                }
+              }}
+            />
+            <button 
+              className="btn-retro"
+              style={{ fontSize: '10px', padding: '6px 12px', borderColor: 'var(--color-amber)', color: 'var(--color-amber)', fontWeight: 'bold' }}
+            >
+              🔍 SEARCH
+            </button>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
             
             {/* 1. Existing Aircraft Cards */}
-            {allAircrafts.map((ac) => {
+            {filteredAircrafts.map((ac) => {
               const isActive = selectedAircraft.id === ac.id;
               
               return (

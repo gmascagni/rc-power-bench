@@ -1953,46 +1953,96 @@ export default function CockpitOverview({
               {/* Search & Auto-Populate Feature */}
               <div style={{ padding: '10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
                 <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-cyan)', marginBottom: '6px' }}>
-                  🔍 FIND AIRPLANE SPECS (AUTO-POPULATE DATABASE)
+                  🔍 FIND AIRPLANE SPECS (SEARCH & AUTO-POPULATE DATABASE)
                 </div>
-                <input 
-                  type="text" 
-                  className="retro-input" 
-                  style={{ width: '100%', fontSize: '11px', padding: '6px' }}
-                  placeholder="Search plane by name or brand (e.g. Mustang, Corsair, P-40, Spitfire, Hellcat, Fw 190, Hangar 9)..." 
-                  value={planeSearchQuery}
-                  onChange={(e) => setPlaneSearchQuery(e.target.value)}
-                />
 
-                {planeSearchQuery.trim() !== "" && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', maxHeight: '140px', overflowY: 'auto' }}>
-                    {aircrafts.filter(a => a.name.toLowerCase().includes(planeSearchQuery.toLowerCase()) || a.manufacturer.toLowerCase().includes(planeSearchQuery.toLowerCase())).map(a => (
-                      <div 
-                        key={a.id}
-                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', background: '#1c222b', borderRadius: '3px', border: '1px solid var(--color-panel-border)', fontSize: '10.5px' }}
-                      >
-                        <div>
-                          <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{a.name}</span>
-                          <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '8px' }}>({a.wingspan}" WS | {a.length}" L | {a.flyingWeight} lb)</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input 
+                    type="text" 
+                    className="retro-input" 
+                    style={{ flex: 1, fontSize: '11px', padding: '6px 8px' }}
+                    placeholder="Search plane by name or brand (e.g. Mustang, Corsair, P-40, Spitfire, Hellcat, Fw 190, Hangar 9)..." 
+                    value={planeSearchQuery}
+                    onChange={(e) => setPlaneSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                  <button 
+                    className="btn-retro"
+                    style={{ fontSize: '10px', padding: '6px 12px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)', fontWeight: 'bold' }}
+                    onClick={() => {
+                      // Execute search focus
+                    }}
+                  >
+                    🔍 SEARCH
+                  </button>
+                </div>
+
+                {planeSearchQuery.trim() !== "" && (() => {
+                  const matches = allAircrafts.filter(a => 
+                    a.name.toLowerCase().includes(planeSearchQuery.toLowerCase()) || 
+                    a.manufacturer.toLowerCase().includes(planeSearchQuery.toLowerCase()) ||
+                    a.class.toLowerCase().includes(planeSearchQuery.toLowerCase())
+                  );
+
+                  if (matches.length > 0) {
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', maxHeight: '140px', overflowY: 'auto' }}>
+                        <div style={{ fontSize: '9.5px', color: 'var(--color-amber-dim)', fontWeight: 'bold' }}>
+                          MATCHING MODELS IN DATABASE ({matches.length} FOUND):
                         </div>
-                        <button 
-                          className="btn-retro"
-                          style={{ fontSize: '9px', padding: '2px 8px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)' }}
-                          onClick={() => {
-                            setCustomName(a.name);
-                            setCustomWingspan(a.wingspan);
-                            setCustomLength(a.length);
-                            setCustomWeight(a.flyingWeight);
-                            setCustomWingArea(a.wingArea);
-                            setPlaneSearchQuery("");
-                          }}
-                        >
-                          ⚡ AUTO-POPULATE
-                        </button>
+                        {matches.map(a => (
+                          <div 
+                            key={a.id}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', background: '#1c222b', borderRadius: '3px', border: '1px solid var(--color-panel-border)', fontSize: '10.5px' }}
+                          >
+                            <div>
+                              <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{a.name}</span>
+                              <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '8px' }}>({a.wingspan}" WS | {a.length}" L | {a.flyingWeight} lb)</span>
+                            </div>
+                            <button 
+                              className="btn-retro"
+                              style={{ fontSize: '9px', padding: '2px 8px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)' }}
+                              onClick={() => {
+                                setCustomName(a.name.replace(/\[USER INPUT MODEL\]/g, "").trim());
+                                setCustomWingspan(a.wingspan);
+                                setCustomLength(a.length);
+                                setCustomWeight(a.flyingWeight);
+                                setCustomWingArea(a.wingArea);
+                                setPlaneSearchQuery("");
+                              }}
+                            >
+                              ⚡ AUTO-POPULATE SPECS
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  }
+
+                  return (
+                    <div style={{ marginTop: '8px', padding: '8px', background: '#1b1612', borderRadius: '3px', border: '1px solid #7c5d2b', fontSize: '10px', color: '#ffb347', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>No exact match in database for "{planeSearchQuery}". Click to auto-fill baseline scale specs!</span>
+                      <button
+                        className="btn-retro"
+                        style={{ fontSize: '9px', padding: '3px 8px', borderColor: '#ffb347', color: '#ffb347' }}
+                        onClick={() => {
+                          setCustomName(planeSearchQuery.toUpperCase());
+                          setCustomWingspan(63);
+                          setCustomLength(56);
+                          setCustomWeight(8.5);
+                          setCustomWingArea(720);
+                          setPlaneSearchQuery("");
+                        }}
+                      >
+                        ⚡ PRE-FILL BASELINE SPECS
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Manual Spec Input Grid */}
@@ -2210,29 +2260,43 @@ export default function CockpitOverview({
                   <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffc97a' }}>STEP 1: AIRCRAFT IDENTIFICATION</div>
                   
                   <div style={{ padding: '10px', background: '#171c22', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
-                    <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-cyan)' }}>🔍 SEARCH EXISTING WARBIRD DATABASE TO PRE-FILL</label>
-                    <input 
-                      type="text"
-                      className="retro-input"
-                      style={{ width: '100%', fontSize: '11px', marginTop: '4px' }}
-                      placeholder="Type plane name (e.g. Mustang, Corsair, P-40, Spitfire, Hangar 9)..."
-                      value={wizardSearchQuery}
-                      onChange={(e) => setWizardSearchQuery(e.target.value)}
-                    />
+                    <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-cyan)', marginBottom: '4px', display: 'block' }}>🔍 SEARCH EXISTING WARBIRD DATABASE TO PRE-FILL</label>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <input 
+                        type="text"
+                        className="retro-input"
+                        style={{ flex: 1, fontSize: '11px' }}
+                        placeholder="Type plane name (e.g. Mustang, Corsair, P-40, Spitfire, Hangar 9)..."
+                        value={wizardSearchQuery}
+                        onChange={(e) => setWizardSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                      <button 
+                        className="btn-retro"
+                        style={{ fontSize: '9.5px', padding: '4px 10px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)', fontWeight: 'bold' }}
+                      >
+                        🔍 SEARCH
+                      </button>
+                    </div>
+
                     {wizardSearchQuery.trim() !== "" && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px', maxHeight: '100px', overflowY: 'auto' }}>
-                        {aircrafts.filter(a => a.name.toLowerCase().includes(wizardSearchQuery.toLowerCase())).map(a => (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', maxHeight: '120px', overflowY: 'auto' }}>
+                        {allAircrafts.filter(a => a.name.toLowerCase().includes(wizardSearchQuery.toLowerCase()) || a.manufacturer.toLowerCase().includes(wizardSearchQuery.toLowerCase())).map(a => (
                           <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 6px', background: '#222933', borderRadius: '3px', fontSize: '10px' }}>
                             <span>{a.name} ({a.wingspan}" WS, {a.flyingWeight} lb)</span>
                             <button className="btn-retro" style={{ fontSize: '8.5px', padding: '2px 6px' }} onClick={() => {
-                              setWizardName(a.name);
+                              setWizardName(a.name.replace(/\[USER INPUT MODEL\]/g, "").trim());
                               setWizardManufacturer(a.manufacturer);
                               setWizardWingspan(a.wingspan);
                               setWizardLength(a.length);
                               setWizardWeight(a.flyingWeight);
                               setWizardWingArea(a.wingArea);
                               setWizardSearchQuery("");
-                            }}>PRE-FILL SPECS</button>
+                            }}>⚡ PRE-FILL SPECS</button>
                           </div>
                         ))}
                       </div>
