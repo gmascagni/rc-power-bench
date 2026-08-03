@@ -10,6 +10,7 @@ export default function ComponentDatabases({
   initialSubTab
 }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab || 'motors');
+  const [componentSearch, setComponentSearch] = useState("");
 
   React.useEffect(() => {
     if (initialSubTab) {
@@ -17,9 +18,30 @@ export default function ComponentDatabases({
     }
   }, [initialSubTab]);
 
+  const filteredMotors = motors.filter(m => 
+    m.name.toLowerCase().includes(componentSearch.toLowerCase()) || 
+    m.brand.toLowerCase().includes(componentSearch.toLowerCase()) ||
+    m.kv.toString().includes(componentSearch)
+  );
+
+  const filteredESCs = escs.filter(e => 
+    e.name.toLowerCase().includes(componentSearch.toLowerCase()) || 
+    e.brand.toLowerCase().includes(componentSearch.toLowerCase())
+  );
+
+  const filteredBatteries = batteries.filter(b => 
+    b.name.toLowerCase().includes(componentSearch.toLowerCase()) || 
+    b.brand.toLowerCase().includes(componentSearch.toLowerCase())
+  );
+
+  const filteredPropellers = propellers.filter(p => 
+    p.name.toLowerCase().includes(componentSearch.toLowerCase()) || 
+    p.type.toLowerCase().includes(componentSearch.toLowerCase())
+  );
+
   const renderMotors = () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
-      {motors.map(m => {
+      {filteredMotors.map(m => {
         const isActive = selectedMotor.id === m.id;
         return (
           <div key={m.id} style={cardStyle(isActive)}>
@@ -54,7 +76,7 @@ export default function ComponentDatabases({
 
   const renderESCs = () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
-      {escs.map(e => {
+      {filteredESCs.map(e => {
         const isActive = selectedEsc.id === e.id;
         return (
           <div key={e.id} style={cardStyle(isActive)}>
@@ -89,23 +111,22 @@ export default function ComponentDatabases({
 
   const renderBatteries = () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
-      {batteries.map(b => {
+      {filteredBatteries.map(b => {
         const isActive = selectedBattery.id === b.id;
         return (
           <div key={b.id} style={cardStyle(isActive)}>
             <div>
               <div className="flex-between" style={{ fontSize: '10px', color: 'var(--color-amber-dim)' }}>
                 <span>{b.brand}</span>
-                <span>LIPO</span>
+                <span>{b.chemistry || "LiPo"}</span>
               </div>
               <h3 style={titleStyle}>{b.name}</h3>
               <table className="retro-table" style={{ fontSize: '11px', marginBottom: '12px' }}>
                 <tbody>
-                  <tr><td className="label">Cells count</td><td className="val">{b.cells}S ({b.cells * 3.7}V Nominal)</td></tr>
+                  <tr><td className="label">Cell Count</td><td className="val">{b.cells}S ({(b.cells * 3.7).toFixed(1)}V)</td></tr>
                   <tr><td className="label">Capacity</td><td className="val">{b.capacity} mAh</td></tr>
-                  <tr><td className="label">Discharge Limit</td><td className="val">{b.cRating} C</td></tr>
+                  <tr><td className="label">C-Rating</td><td className="val">{b.cRating} C</td></tr>
                   <tr><td className="label">Weight</td><td className="val">{b.weight} g</td></tr>
-                  <tr><td className="label">IR (Per Cell)</td><td className="val">{b.internalResistance} Ω</td></tr>
                 </tbody>
               </table>
             </div>
@@ -124,7 +145,7 @@ export default function ComponentDatabases({
 
   const renderPropellers = () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
-      {propellers.map(p => {
+      {filteredPropellers.map(p => {
         const isActive = selectedPropeller.id === p.id;
         return (
           <div key={p.id} style={cardStyle(isActive)}>
@@ -199,7 +220,20 @@ export default function ComponentDatabases({
           </div>
         </div>
         
-        <div className="card-content" style={{ padding: '16px' }}>
+        <div className="card-content" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Top Search Filter Bar */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#13171b', padding: '10px', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', whiteSpace: 'nowrap' }}>🔍 SEARCH ARCHIVE:</span>
+            <input 
+              type="text"
+              className="retro-input"
+              style={{ flex: 1, fontSize: '11px', padding: '6px' }}
+              placeholder={`Search ${activeSubTab} by name, brand, or spec (e.g. Dualsky, 380, Spektrum, Hobbywing)...`}
+              value={componentSearch}
+              onChange={(e) => setComponentSearch(e.target.value)}
+            />
+          </div>
+
           {activeSubTab === 'motors' && renderMotors()}
           {activeSubTab === 'escs' && renderESCs()}
           {activeSubTab === 'batteries' && renderBatteries()}
