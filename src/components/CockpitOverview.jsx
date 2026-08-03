@@ -804,12 +804,16 @@ export default function CockpitOverview({
                 onClick={() => setIsCustomPlaneOpen(true)}
                 className="btn-retro"
                 style={{
-                  fontSize: '10px',
-                  padding: '6px',
-                  borderColor: 'var(--color-cyan)',
+                  fontSize: '11px',
+                  height: '40px',
+                  padding: '8px 10px',
+                  background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
+                  border: '1.8px solid var(--color-cyan)',
                   color: 'var(--color-cyan)',
                   justifyContent: 'center',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  letterSpacing: '0.5px',
+                  boxShadow: '0 0 10px rgba(99, 179, 237, 0.2)'
                 }}
               >
                 ✈️ BUILD / SEARCH CUSTOM AIRPLANE
@@ -1647,20 +1651,27 @@ export default function CockpitOverview({
                 className="btn-retro"
                 style={{
                   width: '100%',
-                  fontSize: '11px',
-                  padding: '10px 8px',
-                  background: 'linear-gradient(180deg, #1c2e3d 0%, #0f1a24 100%)',
-                  border: '1.5px solid var(--color-cyan)',
-                  color: 'var(--color-cyan)',
+                  height: '56px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  fontWeight: 'bold',
-                  boxShadow: '0 0 10px rgba(99, 179, 237, 0.15)'
+                  padding: '8px 12px',
+                  background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
+                  border: '2px solid var(--color-cyan)',
+                  color: 'var(--color-cyan)',
+                  borderRadius: '4px',
+                  boxShadow: '0 0 12px rgba(99, 179, 237, 0.3), inset 0 0 8px rgba(99, 179, 237, 0.1)',
+                  cursor: 'pointer'
                 }}
               >
-                <span>✈️ AIRPLANE SPEC BUILDER & RECOMMENDER</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>✈️</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.5px' }}>AIRPLANE SPEC BUILDER</div>
+                    <div style={{ fontSize: '8.5px', color: 'rgba(99, 179, 237, 0.85)', fontFamily: 'var(--font-mono)' }}>
+                      Search Models, Custom Specs & Auto-Recommend
+                    </div>
+                  </div>
+                </div>
               </button>
             </div>
           </div>
