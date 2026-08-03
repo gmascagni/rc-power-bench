@@ -22,6 +22,7 @@ export default function AirplaneCalculator({
   const [flyingWeight, setFlyingWeight] = useState(8.5);
   const [wingArea, setWingArea] = useState(720);
   const [flightStyle, setFlightStyle] = useState("scale"); // 'scale' or 'aggressive'
+  const [enginesCount, setEnginesCount] = useState(1); // 1 = Single, 2 = Twin (B-25, Mosquito, P-38), 4 = Quad (B-17)
 
   // Aerodynamic math calculations
   const weightLbs = Math.max(parseFloat(flyingWeight) || 8.5, 0.5);
@@ -38,11 +39,15 @@ export default function AirplaneCalculator({
   // Stall speed estimation (mph) = 3.7 * sqrt(wingLoading)
   const stallSpeedMph = 3.7 * Math.sqrt(wingLoading);
 
-  // Power recommendation calculations
+  // Power recommendation calculations (Total Watts for entire airframe)
   const wattsPerLbMin = flightStyle === "aggressive" ? 180 : 120;
   const wattsPerLbMax = flightStyle === "aggressive" ? 220 : 150;
-  const minWatts = Math.round(weightLbs * wattsPerLbMin);
-  const maxWatts = Math.round(weightLbs * wattsPerLbMax);
+  const totalMinWatts = Math.round(weightLbs * wattsPerLbMin);
+  const totalMaxWatts = Math.round(weightLbs * wattsPerLbMax);
+
+  // Per-motor Power Requirements
+  const perMotorMinWatts = Math.round(totalMinWatts / enginesCount);
+  const perMotorMaxWatts = Math.round(totalMaxWatts / enginesCount);
 
   // Wing loading classification
   let loadingClass = "Scale Warbird";
@@ -80,19 +85,20 @@ export default function AirplaneCalculator({
     const newPlane = {
       id: `custom-plane-${Date.now()}`,
       name: `[USER INPUT MODEL] ${modelName.toUpperCase()}`,
-      class: weightLbs >= 7.0 ? "60-CLASS" : "50-CLASS",
+      class: enginesCount > 1 ? `${enginesCount}x MULTI-ENGINE` : (weightLbs >= 7.0 ? "60-CLASS" : "50-CLASS"),
       wingspan: parseFloat(wingspan) || 63,
       length: parseFloat(length) || 56,
       wingArea: parseFloat(wingArea) || 720,
       emptyWeight: Math.max(weightLbs - 1.1, 1.0),
       flyingWeight: weightLbs,
-      powerRangeMin: minWatts,
-      powerRangeMax: maxWatts,
+      powerRangeMin: totalMinWatts,
+      powerRangeMax: totalMaxWatts,
+      enginesCount: enginesCount,
       manufacturer: manufacturer || "User Custom Model",
-      image: "p51.jpg",
+      image: enginesCount > 1 ? "p38.jpg" : "p51.jpg",
       isUserInputModel: true,
       suggestedCg: "Scale CG per builder manual",
-      description: `Custom user-input model created via Airplane Calculator: ${modelName}. ${wingspan}" Wingspan, ${length}" Length, ${flyingWeight} lbs Flying Weight.`,
+      description: `Custom user-input model created via Airplane Calculator: ${modelName}. ${wingspan}" Wingspan, ${length}" Length, ${flyingWeight} lbs Flying Weight. ${enginesCount}x Motor Drive setup.`,
       stockSetup: {
         motorId: recs.matchingMotor ? recs.matchingMotor.id : motors[0].id,
         batteryId: recs.matchingBattery ? recs.matchingBattery.id : batteries[0].id,
@@ -174,6 +180,33 @@ export default function AirplaneCalculator({
               </div>
 
               <div>
+                <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-cyan)' }}>ENGINE DRIVE CONFIGURATION</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginTop: '4px' }}>
+                  <button 
+                    onClick={() => setEnginesCount(1)} 
+                    className={`btn-retro ${enginesCount === 1 ? 'active' : ''}`}
+                    style={{ fontSize: '10px', padding: '6px' }}
+                  >
+                    ✈️ SINGLE (1x)
+                  </button>
+                  <button 
+                    onClick={() => setEnginesCount(2)} 
+                    className={`btn-retro ${enginesCount === 2 ? 'active' : ''}`}
+                    style={{ fontSize: '10px', padding: '6px', borderColor: enginesCount === 2 ? 'var(--color-cyan)' : 'var(--color-panel-border)' }}
+                  >
+                    🛩️ TWIN (2x)
+                  </button>
+                  <button 
+                    onClick={() => setEnginesCount(4)} 
+                    className={`btn-retro ${enginesCount === 4 ? 'active' : ''}`}
+                    style={{ fontSize: '10px', padding: '6px', borderColor: enginesCount === 4 ? 'var(--color-cyan)' : 'var(--color-panel-border)' }}
+                  >
+                    🚀 QUAD (4x)
+                  </button>
+                </div>
+              </div>
+
+              <div>
                 <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>TARGET FLIGHT PERFORMANCE PROFILE</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '4px' }}>
                   <button 
@@ -220,22 +253,24 @@ export default function AirplaneCalculator({
                 </div>
 
                 <div style={{ padding: '8px', background: '#1a2027', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
-                  <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>POWER REQUIREMENT</div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', fontFamily: 'var(--font-mono)' }}>{minWatts}W - {maxWatts}W</div>
-                  <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.6)' }}>{wattsPerLbMin}W - {wattsPerLbMax}W per lb</div>
+                  <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>TOTAL POWER REQUIREMENT</div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', fontFamily: 'var(--font-mono)' }}>{totalMinWatts}W - {totalMaxWatts}W</div>
+                  <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.6)' }}>
+                    {enginesCount > 1 ? `${enginesCount}x Motors @ ${perMotorMinWatts}W-${perMotorMaxWatts}W ea` : `${wattsPerLbMin}W - ${wattsPerLbMax}W per lb`}
+                  </div>
                 </div>
               </div>
 
               {/* Component Match Summary */}
-              <div style={{ padding: '10px', background: 'rgba(255, 179, 71, 0.05)', borderRadius: '4px', border: '1px solid #ffb347' }}>
-                <div style={{ fontSize: '10.5px', fontWeight: 'bold', color: 'var(--color-amber)', marginBottom: '4px' }}>
-                  🏆 RECOMMENDED POWER PACKAGE MATCH
+              <div style={{ padding: '10px', background: enginesCount > 1 ? 'rgba(99, 179, 237, 0.08)' : 'rgba(255, 179, 71, 0.05)', borderRadius: '4px', border: enginesCount > 1 ? '1px solid var(--color-cyan)' : '1px solid #ffb347' }}>
+                <div style={{ fontSize: '10.5px', fontWeight: 'bold', color: enginesCount > 1 ? 'var(--color-cyan)' : 'var(--color-amber)', marginBottom: '4px' }}>
+                  🏆 RECOMMENDED POWER PACKAGE MATCH {enginesCount > 1 ? `(${enginesCount}x DRIVE SETUP)` : ''}
                 </div>
                 <div style={{ fontSize: '10.5px', fontFamily: 'var(--font-mono)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <div>MOTOR: <strong style={{ color: '#ffc97a' }}>{recs.matchingMotor ? recs.matchingMotor.name : '-'}</strong></div>
+                  <div>MOTOR: <strong style={{ color: '#ffc97a' }}>{enginesCount > 1 ? `${enginesCount}x ` : ''}{recs.matchingMotor ? recs.matchingMotor.name : '-'}</strong></div>
                   <div>BATTERY: <strong style={{ color: '#fff' }}>{recs.matchingBattery ? recs.matchingBattery.name : '-'}</strong></div>
-                  <div>PROPELLER: <strong style={{ color: '#63b3ed' }}>{recs.matchingProp ? recs.matchingProp.name : '-'}</strong></div>
-                  <div>ESC: <strong style={{ color: 'var(--color-red)' }}>{recs.matchingEsc ? recs.matchingEsc.name : '-'}</strong></div>
+                  <div>PROPELLER: <strong style={{ color: '#63b3ed' }}>{enginesCount > 1 ? `${enginesCount}x ` : ''}{recs.matchingProp ? recs.matchingProp.name : '-'}</strong></div>
+                  <div>ESC: <strong style={{ color: 'var(--color-red)' }}>{enginesCount > 1 ? `${enginesCount}x ` : ''}{recs.matchingEsc ? recs.matchingEsc.name : '-'}</strong></div>
                 </div>
               </div>
 
