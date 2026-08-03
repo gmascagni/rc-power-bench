@@ -472,6 +472,20 @@ const rawMotors = [
     type: "Brushless Outrunner"
   },
   {
+    id: "dualsky-6360ea-11",
+    name: "DUALSKY XM6360EA-11 380KV",
+    model: "XM6360EA-11-380KV",
+    brand: "Dualsky",
+    kv: 380,
+    weight: 640,
+    maxCurrent: 85,
+    maxPower: 3300,
+    internalResistance: 0.018,
+    noLoadCurrent: 1.8,
+    voltageSupported: "6S - 10S LiPo (22.2V - 37.0V)",
+    type: "Brushless Outrunner"
+  },
+  {
     id: "badass-4520-540",
     name: "BADASS 4520 540KV",
     model: "BA-4520-540",
