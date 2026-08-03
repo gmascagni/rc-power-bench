@@ -23,6 +23,16 @@ function App() {
   const [activeTab, setActiveTab] = useState('cockpit');
   const [componentSubTab, setComponentSubTab] = useState('motors');
 
+  // Custom Fleet Database state (persisted in localStorage)
+  const [customFleet, setCustomFleet] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rc_custom_fleet');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   // Selected components state (initialized to default Scale Performance baseline)
   const [selectedAircraft, setSelectedAircraft] = useState(aircrafts[0]); // P-51D Mustang
   const [selectedMotor, setSelectedMotor] = useState(motors[0]); // SunnySky X4120 600KV
@@ -59,6 +69,8 @@ function App() {
             setActiveSetupType={setActiveSetupType}
             throttle={throttle}
             setThrottle={setThrottle}
+            customFleet={customFleet}
+            setCustomFleet={setCustomFleet}
           />
         );
       case 'aircraft':
@@ -66,7 +78,14 @@ function App() {
           <AircraftDatabase 
             selectedAircraft={selectedAircraft}
             setSelectedAircraft={setSelectedAircraft}
+            setSelectedMotor={setSelectedMotor}
+            setSelectedEsc={setSelectedEsc}
+            setSelectedBattery={setSelectedBattery}
+            setSelectedPropeller={setSelectedPropeller}
+            setThrottle={setThrottle}
             setActiveTab={setActiveTab}
+            customFleet={customFleet}
+            setCustomFleet={setCustomFleet}
           />
         );
       case 'components':

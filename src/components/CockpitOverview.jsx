@@ -170,7 +170,9 @@ export default function CockpitOverview({
   activeSetupType,
   setActiveSetupType,
   throttle,
-  setThrottle
+  setThrottle,
+  customFleet = [],
+  setCustomFleet = () => {}
 }) {
   const [isSimulating, setIsSimulating] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -196,14 +198,6 @@ export default function CockpitOverview({
   const [wizardStyle, setWizardStyle] = useState("scale");
   const [wizardTargetCells, setWizardTargetCells] = useState(6);
   const [wizardSearchQuery, setWizardSearchQuery] = useState("");
-  const [customFleet, setCustomFleet] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rc_custom_fleet');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
 
   const allAircrafts = [...aircrafts, ...customFleet];
   const [adjustedEmptyWeight, setAdjustedEmptyWeight] = useState(null);
