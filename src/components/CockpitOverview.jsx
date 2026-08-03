@@ -1982,11 +1982,13 @@ export default function CockpitOverview({
                 </div>
 
                 {planeSearchQuery.trim() !== "" && (() => {
-                  const matches = allAircrafts.filter(a => 
-                    a.name.toLowerCase().includes(planeSearchQuery.toLowerCase()) || 
-                    a.manufacturer.toLowerCase().includes(planeSearchQuery.toLowerCase()) ||
-                    a.class.toLowerCase().includes(planeSearchQuery.toLowerCase())
-                  );
+                  const cleanQuery = planeSearchQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  const matches = allAircrafts.filter(a => {
+                    const cleanName = a.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const cleanMfr = a.manufacturer.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const cleanClass = a.class.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    return cleanName.includes(cleanQuery) || cleanMfr.includes(cleanQuery) || cleanClass.includes(cleanQuery);
+                  });
 
                   if (matches.length > 0) {
                     return (
@@ -2283,24 +2285,65 @@ export default function CockpitOverview({
                       </button>
                     </div>
 
-                    {wizardSearchQuery.trim() !== "" && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', maxHeight: '120px', overflowY: 'auto' }}>
-                        {allAircrafts.filter(a => a.name.toLowerCase().includes(wizardSearchQuery.toLowerCase()) || a.manufacturer.toLowerCase().includes(wizardSearchQuery.toLowerCase())).map(a => (
-                          <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 6px', background: '#222933', borderRadius: '3px', fontSize: '10px' }}>
-                            <span>{a.name} ({a.wingspan}" WS, {a.flyingWeight} lb)</span>
-                            <button className="btn-retro" style={{ fontSize: '8.5px', padding: '2px 6px' }} onClick={() => {
-                              setWizardName(a.name.replace(/\[USER INPUT MODEL\]/g, "").trim());
-                              setWizardManufacturer(a.manufacturer);
-                              setWizardWingspan(a.wingspan);
-                              setWizardLength(a.length);
-                              setWizardWeight(a.flyingWeight);
-                              setWizardWingArea(a.wingArea);
-                              setWizardSearchQuery("");
-                            }}>⚡ PRE-FILL SPECS</button>
+                    {wizardSearchQuery.trim() !== "" && (() => {
+                      const cleanQuery = wizardSearchQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
+                      const matches = allAircrafts.filter(a => {
+                        const cleanName = a.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        const cleanMfr = a.manufacturer.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        const cleanClass = a.class.toLowerCase().replace(/[^a-z0-9]/g, '');
+                        return cleanName.includes(cleanQuery) || cleanMfr.includes(cleanQuery) || cleanClass.includes(cleanQuery);
+                      });
+
+                      if (matches.length > 0) {
+                        return (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', maxHeight: '140px', overflowY: 'auto' }}>
+                            <div style={{ fontSize: '9.5px', color: 'var(--color-amber)', fontWeight: 'bold' }}>
+                              FOUND {matches.length} MATCHING MODEL(S) FOR "{wizardSearchQuery}":
+                            </div>
+                            {matches.map(a => (
+                              <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', background: '#222933', borderRadius: '3px', border: '1px solid var(--color-panel-border)', fontSize: '10px' }}>
+                                <div>
+                                  <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{a.name}</span>
+                                  <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '6px' }}>({a.wingspan}" WS | {a.flyingWeight} lb)</span>
+                                </div>
+                                <button className="btn-retro" style={{ fontSize: '9px', padding: '3px 8px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)', fontWeight: 'bold' }} onClick={() => {
+                                  setWizardName(a.name.replace(/\[USER INPUT MODEL\]/g, "").trim());
+                                  setWizardManufacturer(a.manufacturer);
+                                  setWizardWingspan(a.wingspan);
+                                  setWizardLength(a.length);
+                                  setWizardWeight(a.flyingWeight);
+                                  setWizardWingArea(a.wingArea);
+                                  setWizardSearchQuery("");
+                                  setWizardStep(2);
+                                }}>⚡ SELECT MODEL & GO TO SPECS ➔</button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      }
+
+                      return (
+                        <div style={{ marginTop: '8px', padding: '8px', background: '#1c1612', borderRadius: '3px', border: '1px solid #7c5d2b', fontSize: '10px', color: '#ffb347', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>No factory profile for "{wizardSearchQuery}". Click to pre-fill baseline scale specs!</span>
+                          <button
+                            className="btn-retro"
+                            style={{ fontSize: '9px', padding: '3px 8px', borderColor: '#ffb347', color: '#ffb347' }}
+                            onClick={() => {
+                              setWizardName(wizardSearchQuery.toUpperCase());
+                              setWizardManufacturer("Custom Builder");
+                              setWizardWingspan(71);
+                              setWizardLength(54);
+                              setWizardWeight(12.5);
+                              setWizardWingArea(860);
+                              setWizardSearchQuery("");
+                              setWizardStep(2);
+                            }}
+                          >
+                            ⚡ AUTO-CREATE SPECS ➔
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
