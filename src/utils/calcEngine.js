@@ -13,6 +13,19 @@
  * - Thrust-to-Weight: 0.78
  */
 
+export function formatAircraftTitle(ac) {
+  if (!ac) return "";
+  const rawName = (ac.name || "Custom Aircraft").replace(/\[USER INPUT MODEL\]/g, "").trim();
+  if (/\(\d+(\.\d+)?["\s]*WS/i.test(rawName) || /\(\d+(\.\d+)?M\b/i.test(rawName)) {
+    return ac.isUserInputModel && !ac.name.includes('[USER INPUT MODEL]') ? `[USER INPUT MODEL] ${rawName}` : ac.name;
+  }
+  const wsTag = ac.wingspan ? `${ac.wingspan}" WS` : "";
+  const clsTag = ac.class ? ac.class : "";
+  const tag = [wsTag, clsTag].filter(Boolean).join(" / ");
+  const fullTitle = tag ? `${rawName} (${tag})` : rawName;
+  return ac.isUserInputModel && !fullTitle.includes('[USER INPUT MODEL]') ? `[USER INPUT MODEL] ${fullTitle}` : fullTitle;
+}
+
 export function getMaxCells(voltageSupportedStr) {
   if (!voltageSupportedStr) return 12;
   const matches = String(voltageSupportedStr).match(/(\d+)S/gi);

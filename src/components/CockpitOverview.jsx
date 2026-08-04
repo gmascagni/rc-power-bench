@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CircularGauge, HorizontalBarGauge } from './Gauges';
 import PowerCurveChart from './PowerCurveChart';
-import { calculateSpecs, getMaxCells, getMinCells, getRecommendationsForAircraftSpecs } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells, getRecommendationsForAircraftSpecs, formatAircraftTitle } from '../utils/calcEngine';
 import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } from '../data/rcData';
 import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
@@ -814,7 +814,7 @@ export default function CockpitOverview({
                 }}
               >
                 {allAircrafts.map(ac => (
-                  <option key={ac.id} value={ac.id}>{ac.name}</option>
+                  <option key={ac.id} value={ac.id}>{formatAircraftTitle(ac)}</option>
                 ))}
               </select>
 
@@ -2031,8 +2031,8 @@ export default function CockpitOverview({
                               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', background: '#1c222b', borderRadius: '3px', border: '1px solid var(--color-panel-border)', fontSize: '10.5px' }}
                             >
                               <div>
-                                <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{a.name}</span>
-                                <span style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '8px' }}>({a.wingspan}" WS | {a.length}" L | {a.flyingWeight} lb)</span>
+                                <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{formatAircraftTitle(a)}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '8px' }}>({a.length}" L | {a.flyingWeight} lb)</span>
                               </div>
                               <button 
                                 type="button"
@@ -2356,8 +2356,8 @@ export default function CockpitOverview({
                             {matches.map(a => (
                               <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px', background: '#1c2530', borderRadius: '3px', border: '1px solid var(--color-panel-border)', fontSize: '10px' }}>
                                 <div>
-                                  <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{a.name}</span>
-                                  <span style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '6px' }}>({a.wingspan}" WS | {a.flyingWeight} lb | {a.manufacturer})</span>
+                                  <span style={{ fontWeight: 'bold', color: '#ffc97a' }}>{formatAircraftTitle(a)}</span>
+                                  <span style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '6px' }}>({a.flyingWeight} lb | {a.manufacturer})</span>
                                 </div>
                                 <button type="button" className="btn-retro" style={{ fontSize: '9px', padding: '3px 8px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)', fontWeight: 'bold' }} onClick={() => {
                                   setWizardName(a.name.replace(/\[USER INPUT MODEL\]/g, "").trim());

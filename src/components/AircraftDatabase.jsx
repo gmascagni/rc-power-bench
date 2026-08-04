@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { aircrafts, motors, batteries, escs, propellers } from '../data/rcData';
-import { getRecommendationsForAircraftSpecs } from '../utils/calcEngine';
+import { getRecommendationsForAircraftSpecs, formatAircraftTitle } from '../utils/calcEngine';
 
 export default function AircraftDatabase({ 
   selectedAircraft, 
@@ -155,7 +155,7 @@ export default function AircraftDatabase({
                     </div>
                     
                     <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', marginBottom: '8px', fontFamily: 'var(--font-serif)' }}>
-                      {ac.name}
+                      {formatAircraftTitle(ac)}
                     </h3>
                     
                     <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.3', marginBottom: '12px' }}>

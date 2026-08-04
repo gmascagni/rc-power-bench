@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { aircrafts, motors, batteries, escs, propellers } from '../data/rcData';
-import { getRecommendationsForAircraftSpecs } from '../utils/calcEngine';
+import { getRecommendationsForAircraftSpecs, formatAircraftTitle } from '../utils/calcEngine';
 import { AlertTriangle, Plane, Zap, Shield, HelpCircle } from 'lucide-react';
 
 export default function AirplaneCalculator({
