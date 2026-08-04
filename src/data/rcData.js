@@ -51,7 +51,7 @@ export const aircrafts = [
     suggestedCg: "3.15 in (80 mm)",
     description: "E-flite 1.2m F4U Corsair. Highly detailed sport-scale model featuring functioning 3-blade prop drive and retractable landing gear.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL12000-Manual-EN.pdf",
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "4s-5000mah-30c", propellerId: "eflite-12x8-3", escId: "hobbywing-skywalker80" }
+    stockSetup: { motorId: "spektrum-15-850", batteryId: "4s-5000mah-30c", propellerId: "eflite-12x8-3", escId: "avian-70a" }
   },
   {
     id: "eflite-bf190-1.5m",
@@ -1121,6 +1121,20 @@ const rawMotors = [
     noLoadCurrent: 1.7,
     voltageSupported: "5S - 6S LiPo (18.5V - 22.2V)",
     type: "Brushless Outrunner"
+  },
+  {
+    id: "spektrum-15-850",
+    name: "SPEKTRUM 15-SIZE 850KV OUTRUNNER",
+    model: "SPMXAM1050",
+    brand: "Spektrum",
+    kv: 850,
+    weight: 180,
+    maxCurrent: 55,
+    maxPower: 850,
+    internalResistance: 0.024,
+    noLoadCurrent: 1.8,
+    voltageSupported: "3S - 4S LiPo (11.1V - 14.8V)",
+    type: "Brushless Outrunner"
   }
 ];
 
@@ -1281,6 +1295,18 @@ const rawEscs = [
     weight: 105,
     voltageSupported: "6S - 12S LiPo (22.2V - 44.4V)",
     becOutput: "BEC: 6.0V/7.4V/8.4V @ 8A"
+  },
+  {
+    id: "avian-70a",
+    name: "SPEKTRUM AVIAN 70A SMART LITE",
+    model: "SPMXAE70",
+    brand: "Spektrum",
+    maxAmps: 70,
+    burstAmps: 85,
+    resistance: 0.0014,
+    weight: 68,
+    voltageSupported: "3S - 4S LiPo (11.1V - 14.8V)",
+    becOutput: "BEC: 6.0V @ 7A"
   },
   {
     id: "avian-130a",
