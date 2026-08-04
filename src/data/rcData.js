@@ -69,7 +69,7 @@ export const aircrafts = [
     suggestedCg: "4.50 in (114 mm)",
     description: "E-flite 1.5m Fw 190A (referenced as BF-190). Heavy sport-scale fighter with scale radial engine cowl and wide-track retractable gear.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01350-Manual-EN.pdf",
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-13x9-3", escId: "avian-100a" }
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-15x8-3", escId: "avian-100a" }
   },
   {
     id: "eflite-p51-1.5m",
@@ -87,7 +87,7 @@ export const aircrafts = [
     suggestedCg: "4.90 in (124 mm)",
     description: "E-flite 1.5m P-51D Mustang. Sport-scale warbird featuring Smart electronics, functional flaps, and retractable landing gear.",
     manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01250-Manual-EN.pdf",
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-13x9-3", escId: "avian-100a" }
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-15x8-4", escId: "avian-100a" }
   },
   {
     id: "fw190",
@@ -1649,6 +1649,24 @@ export const propellers = [
     type: "3-Blade Scale",
     blades: 3,
     kProp: 0.90
+  },
+  {
+    id: "eflite-15x8-3",
+    name: "E-flite 3-Blade 15 x 8",
+    diameter: 15,
+    pitch: 8,
+    type: "3-Blade Scale",
+    blades: 3,
+    kProp: 1.08
+  },
+  {
+    id: "eflite-15x8-4",
+    name: "E-flite 4-Blade 15 x 8",
+    diameter: 15,
+    pitch: 8,
+    type: "4-Blade Scale",
+    blades: 4,
+    kProp: 1.15
   },
   {
     id: "ma-14x9-3",
