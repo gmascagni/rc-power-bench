@@ -1,7 +1,7 @@
 export const aircrafts = [
   {
     id: "p51d-mustang",
-    name: "HANGAR 9 P-51D MUSTANG",
+    name: "HANGAR 9 P-51D MUSTANG (63\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 63,
     length: 56,
@@ -19,7 +19,7 @@ export const aircrafts = [
   },
   {
     id: "f4u-corsair",
-    name: "TOP FLITE F4U CORSAIR",
+    name: "TOP FLITE F4U CORSAIR (65\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 65,
     length: 53,
@@ -37,7 +37,7 @@ export const aircrafts = [
   },
   {
     id: "spitfire-mk9",
-    name: "KYOSHO SPITFIRE MK.IX",
+    name: "KYOSHO SPITFIRE MK.IX (64\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 64,
     length: 55,
@@ -55,7 +55,7 @@ export const aircrafts = [
   },
   {
     id: "bf109",
-    name: "SEAGULL MESSERSCHMITT BF 109",
+    name: "SEAGULL MESSERSCHMITT BF 109 (61\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 61,
     length: 57,
@@ -73,7 +73,7 @@ export const aircrafts = [
   },
   {
     id: "fw190",
-    name: "ESM FOCKE-WULF FW 190",
+    name: "ESM FOCKE-WULF FW 190 (60\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 60,
     length: 54,
@@ -91,7 +91,7 @@ export const aircrafts = [
   },
   {
     id: "p47d-thunderbolt",
-    name: "HANGAR 9 P-47D THUNDERBOLT",
+    name: "HANGAR 9 P-47D THUNDERBOLT (67\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 67,
     length: 58,
@@ -109,7 +109,7 @@ export const aircrafts = [
   },
   {
     id: "seagull-p47-60",
-    name: "SEAGULL P-47D THUNDERBOLT",
+    name: "SEAGULL P-47D THUNDERBOLT (63\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 63,
     length: 52,
@@ -127,7 +127,7 @@ export const aircrafts = [
   },
   {
     id: "hurricane",
-    name: "SEAGULL HAWKER HURRICANE",
+    name: "SEAGULL HAWKER HURRICANE (62\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 62,
     length: 52,
@@ -145,7 +145,7 @@ export const aircrafts = [
   },
   {
     id: "zero",
-    name: "SEAGULL MITSUBISHI A6M ZERO",
+    name: "SEAGULL MITSUBISHI A6M ZERO (64\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 64,
     length: 51,
@@ -163,7 +163,7 @@ export const aircrafts = [
   },
   {
     id: "p38-lightning",
-    name: "ESM P-38 LIGHTNING",
+    name: "ESM P-38 LIGHTNING (74\" WS / TWIN .60)",
     class: "60-CLASS",
     wingspan: 74,
     length: 52,
@@ -182,7 +182,7 @@ export const aircrafts = [
   },
   {
     id: "f6f-hellcat",
-    name: "HANGAR 9 F6F HELLCAT",
+    name: "HANGAR 9 F6F HELLCAT (64\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 64,
     length: 53,
@@ -200,7 +200,7 @@ export const aircrafts = [
   },
   {
     id: "f8f-bearcat",
-    name: "SEAGULL F8F BEARCAT",
+    name: "SEAGULL F8F BEARCAT (60\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 60,
     length: 52,
@@ -218,7 +218,7 @@ export const aircrafts = [
   },
   {
     id: "f4f-wildcat",
-    name: "PHOENIX F4F WILDCAT",
+    name: "PHOENIX F4F WILDCAT (58\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 58,
     length: 49,
@@ -236,7 +236,7 @@ export const aircrafts = [
   },
   {
     id: "eflite-p51-1.5m",
-    name: "E-FLITE 1.5M P-51",
+    name: "E-FLITE 1.5M P-51 MUSTANG (59\" WS / 1.5M FOAM)",
     class: "1.5M CLASS",
     wingspan: 59,
     length: 52,
@@ -254,7 +254,7 @@ export const aircrafts = [
   },
   {
     id: "eflite-bf190-1.5m",
-    name: "E-FLITE 1.5M BF-190 / FW 190",
+    name: "E-FLITE 1.5M FW 190 (59\" WS / 1.5M FOAM)",
     class: "1.5M CLASS",
     wingspan: 59,
     length: 51,
@@ -272,7 +272,7 @@ export const aircrafts = [
   },
   {
     id: "eflite-corsair-1.2m",
-    name: "E-FLITE 1.2M CORSAIR",
+    name: "E-FLITE 1.2M F4U CORSAIR (48\" WS / 1.2M FOAM)",
     class: "1.2M CLASS",
     wingspan: 48,
     length: 38,
@@ -290,7 +290,7 @@ export const aircrafts = [
   },
   {
     id: "topflite-p40",
-    name: "TOP FLITE P-40 WARHAWK",
+    name: "TOP FLITE P-40 WARHAWK (64\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 64,
     length: 54,
@@ -308,7 +308,7 @@ export const aircrafts = [
   },
   {
     id: "topflite-p51",
-    name: "TOP FLITE P-51 MUSTANG",
+    name: "TOP FLITE P-51 MUSTANG (65\" WS / .60-CLASS)",
     class: "60-CLASS",
     wingspan: 65,
     length: 57,
@@ -326,7 +326,7 @@ export const aircrafts = [
   },
   {
     id: "hangar9-p40b-50",
-    name: "HANGAR 9 P-40B WARHAWK .50",
+    name: "HANGAR 9 P-40B WARHAWK (55.5\" WS / .50-CLASS)",
     class: "50-CLASS",
     wingspan: 55.5,
     length: 48,
@@ -344,7 +344,7 @@ export const aircrafts = [
   },
   {
     id: "topflite-b25",
-    name: "TOP FLITE B-25 MITCHELL TWIN .60",
+    name: "TOP FLITE B-25 MITCHELL (81.5\" WS / TWIN .60)",
     class: "60-CLASS TWIN",
     wingspan: 81.5,
     length: 64,
@@ -363,7 +363,7 @@ export const aircrafts = [
   },
   {
     id: "hangar9-b25",
-    name: "HANGAR 9 B-25J MITCHELL 71\"",
+    name: "HANGAR 9 B-25J MITCHELL (71\" WS / TWIN .50)",
     class: "50-CLASS TWIN",
     wingspan: 71,
     length: 54,
@@ -382,7 +382,7 @@ export const aircrafts = [
   },
   {
     id: "nexa-b25",
-    name: "NEXA B-25J MITCHELL 75\"",
+    name: "NEXA B-25J MITCHELL (75\" WS / TWIN .60)",
     class: "60-CLASS TWIN",
     wingspan: 75,
     length: 58,
@@ -401,7 +401,7 @@ export const aircrafts = [
   },
   {
     id: "flightline-b25",
-    name: "FLIGHTLINE B-25J MITCHELL 1600MM",
+    name: "FLIGHTLINE B-25J MITCHELL (63\" WS / 1.6M TWIN FOAM)",
     class: "1.6M TWIN",
     wingspan: 63,
     length: 48,
@@ -420,7 +420,7 @@ export const aircrafts = [
   },
   {
     id: "b17-flying-fortress",
-    name: "HK B-17G FLYING FORTRESS 1875MM",
+    name: "HK B-17G FLYING FORTRESS (73.8\" WS / 1.88M 4-ENGINE)",
     class: "GIANT SCALE 4-ENGINE",
     wingspan: 73.8,
     length: 54,
@@ -439,7 +439,7 @@ export const aircrafts = [
   },
   {
     id: "ziroli-b25",
-    name: "ZIROLI B-25 MITCHELL 101\" (GIANT SCALE)",
+    name: "ZIROLI B-25 MITCHELL (101\" WS / GIANT SCALE TWIN)",
     class: "GIANT SCALE TWIN",
     wingspan: 101,
     length: 79,
@@ -458,7 +458,7 @@ export const aircrafts = [
   },
   {
     id: "ziroli-p51",
-    name: "ZIROLI P-51D MUSTANG 98\" (GIANT SCALE)",
+    name: "ZIROLI P-51D MUSTANG (98\" WS / GIANT SCALE)",
     class: "GIANT SCALE",
     wingspan: 98,
     length: 85,
@@ -476,7 +476,7 @@ export const aircrafts = [
   },
   {
     id: "ziroli-p47",
-    name: "ZIROLI P-47 THUNDERBOLT 92\" (GIANT SCALE)",
+    name: "ZIROLI P-47 THUNDERBOLT (92\" WS / GIANT SCALE)",
     class: "GIANT SCALE",
     wingspan: 92,
     length: 79,
@@ -494,7 +494,7 @@ export const aircrafts = [
   },
   {
     id: "ziroli-corsair",
-    name: "ZIROLI F4U CORSAIR 93\" (GIANT SCALE)",
+    name: "ZIROLI F4U CORSAIR (93\" WS / GIANT SCALE)",
     class: "GIANT SCALE",
     wingspan: 93,
     length: 77,
@@ -512,7 +512,7 @@ export const aircrafts = [
   },
   {
     id: "ziroli-hellcat",
-    name: "ZIROLI F6F HELLCAT 95\" (GIANT SCALE)",
+    name: "ZIROLI F6F HELLCAT (95\" WS / GIANT SCALE)",
     class: "GIANT SCALE",
     wingspan: 95,
     length: 76,
@@ -530,7 +530,7 @@ export const aircrafts = [
   },
   {
     id: "legend-b25",
-    name: "LEGEND HOBBY B-25 MITCHELL 95\" (SCALE ARF)",
+    name: "LEGEND HOBBY B-25 MITCHELL (95\" WS / GIANT SCALE TWIN)",
     class: "GIANT SCALE TWIN",
     wingspan: 95,
     length: 75,
@@ -549,7 +549,7 @@ export const aircrafts = [
   },
   {
     id: "legend-skyraider",
-    name: "LEGEND HOBBY A-1 SKYRAIDER 86\"",
+    name: "LEGEND HOBBY A-1 SKYRAIDER (86\" WS / GIANT SCALE)",
     class: "GIANT SCALE",
     wingspan: 86,
     length: 68,
@@ -567,7 +567,7 @@ export const aircrafts = [
   },
   {
     id: "legend-p47-snafu",
-    name: "LEGEND HOBBY P-47D THUNDERBOLT 81\"",
+    name: "LEGEND HOBBY P-47D THUNDERBOLT (81\" WS / GIANT SCALE)",
     class: "GIANT SCALE",
     wingspan: 81,
     length: 71,
@@ -585,7 +585,7 @@ export const aircrafts = [
   },
   {
     id: "natbalsa-b25",
-    name: "NATIONAL BALSA B-25 MITCHELL 81\" (SHORT KIT)",
+    name: "NATIONAL BALSA B-25 MITCHELL (81.5\" WS / TWIN SHORT KIT)",
     class: "60-CLASS TWIN",
     wingspan: 81.5,
     length: 64,
@@ -604,7 +604,7 @@ export const aircrafts = [
   },
   {
     id: "natbalsa-p40",
-    name: "NATIONAL BALSA P-40 WARHAWK 86\" (SHORT KIT)",
+    name: "NATIONAL BALSA P-40 WARHAWK (86\" WS / GIANT SHORT KIT)",
     class: "GIANT SCALE",
     wingspan: 86,
     length: 74,
@@ -622,7 +622,7 @@ export const aircrafts = [
   },
   {
     id: "darkhorse-p51",
-    name: "DARK HORSE P-51B MUSTANG 85\" (LASER SHORT KIT)",
+    name: "DARK HORSE P-51B MUSTANG (85\" WS / GIANT SHORT KIT)",
     class: "GIANT SCALE",
     wingspan: 85,
     length: 74,
@@ -640,7 +640,7 @@ export const aircrafts = [
   },
   {
     id: "darkhorse-bearcat",
-    name: "DARK HORSE F8F BEARCAT 86\" (LASER SHORT KIT)",
+    name: "DARK HORSE F8F BEARCAT (86\" WS / GIANT SHORT KIT)",
     class: "GIANT SCALE",
     wingspan: 86,
     length: 69,
@@ -658,7 +658,7 @@ export const aircrafts = [
   },
   {
     id: "rcbuilder-mosquito",
-    name: "RC-BUILDER DH-98 MOSQUITO 81\" TWIN",
+    name: "RC-BUILDER DH-98 MOSQUITO (81\" WS / TWIN SHORT KIT)",
     class: "60-CLASS TWIN",
     wingspan: 81,
     length: 63,
@@ -677,7 +677,7 @@ export const aircrafts = [
   },
   {
     id: "seagull-b25-95",
-    name: "SEAGULL B-25 MITCHELL 95\" TWIN ARF",
+    name: "SEAGULL B-25 MITCHELL (95\" WS / GIANT TWIN ARF)",
     class: "GIANT SCALE TWIN",
     wingspan: 95,
     length: 74,
@@ -696,7 +696,7 @@ export const aircrafts = [
   },
   {
     id: "seagull-mosquito-80",
-    name: "SEAGULL DH-98 MOSQUITO 80\" TWIN ARF",
+    name: "SEAGULL DH-98 MOSQUITO (80\" WS / TWIN .60 ARF)",
     class: "60-CLASS TWIN",
     wingspan: 80,
     length: 62,
