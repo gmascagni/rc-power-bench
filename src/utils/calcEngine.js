@@ -213,8 +213,13 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
   else if (w < 5.5) targetCells = 4;
   else if (w < 7.5) targetCells = 5;
   else if (w < 11.0) targetCells = 6;
-  else if (w < 15.0) targetCells = 8;
+  else if (w < 18.0) targetCells = 8;
   else targetCells = 12;
+
+  // RULE: For airplanes smaller than 1.6 meters (<= 65" wingspan / 1.5m foam warbirds), cap motor size & battery voltage to 8S MAX
+  if (ws <= 65) {
+    targetCells = Math.min(targetCells, 8);
+  }
 
   // Target Motor KV
   let targetKv = 500;

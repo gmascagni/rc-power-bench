@@ -246,6 +246,9 @@ export default function CockpitOverview({
     let bestPitchSpeed = 0;
     let bestCombo = null;
 
+    // Rule: For airplanes smaller than 1.6m (<= 65" wingspan / 1.5m foam warbirds), keep battery cell count to 8S MAX
+    const maxAllowedCells = selectedAircraft.wingspan <= 65 ? 8 : 12;
+
     for (const m of motors) {
       const maxMotorCells = getMaxCells(m.voltageSupported);
       const minMotorCells = getMinCells(m.voltageSupported);
@@ -255,6 +258,7 @@ export default function CockpitOverview({
         const minEscCells = getMinCells(e.voltageSupported);
 
         for (const b of batteries) {
+          if (b.cells > maxAllowedCells) continue;
           if (b.cells > maxMotorCells || b.cells < minMotorCells) continue;
           if (b.cells > maxEscCells || b.cells < minEscCells) continue;
 
@@ -2460,14 +2464,23 @@ export default function CockpitOverview({
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>TARGET BATTERY VOLTAGE CLASS</label>
-                    <select className="retro-select" style={{ fontSize: '11px', marginTop: '4px' }} value={wizardTargetCells} onChange={(e) => setWizardTargetCells(parseInt(e.target.value))}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>TARGET BATTERY VOLTAGE CLASS</label>
+                      {wizardWingspan <= 65 && (
+                        <span style={{ fontSize: '9px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>
+                          ⚠️ 8S MAX CAP FOR SUB-1.6M / 1.5M FOAM WARBIRDS
+                        </span>
+                      )}
+                    </div>
+                    <select className="retro-select" style={{ fontSize: '11px', marginTop: '4px' }} value={wizardTargetCells > 8 && wizardWingspan <= 65 ? 8 : wizardTargetCells} onChange={(e) => setWizardTargetCells(parseInt(e.target.value))}>
                       <option value={3}>3S LiPo (11.1V - Park Flyer Class)</option>
                       <option value={4}>4S LiPo (14.8V - 50" Class)</option>
                       <option value={5}>5S LiPo (18.5V - .46/.52 Class)</option>
                       <option value={6}>6S LiPo (22.2V - .60 Class Scale Warbird Standard)</option>
                       <option value={8}>8S LiPo (29.6V - 70"+ Heavy Class)</option>
-                      <option value={12}>12S LiPo (44.4V - Giant Scale Class)</option>
+                      {wizardWingspan > 65 && (
+                        <option value={12}>12S LiPo (44.4V - Giant Scale Class)</option>
+                      )}
                     </select>
                   </div>
 
