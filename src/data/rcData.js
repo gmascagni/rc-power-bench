@@ -1477,7 +1477,7 @@ export const batteries = [
   }
 ];
 
-export const propellers = [
+const rawPropellers = [
   {
     id: "apc-13x6e",
     name: "APC 13 x 6E",
@@ -1920,15 +1920,6 @@ export const propellers = [
     kProp: 1.28
   },
   {
-    id: "biela-20x10-4",
-    name: "Biela 4-Blade 20 x 10 (GIANT SCALE)",
-    diameter: 20,
-    pitch: 10,
-    type: "4-Blade Scale",
-    blades: 4,
-    kProp: 1.30
-  },
-  {
     id: "biela-22x10-4",
     name: "Biela 4-Blade 22 x 10 (GIANT SCALE)",
     diameter: 22,
@@ -1938,6 +1929,13 @@ export const propellers = [
     kProp: 1.34
   }
 ];
+
+export const propellers = [...rawPropellers].sort((a, b) => {
+  if (a.diameter !== b.diameter) return a.diameter - b.diameter;
+  if (a.pitch !== b.pitch) return a.pitch - b.pitch;
+  if (a.blades !== b.blades) return a.blades - b.blades;
+  return a.name.localeCompare(b.name);
+});
 
 export const recommendedSetups = {
   safe: {
