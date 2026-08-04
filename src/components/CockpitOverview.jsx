@@ -338,30 +338,32 @@ export default function CockpitOverview({
         throttle: 100
       });
 
-      let minDiameterForClass = 12.0;
+      let minDiameterForClass = 11.0;
       if (dynamicAircraft.wingspan >= 85 || (dynamicAircraft.class && dynamicAircraft.class.includes('GIANT SCALE'))) {
-        minDiameterForClass = p.blades === 4 ? 18.0 : (p.blades === 3 ? 20.0 : 20.0);
+        minDiameterForClass = 18.0;
       } else if (dynamicAircraft.wingspan >= 70) {
-        minDiameterForClass = p.blades >= 3 ? 16.0 : 18.0;
+        minDiameterForClass = 14.0;
       } else if (dynamicAircraft.class === '60-CLASS') {
-        minDiameterForClass = p.blades >= 3 ? 14.0 : 15.0;
+        minDiameterForClass = 12.0;
       } else if (dynamicAircraft.class === '50-CLASS') {
-        minDiameterForClass = 13.0;
+        minDiameterForClass = 11.0;
       }
 
       const propRpmLimit = 190000 / p.diameter;
 
+      // Physical & Electrical Safety Bounds
       const isSafe = 
-        p.diameter >= minDiameterForClass &&
         s.amps <= motorToOptimize.maxCurrent &&
         s.amps <= escToUse.maxAmps &&
         s.watts <= motorToOptimize.maxPower &&
         s.rpm <= propRpmLimit &&
-        s.thrustToWeight >= 0.65;
+        s.thrustToWeight >= 0.50;
 
       if (!isSafe) return null;
 
-      const score = (s.pitchSpeed * 10.0) + (s.thrustToWeight * 5.0);
+      // Scale preference bonus for scale-appropriate prop diameters
+      const scaleBonus = p.diameter >= minDiameterForClass ? 50.0 : 0.0;
+      const score = scaleBonus + (s.pitchSpeed * 10.0) + (s.thrustToWeight * 5.0);
       return { prop: p, specs: s, score };
     };
 
