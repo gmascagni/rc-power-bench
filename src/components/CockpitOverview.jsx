@@ -853,6 +853,7 @@ export default function CockpitOverview({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <select 
                 className="retro-select" 
+                style={{ fontSize: '12px', paddingRight: '22px' }} 
                 value={selectedAircraft.id} 
                 onChange={(e) => {
                   const ac = allAircrafts.find(item => item.id === e.target.value);
