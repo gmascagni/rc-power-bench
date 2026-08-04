@@ -339,11 +339,17 @@ export default function CockpitOverview({
         throttle: 100
       });
 
-      // Scale propeller diameter suitability for aircraft class
-      const minDiameterForClass = 
-        dynamicAircraft.class === '60-CLASS' ? (p.blades >= 3 ? 14.0 : 15.0) :
-        dynamicAircraft.class === '50-CLASS' ? 14.0 :
-        dynamicAircraft.class === '1.5M CLASS' ? 13.0 : 12.0;
+      // Scale propeller diameter suitability for aircraft class and wingspan scale
+      let minDiameterForClass = 12.0;
+      if (dynamicAircraft.wingspan >= 85 || (dynamicAircraft.class && dynamicAircraft.class.includes('GIANT SCALE'))) {
+        minDiameterForClass = p.blades === 4 ? 18.0 : (p.blades === 3 ? 20.0 : 22.0);
+      } else if (dynamicAircraft.wingspan >= 70) {
+        minDiameterForClass = p.blades >= 3 ? 16.0 : 18.0;
+      } else if (dynamicAircraft.class === '60-CLASS') {
+        minDiameterForClass = p.blades >= 3 ? 14.0 : 15.0;
+      } else if (dynamicAircraft.class === '50-CLASS') {
+        minDiameterForClass = 13.0;
+      }
 
       const propRpmLimit = 190000 / p.diameter;
       

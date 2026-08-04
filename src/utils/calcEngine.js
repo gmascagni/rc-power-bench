@@ -230,9 +230,13 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
   else if (targetCells === 8) targetKv = 380;
   else targetKv = 220;
 
-  // Target Propeller Diameter & Pitch
+  // Target Propeller Diameter & Pitch based on scale wingspan
   let targetDiameter = Math.round(ws * 0.25);
-  if (w >= 7.0 && targetCells >= 6) {
+  if (ws >= 85) {
+    targetDiameter = Math.max(targetDiameter, 22);
+  } else if (ws >= 70) {
+    targetDiameter = Math.max(targetDiameter, 18);
+  } else if (w >= 7.0 && targetCells >= 6) {
     targetDiameter = Math.max(targetDiameter, 15);
   }
   let targetPitch = Math.round(targetDiameter * 0.55);
@@ -254,9 +258,9 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
   // Best matching ESC in database
   const matchingEsc = escs.find(e => e.maxAmps >= recEscAmps) || escs[0];
 
-  // Best matching propeller in database
-  const minPropDiameter = (w >= 7.0 && targetCells >= 6) ? 15 : 12;
-  const matchingProp = propellers.find(p => p.diameter >= minPropDiameter && Math.abs(p.diameter - targetDiameter) <= 1.5) || propellers[0];
+  // Best matching propeller in database (Enforce scale prop diameter bounds for Giant Scale models)
+  const minPropDiameter = ws >= 85 ? 20 : (ws >= 70 ? 18 : ((w >= 7.0 && targetCells >= 6) ? 15 : 12));
+  const matchingProp = propellers.find(p => p.diameter >= minPropDiameter && Math.abs(p.diameter - targetDiameter) <= 2.5) || propellers.find(p => p.diameter >= minPropDiameter) || propellers[propellers.length - 1];
 
   return {
     minWatts,

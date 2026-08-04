@@ -1712,6 +1712,87 @@ export const propellers = [
     type: "4-Blade Scale",
     blades: 4,
     kProp: 1.25
+  },
+  {
+    id: "apc-20x10e",
+    name: "APC 20 x 10E (GIANT SCALE)",
+    diameter: 20,
+    pitch: 10,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.12
+  },
+  {
+    id: "apc-22x10e",
+    name: "APC 22 x 10E (GIANT SCALE)",
+    diameter: 22,
+    pitch: 10,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.15
+  },
+  {
+    id: "apc-22x12e",
+    name: "APC 22 x 12E (GIANT SCALE)",
+    diameter: 22,
+    pitch: 12,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.18
+  },
+  {
+    id: "apc-24x12e",
+    name: "APC 24 x 12E (GIANT SCALE)",
+    diameter: 24,
+    pitch: 12,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.22
+  },
+  {
+    id: "apc-26x10e",
+    name: "APC 26 x 10E (GIANT SCALE)",
+    diameter: 26,
+    pitch: 10,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.25
+  },
+  {
+    id: "biela-20x12-3",
+    name: "Biela 3-Blade 20 x 12 (GIANT SCALE)",
+    diameter: 20,
+    pitch: 12,
+    type: "3-Blade Scale",
+    blades: 3,
+    kProp: 1.24
+  },
+  {
+    id: "biela-22x12-3",
+    name: "Biela 3-Blade 22 x 12 (GIANT SCALE)",
+    diameter: 22,
+    pitch: 12,
+    type: "3-Blade Scale",
+    blades: 3,
+    kProp: 1.28
+  },
+  {
+    id: "biela-20x10-4",
+    name: "Biela 4-Blade 20 x 10 (GIANT SCALE)",
+    diameter: 20,
+    pitch: 10,
+    type: "4-Blade Scale",
+    blades: 4,
+    kProp: 1.30
+  },
+  {
+    id: "biela-22x10-4",
+    name: "Biela 4-Blade 22 x 10 (GIANT SCALE)",
+    diameter: 22,
+    pitch: 10,
+    type: "4-Blade Scale",
+    blades: 4,
+    kProp: 1.34
   }
 ];
 
