@@ -434,21 +434,67 @@ export default function CockpitOverview({
     throttle: 70
   });
 
-  // Apply Recommended Setup
+  // Apply Recommended Setup (Tailored dynamically to aircraft scale size & manufacturer specs)
   const applySetup = (type) => {
     setActiveSetupType(type);
-    const setup = recommendedSetups[type];
-    if (setup) {
-      const m = motors.find(item => item.id === setup.motorId);
-      const e = escs.find(item => item.id === setup.escId);
-      const b = batteries.find(item => item.id === setup.batteryId);
-      const p = propellers.find(item => item.id === setup.propellerId);
-      if (m) setSelectedMotor(m);
-      if (e) setSelectedEsc(e);
-      if (b) setSelectedBattery(b);
-      if (p) setSelectedPropeller(p);
-      setThrottle(100); // Set default full bench load
+    const ws = dynamicAircraft.wingspan || 63;
+    const isGiant = ws >= 80 || (dynamicAircraft.class && dynamicAircraft.class.includes('GIANT SCALE'));
+    const isTwin = (dynamicAircraft.enginesCount || 1) > 1;
+
+    let targetPropId = null;
+    let targetMotorId = null;
+    let targetBatteryId = null;
+    let targetEscId = null;
+
+    if (type === 'scale' && dynamicAircraft.stockSetup) {
+      targetMotorId = dynamicAircraft.stockSetup.motorId;
+      targetBatteryId = dynamicAircraft.stockSetup.batteryId;
+      targetPropId = dynamicAircraft.stockSetup.propellerId;
+      targetEscId = dynamicAircraft.stockSetup.escId;
+    } else if (isGiant) {
+      if (type === 'safe') {
+        targetMotorId = "badass-4530-360";
+        targetBatteryId = "10s-5000mah-45c";
+        targetEscId = "hobbywing-120a-hv";
+        targetPropId = isTwin ? "apc-20x10e" : "apc-22x10e";
+      } else if (type === 'aggressive' || type === 'scale') {
+        targetMotorId = "badass-4530-440";
+        targetBatteryId = "12s-5000mah-45c";
+        targetEscId = "hobbywing-120a-hv";
+        targetPropId = isTwin ? "biela-20x12-3" : "apc-24x12e";
+      } else if (type === 'extreme') {
+        targetMotorId = "dualsky-6360";
+        targetBatteryId = "12s-5000mah-60c";
+        targetEscId = "castle-edge-160a";
+        targetPropId = "apc-26x10e";
+      }
+    } else {
+      const setup = recommendedSetups[type];
+      if (setup) {
+        targetMotorId = setup.motorId;
+        targetBatteryId = setup.batteryId;
+        targetEscId = setup.escId;
+        targetPropId = setup.propellerId;
+      }
     }
+
+    if (targetMotorId) {
+      const m = motors.find(item => item.id === targetMotorId);
+      if (m) setSelectedMotor(m);
+    }
+    if (targetEscId) {
+      const e = escs.find(item => item.id === targetEscId);
+      if (e) setSelectedEsc(e);
+    }
+    if (targetBatteryId) {
+      const b = batteries.find(item => item.id === targetBatteryId);
+      if (b) setSelectedBattery(b);
+    }
+    if (targetPropId) {
+      const p = propellers.find(item => item.id === targetPropId);
+      if (p) setSelectedPropeller(p);
+    }
+    setThrottle(100);
   };
 
   // Run calculation simulation (Bench Test)
@@ -810,7 +856,19 @@ export default function CockpitOverview({
                 value={selectedAircraft.id} 
                 onChange={(e) => {
                   const ac = allAircrafts.find(item => item.id === e.target.value);
-                  if (ac) setSelectedAircraft(ac);
+                  if (ac) {
+                    setSelectedAircraft(ac);
+                    if (ac.stockSetup) {
+                      const m = motors.find(item => item.id === ac.stockSetup.motorId);
+                      const eEsc = escs.find(item => item.id === ac.stockSetup.escId);
+                      const b = batteries.find(item => item.id === ac.stockSetup.batteryId);
+                      const p = propellers.find(item => item.id === ac.stockSetup.propellerId);
+                      if (m) setSelectedMotor(m);
+                      if (eEsc) setSelectedEsc(eEsc);
+                      if (b) setSelectedBattery(b);
+                      if (p) setSelectedPropeller(p);
+                    }
+                  }
                 }}
               >
                 {allAircrafts.map(ac => (

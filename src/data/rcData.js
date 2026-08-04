@@ -454,7 +454,7 @@ export const aircrafts = [
     description: "Nick Ziroli Giant Scale B-25 Mitchell. World-famous 101\" twin bomber design built from Ziroli plans or National Balsa / Precision Kit Cutters short kits.",
     manualUrl: "https://ziroliplans.com/b-25-mitchell-plan.html",
     enginesCount: 2,
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "biela-20x12-3", escId: "hobbywing-120a-hv" }
   },
   {
     id: "ziroli-p51",
@@ -472,7 +472,7 @@ export const aircrafts = [
     suggestedCg: "5.25 in (133 mm)",
     description: "Nick Ziroli 98\" P-51D Mustang. Competition giant scale warbird featuring unmatched scale fidelity, available as laser-cut short kit via Dark Horse Kits & National Balsa.",
     manualUrl: "https://ziroliplans.com/p-51d-mustang-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "ziroli-p47",
@@ -490,7 +490,7 @@ export const aircrafts = [
     suggestedCg: "5.75 in (146 mm)",
     description: "Nick Ziroli 92\" P-47 Thunderbolt. Iconic heavy-duty razorback or bubble canopy giant scale balsa build.",
     manualUrl: "https://ziroliplans.com/p-47-thunderbolt-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "ziroli-corsair",
@@ -508,7 +508,7 @@ export const aircrafts = [
     suggestedCg: "5.00 in (127 mm)",
     description: "Ziroli 93\" F4U Corsair. Magnificent inverted gull wing design, supported by precision balsa laser short kits.",
     manualUrl: "https://ziroliplans.com/f4u-1-corsair-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "ziroli-hellcat",
@@ -526,7 +526,7 @@ export const aircrafts = [
     suggestedCg: "5.50 in (140 mm)",
     description: "Ziroli 95\" F6F Hellcat. Giant scale carrier warbird with rotating retracts, laser cut by RC-Builder Workshop & Kit Cutters.",
     manualUrl: "https://ziroliplans.com/f6f-hellcat-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "legend-b25",
@@ -545,7 +545,7 @@ export const aircrafts = [
     description: "Legend Hobby 95\" B-25 Mitchell ARF. Premium multi-engine scale warbird with aluminum spinner hubs, functional flaps, and twin radial cowls.",
     manualUrl: "https://www.legendhobby.com",
     enginesCount: 2,
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "legend-skyraider",
@@ -563,7 +563,7 @@ export const aircrafts = [
     suggestedCg: "4.85 in (123 mm)",
     description: "Legend Hobby 86\" Douglas A-1 Skyraider. Heavy attack aircraft featuring ordnance hardpoints and high payload capacity.",
     manualUrl: "https://www.legendhobby.com",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "legend-p47-snafu",
@@ -581,7 +581,7 @@ export const aircrafts = [
     suggestedCg: "4.50 in (114 mm)",
     description: "Legend Hobby 81\" P-47D Thunderbolt ARF. Beautifully covered scale warbird with factory-painted camouflage.",
     manualUrl: "https://www.legendhobby.com",
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "natbalsa-b25",
@@ -600,7 +600,7 @@ export const aircrafts = [
     description: "National Balsa precision laser-cut short kit for 81.5\" B-25 Mitchell. Includes contest-grade balsa formers, ribs, and twin engine nacelle wood.",
     manualUrl: "https://www.nationalbalsa.com",
     enginesCount: 2,
-    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-flyfun-120a" }
   },
   {
     id: "natbalsa-p40",
@@ -618,7 +618,7 @@ export const aircrafts = [
     suggestedCg: "5.00 in (127 mm)",
     description: "National Balsa laser-cut short kit for 86\" Curtiss P-40 Warhawk.",
     manualUrl: "https://www.nationalbalsa.com",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "darkhorse-p51",
@@ -636,7 +636,7 @@ export const aircrafts = [
     suggestedCg: "4.75 in (120 mm)",
     description: "Dark Horse Kits razorback P-51B Mustang laser short kit. High-precision interlocking CAD balsa cutouts for custom scale builders.",
     manualUrl: null,
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "darkhorse-bearcat",
@@ -654,7 +654,7 @@ export const aircrafts = [
     suggestedCg: "4.85 in (123 mm)",
     description: "Dark Horse Kits 86\" Grumman F8F Bearcat. Compact giant scale airframe built for high speed passes.",
     manualUrl: null,
-    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "rcbuilder-mosquito",
@@ -673,7 +673,7 @@ export const aircrafts = [
     description: "RC-Builder Workshop de Havilland Mosquito twin-engine wooden wonder scale kit.",
     manualUrl: null,
     enginesCount: 2,
-    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-flyfun-120a" }
   },
   {
     id: "seagull-b25-95",
@@ -692,7 +692,7 @@ export const aircrafts = [
     description: "Seagull Models 95\" B-25 Mitchell Twin ARF. Large scale balsa ARF finished in authentic Doolittle Raid scheme with twin electric nacelles.",
     manualUrl: "https://www.legendhobby.com",
     enginesCount: 2,
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "seagull-mosquito-80",
@@ -711,7 +711,7 @@ export const aircrafts = [
     description: "Seagull Models 80\" DH-98 Mosquito Twin ARF. Outstanding multi-engine scale warbird with mechanical or electric retract options.",
     manualUrl: "https://www.legendhobby.com",
     enginesCount: 2,
-    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "dualsky-5060", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-flyfun-120a" }
   }
 ];
 
