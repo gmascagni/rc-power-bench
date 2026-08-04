@@ -14,7 +14,7 @@ export default function AircraftDatabase({
   customFleet = [],
   setCustomFleet = () => {}
 }) {
-  const allAircrafts = [...aircrafts, ...customFleet];
+  const allAircrafts = [...aircrafts, ...customFleet].sort((a, b) => formatAircraftTitle(a).localeCompare(formatAircraftTitle(b)));
 
   // Inline Custom Aircraft Card Form State
   const [newBrand, setNewBrand] = useState("Custom Builder");

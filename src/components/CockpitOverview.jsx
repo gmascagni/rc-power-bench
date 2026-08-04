@@ -200,7 +200,7 @@ export default function CockpitOverview({
   const [wizardTargetCells, setWizardTargetCells] = useState(6);
   const [wizardSearchQuery, setWizardSearchQuery] = useState("");
 
-  const allAircrafts = [...aircrafts, ...customFleet];
+  const allAircrafts = [...aircrafts, ...customFleet].sort((a, b) => formatAircraftTitle(a).localeCompare(formatAircraftTitle(b)));
   const [adjustedEmptyWeight, setAdjustedEmptyWeight] = useState(null);
 
   // Reset custom weight adjustments on aircraft change
