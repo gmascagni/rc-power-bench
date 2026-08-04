@@ -312,37 +312,35 @@ export default function CockpitOverview({
     }
   };
 
-  // Auto-Optimizer: Find the ideal safe propeller for selected motor on user's selected battery
+  const [autoTuneNotice, setAutoTuneNotice] = useState(null);
+
+  // Auto-Optimizer: Find the ideal safe propeller for selected motor on user's selected battery.
+  // If no safe prop exists on current battery (e.g. 360KV on 6S), dynamically search higher/lower voltage batteries!
   const getOptimalPropForMotorAndBattery = (motorToOptimize, activeBattery, activeEsc) => {
     if (!motorToOptimize || !activeBattery) return null;
 
-    let bestScore = -1;
-    let bestProp = null;
-
-    // Check if battery cell count is within motor supported limits
-    const maxMotorCells = getMaxCells(motorToOptimize.voltageSupported);
-    const minMotorCells = getMinCells(motorToOptimize.voltageSupported);
-
-    if (activeBattery.cells > maxMotorCells || activeBattery.cells < minMotorCells) {
-      return { prop: null, error: `Selected battery (${activeBattery.cells}S) is outside motor's supported voltage range (${motorToOptimize.voltageSupported}).` };
-    }
-
     const escToUse = activeEsc || escs[0];
 
-    for (const p of propellers) {
+    const testSetup = (b, p) => {
+      const maxMotorCells = getMaxCells(motorToOptimize.voltageSupported);
+      const minMotorCells = getMinCells(motorToOptimize.voltageSupported);
+
+      if (b.cells > maxMotorCells || b.cells < minMotorCells) {
+        return null;
+      }
+
       const s = calculateSpecs({
         aircraft: dynamicAircraft,
         motor: motorToOptimize,
         esc: escToUse,
-        battery: activeBattery,
+        battery: b,
         propeller: p,
         throttle: 100
       });
 
-      // Scale propeller diameter suitability for aircraft class and wingspan scale
       let minDiameterForClass = 12.0;
       if (dynamicAircraft.wingspan >= 85 || (dynamicAircraft.class && dynamicAircraft.class.includes('GIANT SCALE'))) {
-        minDiameterForClass = p.blades === 4 ? 18.0 : (p.blades === 3 ? 20.0 : 22.0);
+        minDiameterForClass = p.blades === 4 ? 18.0 : (p.blades === 3 ? 20.0 : 20.0);
       } else if (dynamicAircraft.wingspan >= 70) {
         minDiameterForClass = p.blades >= 3 ? 16.0 : 18.0;
       } else if (dynamicAircraft.class === '60-CLASS') {
@@ -352,35 +350,78 @@ export default function CockpitOverview({
       }
 
       const propRpmLimit = 190000 / p.diameter;
-      
-      // Strict 100% continuous safety bounds for motor and ESC
+
       const isSafe = 
         p.diameter >= minDiameterForClass &&
         s.amps <= motorToOptimize.maxCurrent &&
         s.amps <= escToUse.maxAmps &&
         s.watts <= motorToOptimize.maxPower &&
         s.rpm <= propRpmLimit &&
-        s.thrustToWeight >= 0.70;
+        s.thrustToWeight >= 0.65;
 
-      if (isSafe) {
-        // Score strictly optimized for MAX PITCH SPEED within safe motor thermal limits
-        const score = (s.pitchSpeed * 10.0) + (s.thrustToWeight * 5.0);
-        if (score > bestScore) {
-          bestScore = score;
-          bestProp = p;
+      if (!isSafe) return null;
+
+      const score = (s.pitchSpeed * 10.0) + (s.thrustToWeight * 5.0);
+      return { prop: p, specs: s, score };
+    };
+
+    // 1. Try active battery first
+    let bestCurrentScore = -1;
+    let bestCurrentProp = null;
+
+    for (const p of propellers) {
+      const res = testSetup(activeBattery, p);
+      if (res && res.score > bestCurrentScore) {
+        bestCurrentScore = res.score;
+        bestCurrentProp = res.prop;
+      }
+    }
+
+    if (bestCurrentProp) {
+      return { prop: bestCurrentProp, recommendedBattery: null, notice: null };
+    }
+
+    // 2. If no prop works on active battery, search across ALL supported batteries (e.g. 8S, 10S, 12S)!
+    let bestOverallScore = -1;
+    let bestOverallProp = null;
+    let bestOverallBattery = null;
+
+    for (const b of batteries) {
+      for (const p of propellers) {
+        const res = testSetup(b, p);
+        if (res && res.score > bestOverallScore) {
+          bestOverallScore = res.score;
+          bestOverallProp = res.prop;
+          bestOverallBattery = b;
         }
       }
     }
 
-    return { prop: bestProp, error: bestProp ? null : `No safe propeller found for ${motorToOptimize.name} on ${activeBattery.cells}S without overloading motor continuous current.` };
+    if (bestOverallProp && bestOverallBattery) {
+      return {
+        prop: bestOverallProp,
+        recommendedBattery: bestOverallBattery,
+        notice: `⚡ VOLTAGE OPTIMIZED: ${motorToOptimize.name} requires ${bestOverallBattery.cells}S voltage. Auto-switched to ${bestOverallBattery.name} with ${bestOverallProp.name}!`
+      };
+    }
+
+    return { prop: null, recommendedBattery: null, error: `No safe propeller found for ${motorToOptimize.name}. Check motor KV rating or ESC / Battery limits.` };
   };
 
   const handleAutoTuneForMotor = () => {
     const result = getOptimalPropForMotorAndBattery(selectedMotor, selectedBattery, selectedEsc);
     if (result && result.prop) {
+      if (result.recommendedBattery) {
+        setSelectedBattery(result.recommendedBattery);
+      }
       setSelectedPropeller(result.prop);
       setThrottle(100);
       setActiveSetupType("motor-tuned");
+      if (result.notice) {
+        setAutoTuneNotice(result.notice);
+      } else {
+        setAutoTuneNotice(null);
+      }
     } else if (result && result.error) {
       alert(result.error);
     }
@@ -1066,6 +1107,22 @@ export default function CockpitOverview({
                   </div>
                   <div className={`status-lamp ${activeSetupType === 'motor-tuned' ? 'green' : 'green off'}`} />
                 </button>
+                {autoTuneNotice && (
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '8px 10px',
+                    backgroundColor: 'rgba(255, 179, 71, 0.15)',
+                    border: '1px solid #ffb347',
+                    borderRadius: '4px',
+                    color: '#ffca36',
+                    fontSize: '11px',
+                    lineHeight: '1.4',
+                    textAlign: 'left',
+                    boxShadow: '0 0 8px rgba(255, 179, 71, 0.3)'
+                  }}>
+                    {autoTuneNotice}
+                  </div>
+                )}
               </div>
             </div>
 
