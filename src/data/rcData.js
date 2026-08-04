@@ -180,7 +180,7 @@ export const aircrafts = [
     suggestedCg: "5.25 in (134 mm)",
     description: "Grumman F6F Hellcat. Rugged carrier fighter that dominated Pacific skies. Finished in deep midnight blue sea camo.",
     manualUrl: "https://www.manualslib.com/manual/1000624/Hangar-9-F6f-Hellcat-60.html",
-    stockSetup: { motorId: "badass-4530-730", batteryId: "6s-5000mah-45c", propellerId: "apc-13x10e", escId: "castle-talon90" }
+    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-flyfun-120a" }
   },
   {
     id: "hangar9-p40b-50",
