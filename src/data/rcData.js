@@ -1623,6 +1623,24 @@ export const propellers = [
     kProp: 1.15
   },
   {
+    id: "apc-14x6e",
+    name: "APC 14 x 6E",
+    diameter: 14,
+    pitch: 6,
+    type: "Electric",
+    blades: 2,
+    kProp: 0.94
+  },
+  {
+    id: "apc-14x8e",
+    name: "APC 14 x 8E",
+    diameter: 14,
+    pitch: 8,
+    type: "Electric",
+    blades: 2,
+    kProp: 0.98
+  },
+  {
     id: "apc-14x10e",
     name: "APC 14 x 10E",
     diameter: 14,
