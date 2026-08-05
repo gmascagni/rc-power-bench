@@ -69,22 +69,23 @@ export function calculateSpecs({ aircraft, motor, esc, battery, propeller, throt
 
   // 1. Calculate Full Throttle Current Load Factor based on Propeller Size, Motor KV, Battery Cells, Blades count, IR, and Static Prop Stall
   const blades = propeller.blades || 2;
-  const bladesLoadMultiplier = blades === 3 ? 1.34 : blades === 4 ? 1.62 : 1.0;
+  const bladesLoadMultiplier = blades === 3 ? 1.32 : blades === 4 ? 1.58 : 1.0;
   
-  const dFactor = Math.pow(propeller.diameter / 15.0, 4.2);
-  const pFactor = Math.pow(propeller.pitch / 10.0, 1.35);
+  // Propeller absorbed power scales with D^4 and Pitch.
+  const dFactor = Math.pow(propeller.diameter / 15.0, 4.0);
+  const pFactor = propeller.pitch / 10.0;
   
-  // Power scales directly with RPM^3. High-KV outrunners on 6S experience steep current draw scaling
+  // Power scales with RPM^3. Aerodynamic torque Q scales with RPM^2, so Motor Current I = Q/Kt scales with V^2 and KV^3.
   const kvFactor = Math.pow(motor.kv / 600.0, 3.0);
-  const cellFactor = Math.pow(battery.cells / 6.0, 3.0);
+  const cellFactor = Math.pow(battery.cells / 6.0, 2.0);
   const kProp = propeller.kProp || 1.0;
 
   // Static Propeller Stall Factor (High pitch-to-diameter props e.g. 13x10 pitch ratio 0.77 stall on static bench tests drawing heavy torque current)
   const pitchRatio = propeller.pitch / propeller.diameter;
-  const staticStallMultiplier = pitchRatio > 0.65 ? (1.0 + 0.38 * (pitchRatio - 0.65)) : 1.0;
+  const staticStallMultiplier = pitchRatio > 0.65 ? (1.0 + 0.35 * (pitchRatio - 0.65)) : 1.0;
 
-  // Low Internal Resistance (Ri) Boost: Motors with ultra-low Ri (e.g. BadAss 4530 @ 0.006Ω) pass high current with minimal copper voltage drop
-  const irFactor = motor.internalResistance ? Math.min(Math.max(0.016 / motor.internalResistance, 0.85), 1.35) : 1.0;
+  // Low Internal Resistance (Ri) Boost: Motors with ultra-low Ri pass high current with minimal copper voltage drop
+  const irFactor = motor.internalResistance ? Math.min(Math.max(0.016 / motor.internalResistance, 0.85), 1.30) : 1.0;
 
   const I_full = 78.6 * dFactor * pFactor * kvFactor * cellFactor * kProp * bladesLoadMultiplier * staticStallMultiplier * irFactor;
 

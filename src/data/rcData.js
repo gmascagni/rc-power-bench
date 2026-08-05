@@ -1135,6 +1135,34 @@ const rawMotors = [
     noLoadCurrent: 1.8,
     voltageSupported: "3S - 4S LiPo (11.1V - 14.8V)",
     type: "Brushless Outrunner"
+  },
+  {
+    id: "badass-5345-210",
+    name: "BADASS 5345 210KV (50cc-70cc CLASS)",
+    model: "BA-5345-210",
+    brand: "BadAss",
+    kv: 210,
+    weight: 980,
+    maxCurrent: 140,
+    maxPower: 6500,
+    internalResistance: 0.012,
+    noLoadCurrent: 1.6,
+    voltageSupported: "10S - 14S LiPo (37.0V - 51.8V)",
+    type: "Brushless Outrunner"
+  },
+  {
+    id: "dualsky-ga6000-180",
+    name: "DUALSKY GA6000.8 180KV (50cc-60cc GIANT)",
+    model: "GA6000.8-180KV",
+    brand: "Dualsky",
+    kv: 180,
+    weight: 1020,
+    maxCurrent: 130,
+    maxPower: 6000,
+    internalResistance: 0.014,
+    noLoadCurrent: 1.4,
+    voltageSupported: "10S - 12S LiPo (37.0V - 44.4V)",
+    type: "Brushless Outrunner"
   }
 ];
 

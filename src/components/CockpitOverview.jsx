@@ -496,20 +496,25 @@ export default function CockpitOverview({
       targetEscId = dynamicAircraft.stockSetup.escId;
     } else if (isGiant) {
       if (type === 'safe') {
-        targetMotorId = "badass-4530-360";
+        targetMotorId = "badass-4530-440";
+        targetBatteryId = "8s-5000mah-45c";
+        targetEscId = "hobbywing-120a-hv";
+        targetPropId = isTwin ? "apc-20x10e" : "apc-20x10e";
+      } else if (type === 'scale') {
+        targetMotorId = "badass-4530-440";
         targetBatteryId = "10s-5000mah-45c";
         targetEscId = "hobbywing-120a-hv";
-        targetPropId = isTwin ? "apc-20x10e" : "apc-22x10e";
-      } else if (type === 'aggressive' || type === 'scale') {
-        targetMotorId = "badass-4530-440";
+        targetPropId = isTwin ? "biela-20x12-3" : "apc-22x10e";
+      } else if (type === 'aggressive') {
+        targetMotorId = "badass-4530-360";
         targetBatteryId = "12s-5000mah-45c";
         targetEscId = "hobbywing-120a-hv";
-        targetPropId = isTwin ? "biela-20x12-3" : "apc-24x12e";
+        targetPropId = isTwin ? "biela-20x12-3" : "apc-22x12e";
       } else if (type === 'extreme') {
-        targetMotorId = "dualsky-6360";
+        targetMotorId = "badass-5345-210";
         targetBatteryId = "12s-5000mah-60c";
         targetEscId = "castle-edge-160a";
-        targetPropId = "apc-26x10e";
+        targetPropId = "apc-24x12e";
       }
     } else {
       const setup = recommendedSetups[type];
