@@ -1602,12 +1602,12 @@ export default function CockpitOverview({
                   <table className="retro-table" style={{ fontSize: '10px' }}>
                     <tbody>
                       <tr>
-                        <td className="label">Pitch Speed (Est)</td>
-                        <td className="val" style={{ color: 'var(--color-amber)' }}>{specs.pitchSpeed} MPH</td>
+                        <td className="label">Static Thrust</td>
+                        <td className="val" style={{ color: '#50e3c2', fontWeight: 'bold' }}>{specs.thrust} lbs ({ (specs.thrust * 0.45359).toFixed(2) } kg)</td>
                       </tr>
                       <tr>
                         <td className="label">Thrust to Weight</td>
-                        <td className="val" style={{ color: '#ff8888', fontWeight: 'bold' }}>{specs.thrustToWeight} : 1</td>
+                        <td className="val" style={{ color: '#ff8888', fontWeight: 'bold' }}>{specs.thrustToWeight} : 1 ({dynamicAircraft.flyingWeight.toFixed(2)} lb All-Up)</td>
                       </tr>
                       <tr>
                         <td className="label">Vertical Performance</td>

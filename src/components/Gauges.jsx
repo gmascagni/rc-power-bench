@@ -73,17 +73,32 @@ export function CircularGauge({
   }
 
   // Determine current active glow color based on threshold
+  const isRatioGauge = unit === "RATIO" || label.toUpperCase().includes("THRUST");
   let glowColor = "var(--color-amber-glow)";
   let textColor = "var(--color-amber)";
-  if (clampedValue >= (max * (dangerThreshold / 100))) {
-    glowColor = "var(--color-red-glow)";
-    textColor = "var(--color-red)";
-  } else if (clampedValue >= (max * (warningThreshold / 100))) {
-    glowColor = "var(--color-amber-glow)";
-    textColor = "var(--color-amber)";
+
+  if (isRatioGauge) {
+    if (clampedValue >= 0.95) {
+      textColor = "var(--color-green)";
+      glowColor = "var(--color-green-glow)";
+    } else if (clampedValue >= 0.70) {
+      textColor = "var(--color-amber)";
+      glowColor = "var(--color-amber-glow)";
+    } else {
+      textColor = "var(--color-red)";
+      glowColor = "var(--color-red-glow)";
+    }
   } else {
-    textColor = "var(--color-green)";
-    glowColor = "var(--color-green-glow)";
+    if (clampedValue >= (max * (dangerThreshold / 100))) {
+      glowColor = "var(--color-red-glow)";
+      textColor = "var(--color-red)";
+    } else if (clampedValue >= (max * (warningThreshold / 100))) {
+      glowColor = "var(--color-amber-glow)";
+      textColor = "var(--color-amber)";
+    } else {
+      textColor = "var(--color-green)";
+      glowColor = "var(--color-green-glow)";
+    }
   }
 
   // Dial scale labels matching mockup exactly

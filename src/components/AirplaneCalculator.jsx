@@ -81,6 +81,20 @@ export default function AirplaneCalculator({
     propellers
   });
 
+  // Calculated thrust and T:W for matching components
+  const calculatedSpecs = (recs.matchingMotor && recs.matchingBattery && recs.matchingProp && recs.matchingEsc) 
+    ? calculateSpecs({
+        aircraft: { flyingWeight: weightLbs, enginesCount },
+        motor: recs.matchingMotor,
+        esc: recs.matchingEsc,
+        battery: recs.matchingBattery,
+        propeller: recs.matchingProp,
+        throttle: 100
+      })
+    : { thrust: (weightLbs * (flightStyle === "aggressive" ? 1.4 : 1.05)).toFixed(1), thrustToWeight: (flightStyle === "aggressive" ? 1.40 : 1.05).toFixed(2) };
+
+  const twColor = calculatedSpecs.thrustToWeight >= 0.95 ? 'var(--color-green)' : calculatedSpecs.thrustToWeight >= 0.70 ? 'var(--color-amber)' : 'var(--color-red)';
+
   const handleAddAndLoad = () => {
     const newPlane = {
       id: `custom-plane-${Date.now()}`,
@@ -253,10 +267,16 @@ export default function AirplaneCalculator({
                 </div>
 
                 <div style={{ padding: '8px', background: '#1a2027', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
-                  <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>TOTAL POWER REQUIREMENT</div>
-                  <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', fontFamily: 'var(--font-mono)' }}>{totalMinWatts}W - {totalMaxWatts}W</div>
+                  <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>ESTIMATED STATIC THRUST</div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#50e3c2', fontFamily: 'var(--font-mono)' }}>{calculatedSpecs.thrust} lbs</div>
+                  <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.6)' }}>{(calculatedSpecs.thrust * 0.45359).toFixed(2)} kg Static Lift {enginesCount > 1 ? `(${enginesCount}x Motors)` : ''}</div>
+                </div>
+
+                <div style={{ padding: '8px', background: '#1a2027', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
+                  <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>THRUST-TO-WEIGHT (T:W)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 'bold', color: twColor, fontFamily: 'var(--font-mono)' }}>{calculatedSpecs.thrustToWeight} : 1</div>
                   <div style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.6)' }}>
-                    {enginesCount > 1 ? `${enginesCount}x Motors @ ${perMotorMinWatts}W-${perMotorMaxWatts}W ea` : `${wattsPerLbMin}W - ${wattsPerLbMax}W per lb`}
+                    {calculatedSpecs.thrustToWeight >= 1.2 ? "★★★★★ Scale Vertical" : calculatedSpecs.thrustToWeight >= 0.95 ? "★★★★☆ Strong Climb" : "★★★☆☆ Scale Flight"}
                   </div>
                 </div>
               </div>

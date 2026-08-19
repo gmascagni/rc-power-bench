@@ -9,8 +9,17 @@ export default function ValidatorChecks({
   selectedBattery,
   selectedPropeller
 }) {
+  const batteryWeightLbs = (selectedBattery?.weight || 0) / 453.59;
+  const activeEmptyWeight = selectedAircraft?.emptyWeight || selectedAircraft?.flyingWeight || 8.5;
+  const totalFlyingWeight = activeEmptyWeight + batteryWeightLbs;
+  const dynamicAircraft = {
+    ...selectedAircraft,
+    emptyWeight: activeEmptyWeight,
+    flyingWeight: totalFlyingWeight
+  };
+
   const specs = calculateSpecs({
-    aircraft: selectedAircraft,
+    aircraft: dynamicAircraft,
     motor: selectedMotor,
     esc: selectedEsc,
     battery: selectedBattery,
@@ -79,7 +88,7 @@ export default function ValidatorChecks({
   const thrustExcellent = specs.thrustToWeight >= 0.95;
   checks.push({
     title: "THRUST-TO-WEIGHT FLIGHT CAPABILITY",
-    description: `Thrust-to-weight ratio: ${specs.thrustToWeight} : 1 (${specs.thrust} lbs thrust vs ${selectedAircraft.flyingWeight} lbs flying weight)`,
+    description: `Thrust-to-weight ratio: ${specs.thrustToWeight} : 1 (${specs.thrust} lbs thrust vs ${totalFlyingWeight.toFixed(2)} lbs flying weight [airframe: ${activeEmptyWeight.toFixed(2)} lbs + battery: ${batteryWeightLbs.toFixed(2)} lbs])`,
     status: thrustExcellent ? 'pass' : thrustSufficient ? 'warning' : 'fail',
     remedy: thrustExcellent ? null : thrustSufficient ? "Flyable, scale performance. Takeoff run will require length." : "Insufficient power. The warbird may struggle to fly or stall on climb. Increase battery voltage or propeller size."
   });
