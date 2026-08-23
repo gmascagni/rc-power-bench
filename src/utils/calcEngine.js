@@ -221,37 +221,40 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
   const scaleWatts = Math.round(w * 150);
   const maxWatts = Math.round(w * 200);
 
-  // Target battery cell count
+  // Target battery cell count strictly bounded by wingspan scale & airframe payload limits
   let targetCells = 6;
-  if (w < 4.0) targetCells = 3;
-  else if (w < 5.5) targetCells = 4;
-  else if (w < 7.5) targetCells = 5;
-  else if (w < 11.0) targetCells = 6;
-  else if (w < 18.0) targetCells = 8;
-  else targetCells = 12;
-
-  // RULE: For airplanes smaller than 1.6 meters (<= 65" wingspan / 1.5m foam warbirds), cap motor size & battery voltage to 8S MAX
-  if (ws <= 65) {
-    targetCells = Math.min(targetCells, 8);
+  if (ws <= 52) {
+    targetCells = w <= 3.5 ? 3 : 4; // 1.2m Foamie max 4S!
+  } else if (ws <= 60) {
+    targetCells = w <= 5.5 ? 4 : 6; // 1.5m Foamie max 6S!
+  } else if (ws <= 68) {
+    targetCells = 6; // .60-Class Balsa max 6S/8S!
+  } else if (ws <= 79) {
+    targetCells = w >= 14.0 ? 10 : 8; // Mid-scale twin / large balsa
+  } else {
+    targetCells = w >= 26.0 ? 12 : 10; // Giant Scale 10S/12S
   }
 
-  // Target Motor KV
+  // Target Motor KV tuned for voltage efficiency
   let targetKv = 500;
   if (targetCells === 3) targetKv = 950;
-  else if (targetCells === 4) targetKv = 800;
+  else if (targetCells === 4) targetKv = 850;
   else if (targetCells === 5) targetKv = 600;
   else if (targetCells === 6) targetKv = 500;
   else if (targetCells === 8) targetKv = 380;
-  else targetKv = 220;
+  else if (targetCells === 10) targetKv = 360;
+  else targetKv = 210; // 12S Heavy Giant Scale
 
   // Target Propeller Diameter & Pitch based on scale wingspan
-  let targetDiameter = Math.round(ws * 0.25);
+  let targetDiameter = Math.round(ws * 0.24);
   if (ws >= 85) {
     targetDiameter = Math.max(targetDiameter, 22);
   } else if (ws >= 70) {
     targetDiameter = Math.max(targetDiameter, 18);
-  } else if (w >= 7.0 && targetCells >= 6) {
+  } else if (ws >= 60) {
     targetDiameter = Math.max(targetDiameter, 15);
+  } else if (ws <= 52) {
+    targetDiameter = Math.min(targetDiameter, 13);
   }
   let targetPitch = Math.round(targetDiameter * 0.55);
 
@@ -263,8 +266,11 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
   const matchingMotor = motors.find(m => {
     const maxC = getMaxCells(m.voltageSupported);
     const minC = getMinCells(m.voltageSupported);
-    return targetCells >= minC && targetCells <= maxC && m.maxPower >= minWatts && Math.abs(m.kv - targetKv) <= 180;
-  }) || motors.find(m => m.maxPower >= minWatts) || motors[0];
+    return targetCells >= minC && targetCells <= maxC && Math.abs(m.kv - targetKv) <= 120;
+  }) || motors.find(m => {
+    const maxC = getMaxCells(m.voltageSupported);
+    return maxC >= targetCells && Math.abs(m.kv - targetKv) <= 180;
+  }) || motors[0];
 
   // Best matching battery in database
   const matchingBattery = batteries.find(b => b.cells === targetCells) || batteries[0];
@@ -273,8 +279,8 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
   const matchingEsc = escs.find(e => e.maxAmps >= recEscAmps) || escs[0];
 
   // Best matching propeller in database (Enforce scale prop diameter bounds for Giant Scale models)
-  const minPropDiameter = ws >= 85 ? 20 : (ws >= 70 ? 18 : ((w >= 7.0 && targetCells >= 6) ? 15 : 12));
-  const matchingProp = propellers.find(p => p.diameter >= minPropDiameter && Math.abs(p.diameter - targetDiameter) <= 2.5) || propellers.find(p => p.diameter >= minPropDiameter) || propellers[propellers.length - 1];
+  const minPropDiameter = ws >= 85 ? 20 : (ws >= 70 ? 18 : (ws >= 60 ? 14 : 11));
+  const matchingProp = propellers.find(p => p.diameter >= minPropDiameter && Math.abs(p.diameter - targetDiameter) <= 2.0) || propellers.find(p => p.diameter >= minPropDiameter) || propellers[propellers.length - 1];
 
   return {
     minWatts,

@@ -494,7 +494,49 @@ export default function CockpitOverview({
       targetBatteryId = dynamicAircraft.stockSetup.batteryId;
       targetPropId = dynamicAircraft.stockSetup.propellerId;
       targetEscId = dynamicAircraft.stockSetup.escId;
+    } else if (ws <= 52) {
+      // Sub-1.3m / 1.2m Foamies (Capped to 4S MAX for wing loading realism)
+      if (type === 'safe') {
+        targetMotorId = "spektrum-15-850";
+        targetBatteryId = "3s-2200mah-30c";
+        targetEscId = "avian-70a";
+        targetPropId = "eflite-12x8-3";
+      } else if (type === 'scale') {
+        targetMotorId = "spektrum-15-850";
+        targetBatteryId = "4s-2200mah-45c";
+        targetEscId = "avian-70a";
+        targetPropId = "eflite-12x8-3";
+      } else if (type === 'aggressive' || type === 'extreme') {
+        targetMotorId = "spektrum-15-850";
+        targetBatteryId = "4s-3200mah-50c";
+        targetEscId = "avian-70a";
+        targetPropId = type === 'extreme' ? "apc-13x8e" : "eflite-12x8-3";
+      }
+    } else if (ws <= 60) {
+      // 1.5m Foamies (Capped to 6S MAX for wing loading realism)
+      if (type === 'safe') {
+        targetMotorId = "spektrum-4260-480";
+        targetBatteryId = "4s-5000mah-30c";
+        targetEscId = "avian-70a";
+        targetPropId = "eflite-15x8-3";
+      } else if (type === 'scale') {
+        targetMotorId = "spektrum-4260-480";
+        targetBatteryId = "6s-5000mah-45c";
+        targetEscId = "avian-70a";
+        targetPropId = "eflite-15x8-3";
+      } else if (type === 'aggressive') {
+        targetMotorId = "spektrum-4260-480";
+        targetBatteryId = "6s-5000mah-45c";
+        targetEscId = "avian-70a";
+        targetPropId = "eflite-15x8-4";
+      } else if (type === 'extreme') {
+        targetMotorId = "spektrum-4260-480";
+        targetBatteryId = "6s-6000mah-50c";
+        targetEscId = "avian-100a";
+        targetPropId = "eflite-15x8-4";
+      }
     } else if (isGiant) {
+      // 80"+ Giant Scale Warbirds (10S - 12S Heavy Outrunners)
       if (type === 'safe') {
         targetMotorId = "badass-4530-440";
         targetBatteryId = "8s-5000mah-45c";
@@ -517,6 +559,7 @@ export default function CockpitOverview({
         targetPropId = "apc-24x12e";
       }
     } else {
+      // .60-Class & Mid-Scale Warbirds (6S - 8S Baseline)
       const setup = recommendedSetups[type];
       if (setup) {
         targetMotorId = setup.motorId;
