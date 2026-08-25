@@ -944,7 +944,7 @@ export default function CockpitOverview({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <select 
                 className="retro-select" 
-                style={{ fontSize: '12px', paddingRight: '22px' }} 
+                style={{ fontSize: '13.5px', paddingRight: '22px' }} 
                 value={selectedAircraft.id} 
                 onChange={(e) => {
                   const ac = allAircrafts.find(item => item.id === e.target.value);
@@ -976,7 +976,7 @@ export default function CockpitOverview({
                   }}
                   className="btn-retro btn-red-launcher"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '12px',
                     height: '40px',
                     padding: '8px',
                     justifyContent: 'center',
@@ -991,7 +991,7 @@ export default function CockpitOverview({
                   onClick={() => setIsCustomPlaneOpen(true)}
                   className="btn-retro"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '12px',
                     height: '40px',
                     padding: '8px',
                     background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
@@ -1013,7 +1013,7 @@ export default function CockpitOverview({
                   border: '1px solid #ffb347',
                   borderRadius: '3.5px',
                   padding: '6px 8px',
-                  fontSize: '9.5px',
+                  fontSize: '11px',
                   color: 'var(--color-amber)',
                   fontWeight: 'bold',
                   display: 'flex',
@@ -1069,14 +1069,14 @@ export default function CockpitOverview({
                 top: 0, left: 0, width: '100%', height: '100%',
                 background: 'linear-gradient(to top, rgba(18, 14, 12, 0.9) 0%, rgba(18, 14, 12, 0) 40%)'
               }}></div>
-              <div style={{ position: 'absolute', bottom: '6px', left: '6px', fontSize: '9px', fontWeight: 'bold', color: '#fff', textShadow: '1px 1px 2px #000' }}>
+              <div style={{ position: 'absolute', bottom: '6px', left: '6px', fontSize: '10.5px', fontWeight: 'bold', color: '#fff', textShadow: '1px 1px 2px #000' }}>
                 {selectedAircraft.manufacturer}
               </div>
             </div>
 
             {/* Recommended Setup Buttons */}
             <div>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-amber-dim)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 RECOMMENDED SETUPS
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -1094,13 +1094,15 @@ export default function CockpitOverview({
                       key={type}
                       onClick={() => applySetup(type)}
                       className={`btn-retro ${isActive ? 'active' : ''}`}
-                      style={{ justifyContent: 'space-between', padding: '6px 12px', fontSize: '11px' }}
+                      style={{ justifyContent: 'space-between', padding: '7px 12px', fontSize: '12.5px' }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ color: starColor }}>★</span>
                         <div style={{ textAlign: 'left' }}>
-                          <div style={{ fontWeight: 'bold', fontSize: '11px' }}>{s.name}</div>
-                          <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', textTransform: 'capitalize' }}>{s.subtitle}</div>
+                          <div style={{ fontWeight: 'bold' }}>{type === 'scale' ? "FACTORY STOCK SPEC" : s.name}</div>
+                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', textTransform: 'none' }}>
+                            {type === 'scale' ? "Manufacturer BNF Baseline" : s.subtitle}
+                          </div>
                         </div>
                       </div>
                       <div className={`status-lamp ${isActive ? 'green' : 'green off'}`} />
@@ -1114,8 +1116,8 @@ export default function CockpitOverview({
                     className={`btn-retro ${activeSetupType === 'fastest' ? 'active' : ''}`}
                     style={{ 
                       justifyContent: 'space-between', 
-                      padding: '6px 12px', 
-                      fontSize: '11px',
+                      padding: '7px 12px', 
+                      fontSize: '12.5px',
                       borderColor: activeSetupType === 'fastest' ? 'var(--color-red)' : 'rgba(209, 53, 53, 0.4)',
                       boxShadow: activeSetupType === 'fastest' ? '0 0 10px var(--color-red-glow)' : 'none',
                       marginTop: '6px'
@@ -1124,9 +1126,9 @@ export default function CockpitOverview({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ color: 'var(--color-red)' }}>⚡</span>
                       <div style={{ textAlign: 'left' }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '11px', color: 'var(--color-red)' }}>SPEED RUN SETUP</div>
-                        <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)' }}>
-                          Max Pitch Speed: {fastestSetup.pitchSpeed} MPH
+                        <div style={{ fontWeight: 'bold', color: 'var(--color-red)' }}>MAX SPEED OPTIMIZER</div>
+                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
+                          Highest Pitch Speed on Safe ESC Current
                         </div>
                       </div>
                     </div>
@@ -1139,8 +1141,8 @@ export default function CockpitOverview({
                   className={`btn-retro ${activeSetupType === 'motor-tuned' ? 'active' : ''}`}
                   style={{ 
                     justifyContent: 'space-between', 
-                    padding: '6px 12px', 
-                    fontSize: '11px',
+                    padding: '7px 12px', 
+                    fontSize: '12.5px',
                     borderColor: activeSetupType === 'motor-tuned' ? '#ffb347' : 'rgba(255, 179, 71, 0.4)',
                     boxShadow: activeSetupType === 'motor-tuned' ? '0 0 10px rgba(255, 179, 71, 0.4)' : 'none',
                     marginTop: '6px'
@@ -1149,8 +1151,8 @@ export default function CockpitOverview({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ color: '#ffb347' }}>⚙</span>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#ffb347' }}>AUTO-MATCH PROP ({selectedBattery.cells}S)</div>
-                      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.45)' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#ffb347' }}>AUTO-MATCH PROP ({selectedBattery.cells}S)</div>
+                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
                         Ideal prop for {selectedMotor.model} on {selectedBattery.cells}S
                       </div>
                     </div>
@@ -1165,7 +1167,7 @@ export default function CockpitOverview({
                     border: '1px solid #ffb347',
                     borderRadius: '4px',
                     color: '#ffca36',
-                    fontSize: '11px',
+                    fontSize: '11.5px',
                     lineHeight: '1.4',
                     textAlign: 'left',
                     boxShadow: '0 0 8px rgba(255, 179, 71, 0.3)'
@@ -1489,8 +1491,8 @@ export default function CockpitOverview({
               <div className="panel-header">
                 <span className="badge">3</span> SETUP NOTES
               </div>
-              <div className="card-content" style={{ padding: '8px', fontSize: '11px' }}>
-                <div style={{ color: '#ffb347', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11px', marginBottom: '4px' }}>
+              <div className="card-content" style={{ padding: '8px', fontSize: '12.5px' }}>
+                <div style={{ color: '#ffb347', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '12.5px', marginBottom: '4px' }}>
                   {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].name : (activeSetupType === 'fastest' ? "SPEED RUN SETUP" : "CUSTOM WORKBENCH CONFIG")}
                 </div>
                 <div style={{ borderBottom: '1px solid var(--color-panel-border)', paddingBottom: '4px', marginBottom: '4px' }}>
@@ -1519,10 +1521,10 @@ export default function CockpitOverview({
                     </span>
                   </div>
                 </div>
-                <p style={{ color: '#fff', fontSize: '10px', lineHeight: '1.2' }}>
+                <p style={{ color: '#fff', fontSize: '11.5px', lineHeight: '1.3' }}>
                   {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.behavior : (activeSetupType === 'fastest' ? "Extreme performance speed run setup. Tuned for maximum pitch speed and high static load." : "Analyzing electrical characteristics of custom setup. Check Validator for details.")}
                 </p>
-                <div style={{ color: 'var(--color-red)', fontWeight: 'bold', marginTop: '6px', fontSize: '9px', lineHeight: '1.1' }}>
+                <div style={{ color: 'var(--color-red)', fontWeight: 'bold', marginTop: '6px', fontSize: '11px', lineHeight: '1.2' }}>
                   WARNING: {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.warning : (activeSetupType === 'fastest' ? "Monitor high current draw and temperatures closely to prevent battery thermal runaway." : "Ensure continuous cooling airflow around motor windings on static tests.")}
                 </div>
               </div>

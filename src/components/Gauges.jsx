@@ -236,7 +236,7 @@ export function CircularGauge({
           x={center} 
           y={center + 40} 
           fill="var(--color-amber-dim)" 
-          fontSize="9" 
+          fontSize="10" 
           textAnchor="middle"
           fontWeight="bold"
           style={{ letterSpacing: '0.5px' }}
@@ -247,7 +247,7 @@ export function CircularGauge({
       <div 
         className="glow-text" 
         style={{ 
-          fontSize: '11px', 
+          fontSize: '12.5px', 
           fontWeight: 'bold', 
           marginTop: '-10px', 
           color: 'var(--color-amber)', 
@@ -275,7 +275,7 @@ export function HorizontalBarGauge({ value, label, percentage, max = 100, unit =
 
   return (
     <div style={{ marginBottom: '12px' }}>
-      <div className="flex-between" style={{ fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 'bold' }}>
+      <div className="flex-between" style={{ fontSize: '12.5px', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 'bold' }}>
         <span>{label}</span>
         <span style={{ color: barColor }}>{value}{unit}</span>
       </div>
