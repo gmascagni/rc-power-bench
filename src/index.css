@@ -38,6 +38,24 @@
   padding: 0;
 }
 
+html {
+  /* Fluid base font scaling that scales smoothly from 17px on 1080p up to 28px on 1440p/2560px & 4K displays */
+  font-size: clamp(17px, 0.75vw + 7px, 28px);
+}
+
+/* High Resolution Display Scaling (1440p / 2560px / 4K) */
+@media (min-width: 1921px) {
+  html {
+    font-size: clamp(20px, 0.8vw + 8px, 30px);
+  }
+}
+
+@media (min-width: 2560px) {
+  html {
+    font-size: clamp(24px, 0.9vw + 8px, 34px);
+  }
+}
+
 body {
   background-color: var(--color-bg);
   background-image: 
@@ -47,7 +65,7 @@ body {
   background-size: 100% 100%, 24px 24px, 24px 24px;
   color: var(--color-amber);
   font-family: var(--font-mono);
-  font-size: 17.5px;
+  font-size: 1rem;
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
