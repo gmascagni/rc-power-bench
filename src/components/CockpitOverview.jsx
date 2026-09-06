@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CircularGauge, HorizontalBarGauge } from './Gauges';
 import PowerCurveChart from './PowerCurveChart';
-import { calculateSpecs, getMaxCells, getMinCells, getRecommendationsForAircraftSpecs, formatAircraftTitle } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells, getRecommendationsForAircraftSpecs, formatAircraftTitle, tuneSetupForTargetVoltage } from '../utils/calcEngine';
 import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } from '../data/rcData';
 import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
@@ -408,6 +408,29 @@ export default function CockpitOverview({
     }
 
     return { prop: null, recommendedBattery: null, error: `No safe propeller found for ${motorToOptimize.name}. Check motor KV rating or ESC / Battery limits.` };
+  };
+
+  const handleTuneByVoltage = (targetCells) => {
+    const result = tuneSetupForTargetVoltage({
+      targetCells,
+      aircraft: dynamicAircraft,
+      motors,
+      batteries,
+      escs,
+      propellers
+    });
+
+    if (result && result.motor && result.battery && result.propeller) {
+      setSelectedMotor(result.motor);
+      setSelectedBattery(result.battery);
+      setSelectedEsc(result.esc);
+      setSelectedPropeller(result.propeller);
+      setThrottle(100);
+      setActiveSetupType(`voltage-tuned-${targetCells}s`);
+      setAutoTuneNotice(
+        `⚡ HIGH-PERFORMANCE ${targetCells}S MATCH: Selected ${result.motor.name} (${result.motor.kv}KV) + ${result.propeller.name} on ${result.battery.name}. Calculated Pitch Speed: ${Math.round(result.specs.pitchSpeed)} MPH | Thrust: ${result.specs.thrust} lbs (${result.specs.thrustToWeight} T:W)`
+      );
+    }
   };
 
   const handleAutoTuneForMotor = () => {
@@ -1175,6 +1198,39 @@ export default function CockpitOverview({
                     {autoTuneNotice}
                   </div>
                 )}
+
+                {/* Match Performance by Target Voltage Controls */}
+                <div style={{ marginTop: '12px', borderTop: '1px dashed var(--color-panel-border)', paddingTop: '10px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#63b3ed', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>⚡ MATCH PERFORMANCE BY TARGET VOLTAGE</span>
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px', lineHeight: '1.3' }}>
+                    Select target voltage cell count. Algorithm calculates ideal Motor KV, ESC, and propeller for maximum speed &amp; thrust:
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '4px' }}>
+                    {[3, 4, 5, 6, 8, 12].map((cells) => {
+                      const isSelected = activeSetupType === `voltage-tuned-${cells}s`;
+                      return (
+                        <button
+                          key={cells}
+                          onClick={() => handleTuneByVoltage(cells)}
+                          className={`btn-retro ${isSelected ? 'active' : ''}`}
+                          style={{
+                            padding: '6px 2px',
+                            fontSize: '11.5px',
+                            fontWeight: 'bold',
+                            justifyContent: 'center',
+                            borderColor: isSelected ? '#63b3ed' : 'rgba(99, 179, 237, 0.4)',
+                            color: isSelected ? '#fff' : '#63b3ed',
+                            boxShadow: isSelected ? '0 0 8px rgba(99, 179, 237, 0.5)' : 'none'
+                          }}
+                        >
+                          {cells}S
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
 

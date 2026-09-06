@@ -298,3 +298,103 @@ export function getRecommendationsForAircraftSpecs({ wingspan, length, weight, w
     matchingProp
   };
 }
+
+export function tuneSetupForTargetVoltage({ targetCells, aircraft, motors = [], batteries = [], escs = [], propellers = [] }) {
+  const ws = aircraft?.wingspan || 63;
+  const isTwin = (aircraft?.enginesCount || 1) > 1;
+
+  // 1. Find battery matching targetCells
+  const targetBattery = batteries.find(b => b.cells === targetCells) || batteries.find(b => Math.abs(b.cells - targetCells) <= 1) || batteries[0];
+  const loadedVolts = targetCells * 3.7;
+
+  // 2. Propeller scale boundaries based on wingspan & twin-motor configuration
+  let minDiam = 11;
+  let maxDiam = 26;
+  if (ws <= 52) {
+    minDiam = 10; maxDiam = 13;
+  } else if (ws <= 60) {
+    minDiam = 13; maxDiam = 16;
+  } else if (ws <= 79) {
+    minDiam = isTwin ? 13 : 14; maxDiam = isTwin ? 18 : 19;
+  } else {
+    minDiam = isTwin ? 18 : 20; maxDiam = 26;
+  }
+
+  // 3. Target RPM & Ideal Motor KV calculation for Target Cell Voltage
+  let targetRPM = 10000;
+  if (ws <= 52) targetRPM = 13500;
+  else if (ws <= 60) targetRPM = 10500;
+  else if (ws <= 79) targetRPM = 8800;
+  else targetRPM = 6200;
+
+  const idealKv = Math.round(targetRPM / loadedVolts);
+
+  // Filter motors compatible with targetCells voltage
+  const compatibleMotors = motors.filter(m => {
+    const maxC = getMaxCells(m.voltageSupported);
+    const minC = getMinCells(m.voltageSupported);
+    return targetCells >= minC - 1 && targetCells <= maxC + 1;
+  });
+
+  const motorCandidates = compatibleMotors.length > 0 ? compatibleMotors : motors;
+
+  let bestScore = -1;
+  let bestMotor = motorCandidates[0];
+  let bestProp = propellers[0];
+  let bestEsc = escs[0];
+  let bestSpecs = null;
+
+  for (const m of motorCandidates) {
+    const escCandidate = escs.find(e => e.maxAmps >= m.maxCurrent * 1.15) || escs[escs.length - 1];
+
+    for (const p of propellers) {
+      if (p.diameter < minDiam || p.diameter > maxDiam) continue;
+
+      const s = calculateSpecs({
+        aircraft,
+        motor: m,
+        esc: escCandidate,
+        battery: targetBattery,
+        propeller: p,
+        throttle: 100
+      });
+
+      // Constraints check: Motor load <= 115%, ESC load <= 100%
+      if (s.motorLoad <= 115 && s.escLoad <= 100 && s.thrustToWeight >= 0.70) {
+        const kvMatchScore = 100 - Math.min(Math.abs(m.kv - idealKv), 100);
+        const pitchSpeedScore = s.pitchSpeed * 1.6;
+        const twScore = s.thrustToWeight * 45;
+
+        const totalScore = pitchSpeedScore + twScore + kvMatchScore;
+
+        if (totalScore > bestScore) {
+          bestScore = totalScore;
+          bestMotor = m;
+          bestProp = p;
+          bestEsc = escCandidate;
+          bestSpecs = s;
+        }
+      }
+    }
+  }
+
+  if (!bestSpecs) {
+    const fallbackMotor = motorCandidates.reduce((prev, curr) => Math.abs(curr.kv - idealKv) < Math.abs(prev.kv - idealKv) ? curr : prev, motorCandidates[0]);
+    const fallbackProp = propellers.find(p => p.diameter >= minDiam && p.diameter <= maxDiam) || propellers[0];
+    const fallbackEsc = escs.find(e => e.maxAmps >= fallbackMotor.maxCurrent) || escs[0];
+    bestMotor = fallbackMotor;
+    bestProp = fallbackProp;
+    bestEsc = fallbackEsc;
+    bestSpecs = calculateSpecs({ aircraft, motor: bestMotor, esc: bestEsc, battery: targetBattery, propeller: bestProp, throttle: 100 });
+  }
+
+  return {
+    targetCells,
+    battery: targetBattery,
+    motor: bestMotor,
+    esc: bestEsc,
+    propeller: bestProp,
+    specs: bestSpecs,
+    idealKv
+  };
+}
