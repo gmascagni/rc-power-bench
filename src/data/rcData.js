@@ -50,8 +50,8 @@ export const aircrafts = [
     image: "corsair.jpg",
     suggestedCg: "3.15 in (80 mm)",
     description: "E-flite 1.2m F4U Corsair. Highly detailed sport-scale model featuring functioning 3-blade prop drive and retractable landing gear.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL12000-Manual-EN.pdf",
-    stockSetup: { motorId: "spektrum-15-850", batteryId: "4s-5000mah-30c", propellerId: "eflite-12x8-3", escId: "avian-70a" }
+    manualUrl: "https://www.manualslib.com/manual/2126296/E-Flite-F4u-1A-Corsair-1-2m.html",
+    stockSetup: { motorId: "spektrum-15-850", batteryId: "4s-2200mah-45c", propellerId: "eflite-12x8-3", escId: "avian-70a" }
   },
   {
     id: "eflite-bf190-1.5m",
@@ -68,8 +68,8 @@ export const aircrafts = [
     image: "fw190.jpg",
     suggestedCg: "4.50 in (114 mm)",
     description: "E-flite 1.5m Fw 190A (referenced as BF-190). Heavy sport-scale fighter with scale radial engine cowl and wide-track retractable gear.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01350-Manual-EN.pdf",
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-15x8-3", escId: "avian-100a" }
+    manualUrl: "https://www.manualslib.com/manual/1879304/E-Flite-Fw-190a-1-5m.html",
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "spektrum-6s-5000-120c", propellerId: "eflite-15x8-3", escId: "avian-100a" }
   },
   {
     id: "eflite-p51-1.5m",
@@ -86,8 +86,8 @@ export const aircrafts = [
     image: "p51.jpg",
     suggestedCg: "4.90 in (124 mm)",
     description: "E-flite 1.5m P-51D Mustang. Sport-scale warbird featuring Smart electronics, functional flaps, and retractable landing gear.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/EFL01250-Manual-EN.pdf",
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "6s-5000mah-45c", propellerId: "eflite-15x8-4", escId: "avian-100a" }
+    manualUrl: "https://www.manualslib.com/manual/1769634/E-Flite-P-51d-Mustang-1-5m.html",
+    stockSetup: { motorId: "spektrum-4260-480", batteryId: "spektrum-6s-5000-120c", propellerId: "eflite-15x8-4", escId: "avian-100a" }
   },
   {
     id: "fw190",
@@ -160,9 +160,9 @@ export const aircrafts = [
     image: "b25.jpg",
     suggestedCg: "4.12 in (105 mm)",
     description: "Hangar 9 B-25J Mitchell twin ARF. Doolittle Raid WWII medium bomber with twin scale engine cowls and glass nose canopy.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN4575-Manual.pdf",
+    manualUrl: "https://www.manualslib.com/manual/1487210/Hangar-9-B-25j-Mitchell-50.html",
     enginesCount: 2,
-    stockSetup: { motorId: "eflite-power52", batteryId: "5s-5000mah-45c", propellerId: "apc-14x10e", escId: "hobbywing-skywalker80" }
+    stockSetup: { motorId: "eflite-power52", batteryId: "spektrum-5s-5000-120c", propellerId: "apc-14x10e", escId: "avian-80a-hv" }
   },
   {
     id: "f6f-hellcat",
@@ -180,7 +180,7 @@ export const aircrafts = [
     suggestedCg: "5.25 in (134 mm)",
     description: "Grumman F6F Hellcat. Rugged carrier fighter that dominated Pacific skies. Finished in deep midnight blue sea camo.",
     manualUrl: "https://www.manualslib.com/manual/1000624/Hangar-9-F6f-Hellcat-60.html",
-    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "eflite-power60", batteryId: "spektrum-6s-5000-120c", propellerId: "apc-16x8e", escId: "avian-100a" }
   },
   {
     id: "hangar9-p40b-50",
@@ -197,8 +197,8 @@ export const aircrafts = [
     image: "p40.jpg",
     suggestedCg: "3.00 in (76 mm) gear in / 2.38 in (60 mm) gear out",
     description: "Hangar 9 P-40B Warhawk .50 ARF. Classic WWII Flying Tigers fighter featuring rotating retracts, scale camouflage, and compact 50-class airframe.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2595-Manual.pdf",
-    stockSetup: { motorId: "eflite-power52", batteryId: "5s-5000mah-45c", propellerId: "apc-14x10e", escId: "hobbywing-skywalker80" }
+    manualUrl: "https://www.manualslib.com/manual/1487212/Hangar-9-P-40b-Warhawk-50.html",
+    stockSetup: { motorId: "eflite-power52", batteryId: "spektrum-5s-5000-120c", propellerId: "apc-14x10e", escId: "avian-80a-hv" }
   },
   {
     id: "p47d-thunderbolt",
@@ -215,8 +215,8 @@ export const aircrafts = [
     image: "p47.jpg",
     suggestedCg: "4.75 in (120 mm)",
     description: "Republic P-47 Thunderbolt 'Jug'. Large, heavy, and extremely rugged escort fighter. Featuring broad black and white Normandy stripes.",
-    manualUrl: null,
-    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-flyfun-120a" }
+    manualUrl: "https://www.manualslib.com/manual/1000627/Hangar-9-P-47d-Thunderbolt-60.html",
+    stockSetup: { motorId: "eflite-power60", batteryId: "spektrum-6s-5000-120c", propellerId: "apc-16x10e", escId: "avian-100a" }
   },
   {
     id: "p51d-mustang",
@@ -233,8 +233,8 @@ export const aircrafts = [
     image: "p51.jpg",
     suggestedCg: "4.25 in (108 mm)",
     description: "North American P-51D Mustang. Famous long-range WWII escort fighter featuring Allied Normandy invasion stripes. High speed and excellent aerodynamics.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master/default/Manuals/HAN2375-Manual.pdf",
-    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-flyfun-120a" }
+    manualUrl: "https://www.manualslib.com/manual/1000629/Hangar-9-P-51d-Mustang-60.html",
+    stockSetup: { motorId: "eflite-power60", batteryId: "spektrum-6s-5000-120c", propellerId: "apc-16x8e", escId: "avian-100a" }
   },
   {
     id: "hangar9-p51d-20cc",
@@ -251,8 +251,8 @@ export const aircrafts = [
     image: "p51.jpg",
     suggestedCg: "4.50 - 4.75 in (114 - 121 mm) back from leading edge",
     description: "Hangar 9 P-51D Mustang 20cc ARF. Large 69.5\" wingspan scale balsa/plywood warbird designed for 20cc gas or E-flite Power 60/90 electric brushless systems.",
-    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master-catalog/default/dw10d5140f/Manuals/HAN2820-Manual-EN.pdf",
-    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a-hv" }
+    manualUrl: "https://www.manualslib.com/manual/1457190/Hangar-9-P-51d-Mustang-20cc.html",
+    stockSetup: { motorId: "eflite-power60", batteryId: "spektrum-6s-5000-120c", propellerId: "apc-16x10e", escId: "avian-100a" }
   },
   {
     id: "b17-flying-fortress",
