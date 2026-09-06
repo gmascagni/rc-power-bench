@@ -237,6 +237,24 @@ export const aircrafts = [
     stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x8e", escId: "hobbywing-flyfun-120a" }
   },
   {
+    id: "hangar9-p51d-20cc",
+    name: "HANGAR 9 P-51D MUSTANG (69.5\" WS / 20CC CLASS)",
+    class: "20CC CLASS",
+    wingspan: 69.5,
+    length: 60,
+    wingArea: 848,
+    emptyWeight: 9.8,
+    flyingWeight: 12.0,
+    powerRangeMin: 1400,
+    powerRangeMax: 2600,
+    manufacturer: "Hangar 9 / Horizon Hobby",
+    image: "p51.jpg",
+    suggestedCg: "4.50 - 4.75 in (114 - 121 mm) back from leading edge",
+    description: "Hangar 9 P-51D Mustang 20cc ARF. Large 69.5\" wingspan scale balsa/plywood warbird designed for 20cc gas or E-flite Power 60/90 electric brushless systems.",
+    manualUrl: "https://www.horizonhobby.com/on/demandware.static/-/Sites-horizon-master-catalog/default/dw10d5140f/Manuals/HAN2820-Manual-EN.pdf",
+    stockSetup: { motorId: "eflite-power60", batteryId: "6s-5000mah-45c", propellerId: "apc-16x10e", escId: "hobbywing-120a-hv" }
+  },
+  {
     id: "b17-flying-fortress",
     name: "HK B-17G FLYING FORTRESS (73.8\" WS / 1.88M 4-ENGINE)",
     class: "GIANT SCALE 4-ENGINE",
