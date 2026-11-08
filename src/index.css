@@ -1,35 +1,40 @@
-/* Google Fonts for vintage/military/monospaced/cursive vibes */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Special+Elite&family=Oswald:wght@500;700&family=Alex+Brush&display=swap');
+/* Modern Avionics & Friendly Hangar Theme - RC Power Bench Pro */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=Oswald:wght@500;600;700&family=Alex+Brush&display=swap');
 
 :root {
-  --color-bg: #121519;
-  --color-panel-bg: #20262d;
-  --color-panel-border: #5a6778; /* Machined Aircraft Aluminum / Gunmetal Steel */
-  --color-panel-header: #2b323c;
-  
-  /* Cool Aluminum Steel Accent Theme */
-  --color-amber: #e3edf7; 
-  --color-amber-dim: #8fa0b5;
-  --color-amber-glow: rgba(227, 237, 247, 0.18);
-  
-  --color-red: #d13535;
-  --color-red-dim: #731b1b;
-  --color-red-glow: rgba(209, 53, 53, 0.45);
-  
-  --color-green: #4caf50;
-  --color-green-dim: #2e6030;
-  --color-green-glow: rgba(76, 175, 80, 0.45);
+  --color-bg: #0f172a;
+  --color-panel-bg: #1e293b;
+  --color-card-bg: #111827;
+  --color-panel-border: #475569; /* Anodized Aviation Slate / Brushed Aluminum */
+  --color-panel-header: #1e293b;
 
+  /* Default: Classic Warm Avionics Gold / Amber Instrumentation */
+  --color-amber: #f59e0b;
+  --color-amber-dim: #94a3b8;
+  --color-amber-glow: rgba(245, 158, 11, 0.25);
+
+  --color-cyan: #38bdf8;
+  --color-cyan-glow: rgba(56, 189, 248, 0.35);
+
+  --color-red: #ef4444;
+  --color-red-dim: #7f1d1d;
+  --color-red-glow: rgba(239, 68, 68, 0.4);
+
+  --color-green: #10b981;
+  --color-green-dim: #064e3b;
+  --color-green-glow: rgba(16, 185, 129, 0.4);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'Share Tech Mono', 'Consolas', 'Courier New', monospace;
-  --font-serif: 'Oswald', 'Special Elite', 'Georgia', serif;
-  --font-script: 'Alex Brush', 'Georgia', cursive;
+  --font-serif: 'Oswald', 'Inter', sans-serif;
+  --font-script: 'Alex Brush', cursive;
 }
 
 .crt-effect {
-  /* High-Tech Tactical Backlight Theme (Backlight ON) */
-  --color-amber: #63b3ed; 
-  --color-amber-dim: #3182ce;
-  --color-amber-glow: rgba(99, 179, 237, 0.35);
+  /* Modern Glass Cockpit Sky-Blue Avionics Theme (Default Active) */
+  --color-amber: #38bdf8;
+  --color-amber-dim: #94a3b8;
+  --color-amber-glow: rgba(56, 189, 248, 0.3);
 }
 
 * {
@@ -39,31 +44,25 @@
 }
 
 html {
-  /* Fluid base font scaling that scales smoothly from 17px on 1080p up to 28px on 1440p/2560px & 4K displays */
-  font-size: clamp(17px, 0.75vw + 7px, 28px);
+  /* Fluid base font scaling that works cleanly from 320px mobile phones up to 1080p, 1440p & 4K */
+  font-size: clamp(14px, 0.45vw + 12.5px, 20px);
+  -webkit-text-size-adjust: 100%;
 }
 
-/* High Resolution Display Scaling (1440p / 2560px / 4K) */
 @media (min-width: 1921px) {
   html {
-    font-size: clamp(20px, 0.8vw + 8px, 30px);
-  }
-}
-
-@media (min-width: 2560px) {
-  html {
-    font-size: clamp(24px, 0.9vw + 8px, 34px);
+    font-size: clamp(17px, 0.55vw + 12px, 24px);
   }
 }
 
 body {
   background-color: var(--color-bg);
-  background-image: 
-    radial-gradient(circle at 50% 30%, #1e242b 0%, #0d1013 100%),
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 24px 24px, 24px 24px;
-  color: var(--color-amber);
+  background-image:
+    radial-gradient(circle at 50% 15%, #1e293b 0%, #0f172a 70%, #090d16 100%),
+    linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
+  color: #f8fafc;
   font-family: var(--font-mono);
   font-size: 1rem;
   overflow-x: hidden;
@@ -77,18 +76,18 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #14181c;
+  background: #0f172a;
   border-left: 1px solid var(--color-panel-border);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-panel-border);
+  background: #475569;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-amber-dim);
+  background: var(--color-amber);
 }
 
-/* Warm Cockpit Backlight Overlay */
+/* Subtle Cockpit Ambient Lighting (Non-intrusive, mobile friendly) */
 .crt-effect {
   position: relative;
 }
@@ -101,36 +100,34 @@ body {
   left: 0;
   bottom: 0;
   right: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(240, 180, 89, 0.04) 0%, transparent 75%);
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.04) 0%, transparent 70%);
   pointer-events: none;
   z-index: 9999;
 }
 
-/* Cockpit Vignette shadow */
 .crt-vignette {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.95);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
   pointer-events: none;
   z-index: 9998;
 }
 
-/* Panel Designs (Brushed gunmetal / riveted aluminum airplane skin style) */
+/* Panel Designs (Crafted Anodized Avionics Bezel) */
 .metal-panel {
-  background-color: #20262d;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 65%),
-    linear-gradient(145deg, #2c333c 0%, #1e232a 50%, #171b20 100%);
-  border: 2px solid #5a6778; /* Machined Aircraft Aluminum */
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.45), /* Top metallic bevel reflection */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.6),
-    inset 0 0 16px rgba(0, 0, 0, 0.75),
-    0 10px 25px rgba(0, 0, 0, 0.85);
-  border-radius: 4px;
+  background-color: #1e293b;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.07) 0%, transparent 65%),
+    linear-gradient(165deg, #243247 0%, #192334 55%, #131c2b 100%);
+  border: 1.5px solid #475569;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.55);
+  border-radius: 8px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -138,62 +135,49 @@ body {
 
 /* Panel Headers */
 .panel-header {
-  background: linear-gradient(180deg, #323a45 0%, #20262e 100%);
-  border-bottom: 2px solid #5a6778;
+  background: linear-gradient(180deg, #29384e 0%, #1b2638 100%);
+  border-bottom: 1.5px solid #475569;
+  border-radius: 6px 6px 0 0;
   padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: bold;
-  letter-spacing: 0.8px;
-  color: #e3edf7;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.7px;
+  color: #f1f5f9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .panel-header .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
+  min-width: 24px;
   height: 24px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #434d5c, #22272f);
-  border: 1px solid #7e8d9f;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.6);
-  font-size: 13px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #0284c7, #0369a1);
+  border: 1px solid #38bdf8;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.4);
+  font-size: 12.5px;
   font-weight: bold;
   color: #fff;
-  margin-right: 4px;
+  margin-right: 2px;
 }
 
 /* Photorealistic Aircraft Panel Rivets */
 .rivet {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #d8e2ec 20%, #7e8f9e 60%, #3e4854 85%, #1d2228 100%);
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.9),
-    inset 0 1px 1px rgba(255, 255, 255, 0.8),
-    inset -1px -1px 1px rgba(0, 0, 0, 0.7);
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #cbd5e1 25%, #64748b 65%, #334155 90%, #0f172a 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7);
   position: absolute;
   z-index: 10;
-}
-
-/* Central bucked pin indent inside the rivet */
-.rivet::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, #2b323b 0%, #15191d 100%);
-  box-shadow: inset 0.5px 0.5px 1px rgba(0, 0, 0, 0.9), 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.4);
 }
 
 .rivet.top-left { top: 6px; left: 6px; }
@@ -203,31 +187,29 @@ body {
 
 /* Screws */
 .screw {
-  width: 11px;
-  height: 11px;
-  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #cfd9e5 20%, #6e7d8e 65%, #2a313a 100%);
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #cbd5e1 25%, #64748b 65%, #1e293b 100%);
   border-radius: 50%;
   position: absolute;
-  box-shadow: 
-    0 2px 3px rgba(0, 0, 0, 0.85),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.7),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.75),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 .screw::after {
   content: "";
   position: absolute;
-  top: 4.5px;
+  top: 4px;
   left: 1.5px;
-  width: 8px;
-  height: 2px;
-  background-color: #12161a;
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.8);
+  width: 7px;
+  height: 1.5px;
+  background-color: #0f172a;
   transform: rotate(45deg);
 }
 
 /* Glowing text effects */
 .glow-text {
-  text-shadow: 0 0 8px var(--color-amber-glow);
+  text-shadow: 0 0 10px var(--color-amber-glow);
 }
 
 .glow-text-red {
@@ -240,106 +222,107 @@ body {
   text-shadow: 0 0 8px var(--color-green-glow);
 }
 
-/* Retro Vintage / Aircraft Buttons */
+/* Avionics Tactile Buttons */
 .btn-retro {
-  background: linear-gradient(180deg, #424c58 0%, #222830 100%);
-  border: 1.5px solid #637182;
-  color: #dce6f0;
-  padding: 8px 16px;
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  border: 1.5px solid #475569;
+  color: #e2e8f0;
+  padding: 8px 14px;
   font-family: var(--font-mono);
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 4px;
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.3),
-    inset 0 -1px 0 rgba(0,0,0,0.4),
-    0 2px 5px rgba(0,0,0,0.7);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 2px 4px rgba(0,0,0,0.45);
   transition: all 0.15s ease-in-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   text-transform: uppercase;
+  touch-action: manipulation;
 }
 
-.btn-retro:hover {
-  background: linear-gradient(180deg, #515d6c 0%, #2c343f 100%);
+.btn-retro:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3e4f66 0%, #26354d 100%);
   color: #fff;
-  border-color: #9bb0c7;
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    0 0 12px rgba(155, 176, 199, 0.35);
+  border-color: #38bdf8;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 0 10px rgba(56, 189, 248, 0.25);
 }
 
-.btn-retro:active {
+.btn-retro:active:not(:disabled) {
   transform: translateY(1px);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
 }
 
 .btn-retro.active {
-  background: linear-gradient(180deg, #2b6cb0 0%, #1a497a 100%);
-  border-color: #63b3ed;
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+  border-color: #38bdf8;
   color: #fff;
-  box-shadow: 0 0 12px rgba(99, 179, 237, 0.5);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
-/* Red vintage launcher button */
+/* Aviation Gold / Amber Primary Action Button */
 .btn-red-launcher {
-  background: linear-gradient(#d13535, #731b1b);
-  border: 2px solid #ff6b6b;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.3),
-    0 5px 10px rgba(0,0,0,0.6),
-    0 0 15px var(--color-red-glow);
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  border: 1.5px solid #fbbf24;
+  color: #0f172a;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    0 4px 10px rgba(0,0,0,0.45),
+    0 0 14px rgba(245, 158, 11, 0.35);
   font-family: var(--font-serif);
-  font-size: 16px;
-  letter-spacing: 1px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
 }
 
-.btn-red-launcher:hover {
-  background: linear-gradient(#e24c4c, #8c2121);
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.4),
-    0 5px 15px rgba(0,0,0,0.8),
-    0 0 25px rgba(209, 53, 53, 0.7);
+.btn-red-launcher:hover:not(:disabled) {
+  background: linear-gradient(180deg, #fbbf24 0%, #ea580c 100%);
+  color: #0f172a;
+  border-color: #fde68a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    0 5px 14px rgba(0,0,0,0.6),
+    0 0 20px rgba(245, 158, 11, 0.55);
 }
 
-.btn-red-launcher:active {
-  transform: translateY(2px);
-  box-shadow: 
-    inset 0 3px 5px rgba(0,0,0,0.9),
-    0 1px 2px rgba(0,0,0,0.4);
-}
-
-/* Dashboard Grid Layout (Narrow Control Bench right column, Expand Middle) */
+/* Logical 1 -> 6 Cockpit Grid Layout */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 310px 1fr 240px;
+  grid-template-columns: 330px 1fr 270px;
   grid-template-rows: auto auto;
   gap: 16px;
-  padding: 16px;
+  padding: 12px 16px 24px 16px;
   max-width: 1750px;
   margin: 0 auto;
+  align-items: start;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1240px) {
   .dashboard-grid {
     display: flex !important;
     flex-direction: column !important;
+    gap: 14px;
+    padding: 10px 12px 24px 12px;
   }
   .left-column {
     order: 1 !important;
-  }
-  .right-column {
-    order: 2 !important;
-    height: auto !important;
+    width: 100% !important;
   }
   .middle-column {
+    order: 2 !important;
+    width: 100% !important;
+  }
+  .right-column {
     order: 3 !important;
+    width: 100% !important;
+    height: auto !important;
   }
 }
 
@@ -349,16 +332,16 @@ body {
   flex-grow: 1;
 }
 
-/* Table Style for Retro Stats */
+/* Table Style for Avionics Telemetry */
 .retro-table {
   width: 100%;
   border-collapse: collapse;
 }
 
 .retro-table td {
-  padding: 8px 0;
-  border-bottom: 1px dashed rgba(90, 103, 120, 0.4);
-  font-size: 16.5px;
+  padding: 7px 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.25);
+  font-size: 13.5px;
 }
 
 .retro-table tr:last-child td {
@@ -368,97 +351,157 @@ body {
 .retro-table td.label {
   color: var(--color-amber-dim);
   text-transform: uppercase;
-  font-size: 15.5px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
 .retro-table td.val {
   text-align: right;
   font-weight: bold;
-  color: #fff;
-  font-size: 17.5px;
+  color: #f8fafc;
+  font-size: 14px;
 }
 
 /* Inputs and Forms */
 .retro-input, .retro-select {
-  background-color: #13171b;
-  border: 1px solid #485463;
-  color: var(--color-amber);
-  padding: 7px 9px;
+  background-color: #0f172a;
+  border: 1.5px solid #475569;
+  color: #f8fafc;
+  padding: 8px 10px;
   font-family: var(--font-mono);
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: bold;
-  border-radius: 3.5px;
+  border-radius: 6px;
   width: 100%;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.65);
 }
 
 .retro-select {
-  font-size: 14px;
-  padding-right: 22px;
+  font-size: 13px;
+  padding-right: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .retro-input:focus, .retro-select:focus {
   outline: none;
-  border-color: #8bb0d6;
-  box-shadow: 0 0 8px rgba(139, 176, 214, 0.4);
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+/* Accessible Native Range Slider (Throttle Quadrant) */
+.throttle-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 36px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.throttle-range-slider:focus {
+  outline: none;
+}
+
+.throttle-range-slider::-webkit-slider-runnable-track {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981 0%, #38bdf8 55%, #f59e0b 85%, #ef4444 100%);
+  border: 1.5px solid #475569;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.throttle-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
+  border: 2px solid #0284c7;
+  margin-top: -9px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.7), 0 0 10px rgba(56, 189, 248, 0.5);
+  transition: transform 0.1s ease;
+}
+
+.throttle-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+}
+
+.throttle-range-slider::-moz-range-track {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981 0%, #38bdf8 55%, #f59e0b 85%, #ef4444 100%);
+  border: 1.5px solid #475569;
+}
+
+.throttle-range-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
+  border: 2px solid #0284c7;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.7);
 }
 
 /* Navigation bar */
 .nav-bar {
   display: flex;
-  background: linear-gradient(180deg, #232930 0%, #14181c 100%);
-  border-top: 2px solid #525f70;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-top: 2px solid #475569;
   position: sticky;
   bottom: 0;
   width: 100%;
   z-index: 1000;
-  padding: 5px 10px;
+  padding: 6px 10px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   gap: 6px;
   justify-content: space-between;
   overflow-x: auto;
-  box-shadow: 0 -4px 15px rgba(0,0,0,0.6);
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 -4px 18px rgba(0,0,0,0.65);
 }
 
 .nav-item {
   flex: 1;
-  min-width: 75px;
-  background: linear-gradient(180deg, #353d48 0%, #1e2329 100%);
-  border: 1px solid #4a5666;
-  color: var(--color-amber-dim);
-  padding: 9px 5px;
+  min-width: 82px;
+  background: linear-gradient(180deg, #283548 0%, #182232 100%);
+  border: 1px solid #3f4f66;
+  color: #94a3b8;
+  padding: 8px 6px;
   text-align: center;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: bold;
   text-transform: uppercase;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  touch-action: manipulation;
 }
 
 .nav-item:hover {
-  color: var(--color-amber);
-  border-color: #8da2ba;
+  color: #f8fafc;
+  border-color: #64748b;
 }
 
 .nav-item.active {
-  background: linear-gradient(180deg, #b82e2e 0%, #5e1414 100%);
-  border-color: var(--color-red);
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+  border-color: #38bdf8;
   color: #fff;
-  box-shadow: 0 0 12px var(--color-red-glow), inset 0 1px 0 rgba(255,255,255,0.3);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
 .nav-item.active svg {
-  color: var(--color-red);
+  color: #fff;
 }
 
 /* Utilities */
@@ -480,10 +523,11 @@ body {
 
 /* Status indicator lamps */
 .status-lamp {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
   border: 1px solid rgba(0,0,0,0.5);
 }
@@ -518,12 +562,12 @@ body {
 /* Responsive Grids & Containers */
 .middle-row-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: 1.25fr 1fr 1fr;
 }
 
 .bottom-row-grid {
   display: grid;
-  grid-template-columns: 1.3fr 0.5fr 1.55fr;
+  grid-template-columns: 1.25fr 0.45fr 1.55fr;
 }
 
 .setup-inner-grid {
@@ -533,7 +577,18 @@ body {
 
 .prediction-inner-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1.2fr;
+  grid-template-columns: 1fr 1.3fr;
+}
+
+.calc-engine-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+}
+
+.calc-controls-col {
+  border-right: 1px solid var(--color-panel-border);
+  padding-right: 20px;
 }
 
 /* Tablet & Large Phone Responsiveness */
@@ -544,24 +599,37 @@ body {
   .bottom-row-grid {
     grid-template-columns: 1fr !important;
   }
+  .calc-engine-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .calc-controls-col {
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-panel-border);
+    padding-right: 0 !important;
+    padding-bottom: 16px;
+  }
 }
 
 /* Mobile & Touch Layout Adjustments (Android / iOS) */
 @media (max-width: 768px) {
   .header-flex {
     flex-direction: column !important;
-    gap: 12px;
-    padding: 12px 16px !important;
+    gap: 10px;
+    padding: 10px 12px !important;
     text-align: center;
   }
   .header-flex > div {
     justify-content: center !important;
   }
   .setup-inner-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr !important;
   }
   .prediction-inner-grid {
     grid-template-columns: 1fr !important;
+  }
+  .panel-header {
+    font-size: 13.5px;
+    padding: 8px 12px;
   }
 }
 
@@ -569,28 +637,36 @@ body {
   .header-aviator-banner {
     display: none !important;
   }
+  .setup-inner-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .nav-item {
+    min-width: 70px;
+    padding: 7px 4px;
+    font-size: 10px;
+  }
 }
 
-/* Modal overlays for system dialogs (Compare/Export) */
+/* Modal overlays for system dialogs (Compare/Export/Wizard) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(9, 13, 22, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 16px;
-  backdrop-filter: blur(4px);
+  padding: 12px;
+  backdrop-filter: blur(6px);
 }
 
 .modal-content {
-  max-width: 580px;
+  max-width: 600px;
   width: 100%;
-  max-height: 85vh;
+  max-height: 88vh;
   overflow-y: auto;
   position: relative;
 }
@@ -604,13 +680,13 @@ body {
 
 .comparison-table th, .comparison-table td {
   padding: 8px 6px;
-  border-bottom: 1px solid rgba(142, 104, 64, 0.3);
-  font-size: 11px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 11.5px;
   text-align: center;
 }
 
 .comparison-table th {
-  color: var(--color-panel-border);
+  color: var(--color-amber-dim);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -619,7 +695,7 @@ body {
   text-align: left;
   color: var(--color-amber-dim);
   font-weight: bold;
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 .comparison-table td.active-cell {
@@ -632,5 +708,5 @@ body {
 }
 
 .comparison-table td.saved-cell {
-  color: #ffc97a;
+  color: #fbbf24;
 }

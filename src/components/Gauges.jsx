@@ -9,6 +9,7 @@ export function CircularGauge({
   color = "var(--color-amber)", 
   warningThreshold = 85, 
   dangerThreshold = 95,
+  loadPct = null,
   size = 130
 }) {
   const radius = 50;
@@ -73,7 +74,9 @@ export function CircularGauge({
   }
 
   // Determine current active glow color based on threshold
-  const isRatioGauge = unit === "RATIO" || label.toUpperCase().includes("THRUST");
+  const upperLabel = label.toUpperCase();
+  const isRatioGauge = unit === "RATIO" || upperLabel.includes("THRUST");
+  const isEffGauge = upperLabel.includes("EFF");
   let glowColor = "var(--color-amber-glow)";
   let textColor = "var(--color-amber)";
 
@@ -88,6 +91,28 @@ export function CircularGauge({
       textColor = "var(--color-red)";
       glowColor = "var(--color-red-glow)";
     }
+  } else if (isEffGauge) {
+    if (clampedValue === 0 || clampedValue >= 72) {
+      textColor = "var(--color-green)";
+      glowColor = "var(--color-green-glow)";
+    } else if (clampedValue >= 55) {
+      textColor = "var(--color-amber)";
+      glowColor = "var(--color-amber-glow)";
+    } else {
+      textColor = "var(--color-red)";
+      glowColor = "var(--color-red-glow)";
+    }
+  } else if (loadPct !== null && Number.isFinite(loadPct)) {
+    if (loadPct > 100 || loadPct >= dangerThreshold) {
+      glowColor = "var(--color-red-glow)";
+      textColor = "var(--color-red)";
+    } else if (loadPct >= warningThreshold) {
+      glowColor = "var(--color-amber-glow)";
+      textColor = "var(--color-amber)";
+    } else {
+      textColor = "var(--color-green)";
+      glowColor = "var(--color-green-glow)";
+    }
   } else {
     if (clampedValue >= (max * (dangerThreshold / 100))) {
       glowColor = "var(--color-red-glow)";
@@ -101,16 +126,32 @@ export function CircularGauge({
     }
   }
 
-  // Dial scale labels matching mockup exactly
+  // Format dial scale label numbers cleanly (e.g. 1500 -> 1.5K, 4000 -> 4K)
+  const fmtDialNum = (n) => {
+    if (n === 0) return "0";
+    if (n >= 1000) {
+      const k = n / 1000;
+      return Number.isInteger(k) ? `${k}K` : `${k.toFixed(1)}K`;
+    }
+    return String(Math.round(n));
+  };
+
   let scaleLabels = [];
-  const upperLabel = label.toUpperCase();
-  if (upperLabel.includes("RPM")) scaleLabels = ["0", "4K", "8K", "12K", "16K"];
-  else if (upperLabel.includes("AMP")) scaleLabels = ["0", "40", "80", "120", "160"];
-  else if (upperLabel.includes("VOLT")) scaleLabels = ["0", "10", "20", "30", "40"];
-  else if (upperLabel.includes("WATT")) scaleLabels = ["0", "1K", "2K", "3K", "4K"];
-  else if (upperLabel.includes("EFF")) scaleLabels = ["0", "25", "50", "75", "100"];
-  else if (upperLabel.includes("TEMP")) scaleLabels = ["0", "50", "100", "150"];
-  else if (upperLabel.includes("THRUST") || upperLabel.includes("WT")) scaleLabels = ["0", "1.0", "2.0"];
+  if (upperLabel.includes("RPM")) {
+    scaleLabels = [0, 0.25, 0.5, 0.75, 1].map(f => fmtDialNum(max * f));
+  } else if (upperLabel.includes("AMP")) {
+    scaleLabels = [0, 0.25, 0.5, 0.75, 1].map(f => fmtDialNum(max * f));
+  } else if (upperLabel.includes("VOLT")) {
+    scaleLabels = [0, 0.25, 0.5, 0.75, 1].map(f => fmtDialNum(max * f));
+  } else if (upperLabel.includes("WATT")) {
+    scaleLabels = [0, 0.25, 0.5, 0.75, 1].map(f => fmtDialNum(max * f));
+  } else if (upperLabel.includes("EFF")) {
+    scaleLabels = ["0", "25", "50", "75", "100"];
+  } else if (upperLabel.includes("TEMP")) {
+    scaleLabels = ["0", "50", "100", "150"];
+  } else if (upperLabel.includes("THRUST") || upperLabel.includes("WT")) {
+    scaleLabels = ["0", "1.0", "2.0"];
+  }
 
   const renderedScaleLabels = scaleLabels.map((lbl, idx) => {
     const divs = scaleLabels.length - 1;

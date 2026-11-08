@@ -1,5 +1,5 @@
 import React from 'react';
-import { calculateSpecs, getMaxCells, getMinCells } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells, isEscVoltageCompatible, getPropDiamBounds, formatWeight } from '../utils/calcEngine';
 import { ShieldAlert, AlertTriangle, CheckCircle, Flame, BatteryCharging, Zap } from 'lucide-react';
 
 export default function ValidatorChecks({
@@ -7,11 +7,13 @@ export default function ValidatorChecks({
   selectedMotor,
   selectedEsc,
   selectedBattery,
-  selectedPropeller
+  selectedPropeller,
+  unitSystem = 'imperial'
 }) {
   const batteryWeightLbs = (selectedBattery?.weight || 0) / 453.59;
   const activeEmptyWeight = selectedAircraft?.emptyWeight || selectedAircraft?.flyingWeight || 8.5;
   const totalFlyingWeight = activeEmptyWeight + batteryWeightLbs;
+  const enginesCount = selectedAircraft?.enginesCount || 1;
   const dynamicAircraft = {
     ...selectedAircraft,
     emptyWeight: activeEmptyWeight,
@@ -27,41 +29,54 @@ export default function ValidatorChecks({
     throttle: 100 // Test at full load
   });
 
+  const motorAmps = specs.ampsPerMotor ?? (specs.amps / enginesCount);
+  const motorWatts = specs.wattsPerMotor ?? (specs.watts / enginesCount);
+
   // Run validations
   const checks = [];
 
-  // 1. ESC check
-  const escSafe = specs.amps <= selectedEsc.maxAmps;
-  const escMarginal = specs.amps > selectedEsc.maxAmps && specs.amps <= selectedEsc.burstAmps;
+  // 1. ESC Current Capacity check (evaluated per ESC against single motor draw)
+  const escSafe = specs.escLoad <= 85;
+  const escMarginal = specs.escLoad > 85 && specs.escLoad <= 100;
   checks.push({
     title: "ESC CURRENT CAPACITY",
-    description: `Current draw: ${specs.amps}A vs ESC max capacity: ${selectedEsc.maxAmps}A (burst: ${selectedEsc.burstAmps}A)`,
+    description: `Per-ESC current draw: ${motorAmps}A (${specs.escLoad}% load) ${enginesCount > 1 ? `[Total system: ${specs.amps}A across ${enginesCount} ESCs] ` : ''}vs ESC max continuous capacity: ${selectedEsc.maxAmps}A (burst: ${selectedEsc.burstAmps}A)`,
     status: escSafe ? 'pass' : escMarginal ? 'warning' : 'fail',
-    remedy: escSafe ? null : escMarginal ? "Avoid prolonged full-throttle flights beyond 10-15 seconds." : "High risk of ESC thermal destruction. Upgrade to a larger ESC (minimum 100A+)."
+    remedy: escSafe ? null : escMarginal ? "ESC is running above 85% continuous rating. Ensure direct cooling airflow and avoid prolonged WOT." : "High risk of ESC thermal destruction! Upgrade to a higher-amperage ESC."
   });
 
-  // 2. Motor Continuous Current check
-  const motorCurrentSafe = specs.amps <= selectedMotor.maxCurrent;
-  const motorCurrentMarginal = specs.amps > selectedMotor.maxCurrent && specs.amps <= selectedMotor.maxCurrent * 1.15;
-  const motorOverloadPct = selectedMotor.maxCurrent > 0 ? Math.round(((specs.amps / selectedMotor.maxCurrent) - 1) * 100) : 0;
+  // 2. ESC Voltage Rating check
+  const escVoltageSafe = isEscVoltageCompatible(selectedEsc, selectedBattery.cells);
+  const escVoltageStr = selectedEsc.voltageSupported || selectedEsc.voltageRange || "3S-6S";
+  checks.push({
+    title: "ESC VOLTAGE RATING",
+    description: `Selected Battery: ${selectedBattery.cells}S (${(selectedBattery.cells * 4.2).toFixed(1)}V charged) vs ESC Rated Voltage: ${escVoltageStr}`,
+    status: escVoltageSafe ? 'pass' : 'fail',
+    remedy: escVoltageSafe ? null : `CRITICAL ESC OVERVOLTAGE/UNDERVOLTAGE! ${selectedBattery.cells}S battery is outside ${selectedEsc.name} rated voltage (${escVoltageStr}). Select an HV-rated ESC.`
+  });
+
+  // 3. Motor Continuous Current check (evaluated per motor)
+  const motorCurrentSafe = specs.motorLoad <= 85;
+  const motorCurrentMarginal = specs.motorLoad > 85 && specs.motorLoad <= 100;
+  const motorOverloadPct = selectedMotor.maxCurrent > 0 ? Math.round(((motorAmps / selectedMotor.maxCurrent) - 1) * 100) : 0;
   checks.push({
     title: "MOTOR CONTINUOUS CURRENT LIMIT",
-    description: `Current draw: ${specs.amps}A vs Motor max continuous limit: ${selectedMotor.maxCurrent}A`,
+    description: `Per-motor current draw: ${motorAmps}A (${specs.motorLoad}% load) ${enginesCount > 1 ? `[${enginesCount}x Motors = ${specs.amps}A total] ` : ''}vs Motor max continuous limit: ${selectedMotor.maxCurrent}A`,
     status: motorCurrentSafe ? 'pass' : motorCurrentMarginal ? 'warning' : 'fail',
-    remedy: motorCurrentSafe ? null : motorCurrentMarginal ? "Motor will run warm. Limit continuous full-throttle operation." : `Severe motor overload! Current draw exceeds motor rating by +${motorOverloadPct}%. Downsize propeller diameter/pitch or lower cell count to prevent winding burnout.`
+    remedy: motorCurrentSafe ? null : motorCurrentMarginal ? "Motor is operating at 86-100% of continuous current limit. Limit continuous full-throttle passes." : `Severe motor overload! Current draw exceeds motor rating by +${motorOverloadPct}%. Downsize propeller diameter/pitch or lower cell count to prevent winding burnout.`
   });
 
-  // 3. Motor Power check
-  const motorWattsSafe = specs.watts <= selectedMotor.maxPower;
-  const motorWattsMarginal = specs.watts > selectedMotor.maxPower && specs.watts <= selectedMotor.maxPower * 1.2;
+  // 4. Motor Power check (evaluated per motor)
+  const motorWattsSafe = motorWatts <= selectedMotor.maxPower;
+  const motorWattsMarginal = motorWatts > selectedMotor.maxPower && motorWatts <= selectedMotor.maxPower * 1.15;
   checks.push({
     title: "MOTOR THERMAL POWER LIMIT",
-    description: `Calculated Power: ${specs.watts}W vs Motor max limit: ${selectedMotor.maxPower}W`,
+    description: `Per-motor power: ${motorWatts}W ${enginesCount > 1 ? `(Total airframe: ${specs.watts}W) ` : ''}vs Motor max limit: ${selectedMotor.maxPower}W`,
     status: motorWattsSafe ? 'pass' : motorWattsMarginal ? 'warning' : 'fail',
     remedy: motorWattsSafe ? null : motorWattsMarginal ? "Monitor motor core temperature. Improve cowled cooling airflow." : "Windings will overheat and burn. Decrease propeller diameter or pitch, or decrease battery voltage (cells)."
   });
 
-  // 4. Motor Voltage Rating check
+  // 5. Motor Voltage Rating check
   const maxMotorCells = getMaxCells(selectedMotor.voltageSupported);
   const minMotorCells = getMinCells(selectedMotor.voltageSupported);
   const voltageSafe = selectedBattery.cells >= minMotorCells && selectedBattery.cells <= maxMotorCells;
@@ -72,28 +87,40 @@ export default function ValidatorChecks({
     remedy: voltageSafe ? null : `Voltage out of spec! Selected ${selectedBattery.cells}S battery is outside motor rated range (${selectedMotor.voltageSupported}). Select a battery matching motor cell specs.`
   });
 
-  // 5. Battery Discharge C-Rate check
-  const maxBatAmps = (selectedBattery.capacity / 1000) * selectedBattery.cRating;
-  const batterySafe = specs.amps <= maxBatAmps * 0.8;
-  const batteryMarginal = specs.amps > maxBatAmps * 0.8 && specs.amps <= maxBatAmps;
+  // 6. Battery Discharge C-Rate check (aligned with calculateSpecs sustained discharge limit)
+  const maxBatAmps = Math.round((selectedBattery.capacity / 1000) * selectedBattery.cRating * 0.57);
+  const peakBurstBatAmps = Math.round((selectedBattery.capacity / 1000) * selectedBattery.cRating);
+  const batterySafe = specs.batteryLoad <= 85;
+  const batteryMarginal = specs.batteryLoad > 85 && specs.batteryLoad <= 100;
   checks.push({
     title: "BATTERY DISCHARGE RATE (C)",
-    description: `Current draw: ${specs.amps}A vs battery continuous max limit: ${maxBatAmps}A (${selectedBattery.cRating}C continuous)`,
+    description: `Total battery current draw: ${specs.amps}A (${specs.batteryLoad}% sustained load) vs sustained safe limit: ${maxBatAmps}A (${peakBurstBatAmps}A theoretical ${selectedBattery.cRating}C rating)`,
     status: batterySafe ? 'pass' : batteryMarginal ? 'warning' : 'fail',
-    remedy: batterySafe ? null : batteryMarginal ? "Battery cells will run warm. Ensure adequate venting." : "Severe risk of battery puffing, swelling or thermal runaway. Choose a battery pack with higher capacity or C-rating."
+    remedy: batterySafe ? null : batteryMarginal ? "Battery cells will run warm under sustained WOT. Ensure adequate venting." : "Severe risk of voltage sag, battery puffing, or thermal runaway. Choose a battery pack with higher capacity or C-rating."
   });
 
-  // 6. Thrust-to-Weight Flight Capability Check
+  // 7. Thrust-to-Weight Flight Capability Check
   const thrustSufficient = specs.thrustToWeight >= 0.7;
-  const thrustExcellent = specs.thrustToWeight >= 0.95;
+  const thrustExcellent = specs.thrustToWeight >= 0.90;
   checks.push({
     title: "THRUST-TO-WEIGHT FLIGHT CAPABILITY",
-    description: `Thrust-to-weight ratio: ${specs.thrustToWeight} : 1 (${specs.thrust} lbs thrust vs ${totalFlyingWeight.toFixed(2)} lbs flying weight [airframe: ${activeEmptyWeight.toFixed(2)} lbs + battery: ${batteryWeightLbs.toFixed(2)} lbs])`,
+    description: `Thrust-to-weight ratio: ${specs.thrustToWeight} : 1 (${formatWeight(specs.thrust, unitSystem, 2)} thrust vs ${formatWeight(totalFlyingWeight, unitSystem, 2)} flying weight [airframe: ${formatWeight(activeEmptyWeight, unitSystem, 2)} + battery: ${formatWeight(batteryWeightLbs, unitSystem, 2)}])`,
     status: thrustExcellent ? 'pass' : thrustSufficient ? 'warning' : 'fail',
-    remedy: thrustExcellent ? null : thrustSufficient ? "Flyable, scale performance. Takeoff run will require length." : "Insufficient power. The warbird may struggle to fly or stall on climb. Increase battery voltage or propeller size."
+    remedy: thrustExcellent ? null : thrustSufficient ? "Flyable scale performance. Takeoff roll will require scale runway distance." : "Insufficient thrust. The warbird may struggle to climb out safely. Increase battery voltage or propeller size."
   });
 
-  // 7. RPM propeller speed limits
+  // 8. Propeller Airframe Scale & Ground Clearance Check
+  const { minD, maxD } = getPropDiamBounds(dynamicAircraft, null);
+  const propScaleSafe = selectedPropeller.diameter >= minD - 1 && selectedPropeller.diameter <= maxD;
+  const propScaleWarning = (selectedPropeller.diameter === minD - 2 || selectedPropeller.diameter === maxD + 1);
+  checks.push({
+    title: "PROPELLER AIRFRAME SCALE & CLEARANCE",
+    description: `Selected Propeller: ${selectedPropeller.diameter}" diameter vs Airframe Scale Envelope: ${minD}" – ${maxD}" (${dynamicAircraft.wingspan}" WS${enginesCount > 1 ? `, ${enginesCount}-Engine` : ''})`,
+    status: propScaleSafe ? 'pass' : propScaleWarning ? 'warning' : 'fail',
+    remedy: propScaleSafe ? null : selectedPropeller.diameter > maxD ? `Propeller diameter (${selectedPropeller.diameter}") exceeds landing gear / nacelle ground clearance (${maxD}" max) and risks prop strike!` : `Propeller diameter (${selectedPropeller.diameter}") is undersized for ${dynamicAircraft.wingspan}" wingspan cowl & disc area.`
+  });
+
+  // 9. RPM propeller speed limits
   const propLimit = 190000 / selectedPropeller.diameter; // Standard APC E RPM limit formula
   const rpmSafe = specs.rpm <= propLimit;
   checks.push({
@@ -108,7 +135,7 @@ export default function ValidatorChecks({
   const totalWarnings = checks.filter(c => c.status === 'warning').length;
 
   return (
-    <div className="crt-effect" style={{ padding: '16px', maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', maxWidth: '1000px', margin: '0 auto' }}>
       <div className="metal-panel">
         <div className="screw" style={{ top: '8px', left: '8px' }}></div>
         <div className="screw" style={{ top: '8px', right: '8px' }}></div>

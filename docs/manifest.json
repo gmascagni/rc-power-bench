@@ -1,0 +1,20 @@
+{
+  "name": "RC Power Bench Pro — Avionics & Propulsion Configurator",
+  "short_name": "RC Power Bench",
+  "description": "Professional RC aircraft brushless power system calculator, aerodynamic wing loading studio, and telemetry dyno bench.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "categories": ["utilities", "education", "simulation"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { calculateSpecs } from '../utils/calcEngine';
+import { calculateSpecs, formatWeight, formatSpeed } from '../utils/calcEngine';
 import { CircularGauge } from './Gauges';
 
-export default function CalculatorEngine() {
+export default function CalculatorEngine({ unitSystem = 'imperial' }) {
   // Custom calculator state
   const [cells, setCells] = useState(6);
   const [capacity, setCapacity] = useState(5000);
@@ -29,7 +29,7 @@ export default function CalculatorEngine() {
   const specs = calculateSpecs({ aircraft, motor, esc, battery, propeller, throttle });
 
   return (
-    <div className="crt-effect" style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
       <div className="metal-panel">
         <div className="screw" style={{ top: '8px', left: '8px' }}></div>
         <div className="screw" style={{ top: '8px', right: '8px' }}></div>
@@ -37,13 +37,13 @@ export default function CalculatorEngine() {
         <div className="screw" style={{ bottom: '8px', right: '8px' }}></div>
 
         <div className="panel-header">
-          ★ POWER SYSTEM CALCULATOR ENGINE (MANUAL OVERRIDE BENCH)
+          ⚡ POWER SYSTEM CALCULATOR ENGINE (MANUAL OVERRIDE BENCH)
         </div>
 
-        <div className="card-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px', padding: '16px' }}>
+        <div className="card-content calc-engine-grid" style={{ padding: '16px' }}>
           
           {/* Controls Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderRight: '1px solid var(--color-panel-border)', paddingRight: '20px' }}>
+          <div className="calc-controls-col" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             
             {/* Battery Override */}
             <div>
@@ -88,7 +88,7 @@ export default function CalculatorEngine() {
                 </div>
                 <div>
                   <label style={{ fontSize: '9px', display: 'block', marginBottom: '2px' }}>MAX WATTS (W)</label>
-                  <input type="number" className="retro-input" value={maxPower} onChange={e => setMaxPower(parseInt(e.target.value) || 100)} min="100" max="6000" step="50" />
+                  <input type="number" className="retro-input" value={maxPower} onChange={e => setMaxPower(parseInt(e.target.value) || 100)} min="100" max="10000" step="50" />
                 </div>
                 <div>
                   <label style={{ fontSize: '9px', display: 'block', marginBottom: '2px' }}>MAX AMPS (A)</label>
@@ -157,15 +157,15 @@ export default function CalculatorEngine() {
 
             {/* Live readout grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-              <div style={{ border: '1px solid var(--color-panel-border)', borderRadius: '4px', padding: '10px', backgroundColor: '#120e0c' }}>
+              <div style={{ border: '1px solid var(--color-panel-border)', borderRadius: '4px', padding: '10px', backgroundColor: 'var(--color-card-bg)' }}>
                 <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>STATIC THRUST (EST)</div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--color-green)' }}>{specs.thrust} lbs</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--color-green)' }}>{formatWeight(specs.thrust, unitSystem, 2)}</div>
                 <div style={{ fontSize: '9px', color: '#ffb347', marginTop: '2px' }}>Ratio: {specs.thrustToWeight} : 1</div>
               </div>
-              <div style={{ border: '1px solid var(--color-panel-border)', borderRadius: '4px', padding: '10px', backgroundColor: '#120e0c' }}>
+              <div style={{ border: '1px solid var(--color-panel-border)', borderRadius: '4px', padding: '10px', backgroundColor: 'var(--color-card-bg)' }}>
                 <div style={{ fontSize: '9px', color: 'var(--color-amber-dim)' }}>PITCH SPEED (EST)</div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--color-green)' }}>{specs.pitchSpeed} MPH</div>
-                <div style={{ fontSize: '9px', color: '#ffb347', marginTop: '2px' }}>Level: ~{specs.topSpeed} MPH</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--color-green)' }}>{formatSpeed(specs.pitchSpeed, unitSystem)}</div>
+                <div style={{ fontSize: '9px', color: '#ffb347', marginTop: '2px' }}>Level: ~{formatSpeed(specs.topSpeed, unitSystem)}</div>
               </div>
             </div>
 

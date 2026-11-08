@@ -1,5 +1,5 @@
 import React from 'react';
-import { generatePowerCurve } from '../utils/calcEngine';
+import { generatePowerCurve, getPresetSetupForAircraft } from '../utils/calcEngine';
 import { recommendedSetups, motors, escs, batteries, propellers } from '../data/rcData';
 
 export default function PowerCurveChart({ aircraft, motor, esc, battery, propeller, currentThrottle }) {
@@ -7,22 +7,21 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   const data = generatePowerCurve(aircraft, motor, esc, battery, propeller);
 
   // Retrieve manufacturer recommended stock setup components for the selected aircraft
-  const stockConfig = aircraft?.stockSetup || recommendedSetups?.scale || {};
-  const recMotor = motors.find(m => m.id === stockConfig.motorId) || motor || motors[0];
-  const recEsc = escs.find(e => e.id === stockConfig.escId) || esc || escs[0];
-  const recBattery = batteries.find(b => b.id === stockConfig.batteryId) || battery || batteries[0];
-  const recPropeller = propellers.find(p => p.id === stockConfig.propellerId) || propeller || propellers[0];
+  const stockPreset = getPresetSetupForAircraft(aircraft, 'scale', { motors, escs, batteries, propellers });
+  const recMotor = stockPreset?.motor || motor || motors[0];
+  const recEsc = stockPreset?.esc || esc || escs[0];
+  const recBattery = stockPreset?.battery || battery || batteries[0];
+  const recPropeller = stockPreset?.propeller || propeller || propellers[0];
 
   // Generate recommended data points
   const recData = generatePowerCurve(aircraft, recMotor, recEsc, recBattery, recPropeller);
 
-  // Retrieve saved model / benchmark setup (Fastest / Speed Run or Auto-Tuned prop)
-  const optSetup = recommendedSetups?.fastest || {};
-  const optMotor = motor || motors[0];
-  const optEsc = esc || escs[0];
-  const optBattery = battery || batteries[0];
-  // Select optimal speed prop for motor & battery if active prop differs, or fastest setup prop
-  const optPropeller = propellers.find(p => p.id === optSetup.propellerId) || propeller || propellers[0];
+  // Retrieve scale-appropriate Aggressive / Speed Tuned benchmark setup for the selected aircraft
+  const aggrPreset = getPresetSetupForAircraft(aircraft, 'aggressive', { motors, escs, batteries, propellers });
+  const optMotor = aggrPreset?.motor || motor || motors[0];
+  const optEsc = aggrPreset?.esc || esc || escs[0];
+  const optBattery = aggrPreset?.battery || battery || batteries[0];
+  const optPropeller = aggrPreset?.propeller || propeller || propellers[0];
 
   // Generate benchmark data points
   const optData = generatePowerCurve(aircraft, optMotor, optEsc, optBattery, optPropeller);
@@ -30,7 +29,25 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   // Dimensions of SVG (Enlarged chart canvas)
   const width = 500;
   const height = 230;
-  const padding = { top: 24, right: 42, bottom: 32, left: 42 };
+  const padding = { top: 24, right: 44, bottom: 32, left: 42 };
+
+  // Dynamic Y-axis scaling so 1.2m foamies (40A/600W) and Giant Scale / Multi-Engine warbirds (250A/7500W) never clip or flatten
+  const peakAmps = Math.max(
+    data[data.length - 1]?.amps || 0,
+    recData[recData.length - 1]?.amps || 0,
+    optData[optData.length - 1]?.amps || 0,
+    30
+  );
+  const peakWatts = Math.max(
+    data[data.length - 1]?.watts || 0,
+    recData[recData.length - 1]?.watts || 0,
+    optData[optData.length - 1]?.watts || 0,
+    500
+  );
+
+  const maxAmpsAxis = peakAmps <= 60 ? 60 : (peakAmps <= 150 ? 150 : (peakAmps <= 250 ? 250 : 400));
+  const maxWattsAxis = peakWatts <= 1500 ? 1500 : (peakWatts <= 3000 ? 3000 : (peakWatts <= 5000 ? 5000 : (peakWatts <= 7500 ? 7500 : 10000)));
+  const yTicks = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
 
   // Scale functions
   const getX = (throttle) => {
@@ -38,13 +55,13 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
   };
 
   const getYAmps = (amps) => {
-    // Amps ranges 0 to 150
-    return height - padding.bottom - (amps / 150) * (height - padding.top - padding.bottom);
+    const clamped = Math.min(Math.max(amps, 0), maxAmpsAxis);
+    return height - padding.bottom - (clamped / maxAmpsAxis) * (height - padding.top - padding.bottom);
   };
 
   const getYWatts = (watts) => {
-    // Watts ranges 0 to 5000
-    return height - padding.bottom - (watts / 5000) * (height - padding.top - padding.bottom);
+    const clamped = Math.min(Math.max(watts, 0), maxWattsAxis);
+    return height - padding.bottom - (clamped / maxWattsAxis) * (height - padding.top - padding.bottom);
   };
 
   // Generate path strings for selected setup
@@ -119,10 +136,12 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
 
         {/* Grid lines */}
         {/* Horizontal grids */}
-        {[0, 30, 60, 90, 120, 150].map((val) => {
-          const y = getYAmps(val);
+        {yTicks.map((frac) => {
+          const valAmps = Math.round(frac * maxAmpsAxis);
+          const valWatts = Math.round(frac * maxWattsAxis);
+          const y = getYAmps(valAmps);
           return (
-            <g key={`y-${val}`}>
+            <g key={`y-${frac}`}>
               <line 
                 x1={padding.left} 
                 y1={y} 
@@ -133,9 +152,9 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
                 strokeDasharray="2,4" 
               />
               {/* Amps label (Left) */}
-              <text x={padding.left - 6} y={y + 4} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="end">{val}</text>
-              {/* Watts label (Right, maps 150A -> 5000W) */}
-              <text x={width - padding.right + 6} y={y + 4} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="start">{Math.round(val * 5000 / 150)}</text>
+              <text x={padding.left - 6} y={y + 4} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="end">{valAmps}</text>
+              {/* Watts label (Right) */}
+              <text x={width - padding.right + 6} y={y + 4} fill="var(--color-amber-dim)" fontSize="13.5" fontWeight="bold" textAnchor="start">{valWatts}</text>
             </g>
           );
         })}
@@ -219,8 +238,12 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
 
         {/* Setup 2: Current Workbench Setup (Active Selected) */}
         {(() => {
+          const engines = aircraft?.enginesCount || 1;
           const activeAmps = currentPt.amps > 0 ? currentPt.amps : data[data.length - 1].amps;
-          const currentRatio = activeAmps / Math.max(motor.maxCurrent, 1);
+          const activeMotorAmps = currentPt.ampsPerMotor !== undefined
+            ? (currentPt.ampsPerMotor > 0 ? currentPt.ampsPerMotor : data[data.length - 1].ampsPerMotor)
+            : (activeAmps / engines);
+          const currentRatio = activeMotorAmps / Math.max(motor.maxCurrent, 1);
           let ampColor = "var(--color-green)";
           let ampGlow = "0 0 8px var(--color-green-glow)";
           let statusLabel = "SAFE";
@@ -236,32 +259,32 @@ export default function PowerCurveChart({ aircraft, motor, esc, battery, propell
           }
 
           return (
-            <div style={{ padding: '8px 10px', background: 'rgba(255, 179, 71, 0.05)', borderRadius: '4px', border: '1px solid #ffb347' }}>
+            <div style={{ padding: '8px 10px', background: 'rgba(56, 189, 248, 0.06)', borderRadius: '4px', border: '1px solid var(--color-amber)' }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', fontWeight: 'bold', marginBottom: '4px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ display: 'inline-block', width: '16px', height: '3.5px', background: 'var(--color-amber)', boxShadow: '0 0 5px var(--color-amber-glow)' }}></span>
                   <span style={{ color: 'var(--color-amber)' }}>2. CURRENT WORKBENCH SETUP (SELECTED)</span>
                 </div>
                 <span style={{ color: ampColor, textShadow: ampGlow, fontSize: '13px', fontFamily: 'var(--font-mono)' }}>
-                  {Math.round(currentPt.watts)} W / {activeAmps} A [{statusLabel}]
+                  {Math.round(currentPt.watts)} W / {activeAmps} A {engines > 1 ? `(${activeMotorAmps}A/motor) ` : ''}[{statusLabel}]
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'var(--font-mono)', lineHeight: '1.4' }}>
-                <span style={{ color: '#fff', fontWeight: 'bold' }}>{battery.cells}S ({(battery.cells * 3.7).toFixed(1)}V)</span> | <span style={{ color: '#ffc97a', fontWeight: 'bold' }}>{motor.name}</span> | <span style={{ color: '#63b3ed', fontWeight: 'bold' }}>{propeller.name}</span> | <span>{esc.name}</span>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>{battery.cells}S ({(battery.cells * 3.7).toFixed(1)}V)</span> | <span style={{ color: '#ffc97a', fontWeight: 'bold' }}>{engines > 1 ? `${engines}x ` : ''}{motor.name}</span> | <span style={{ color: '#63b3ed', fontWeight: 'bold' }}>{engines > 1 ? `${engines}x ` : ''}{propeller.name}</span> | <span>{engines > 1 ? `${engines}x ` : ''}{esc.name}</span>
               </div>
             </div>
           );
         })()}
 
-        {/* Setup 3: Saved Model / Speed Tuned Setup */}
+        {/* Setup 3: Aggressive Scale / Speed Tuned Benchmark Setup */}
         <div style={{ padding: '8px 10px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ color: 'var(--color-cyan)', fontWeight: 'bold' }}>━ · </span>
-              <span style={{ color: 'var(--color-cyan)' }}>3. SAVED MODEL / BENCHMARK TUNED SETUP</span>
+              <span style={{ color: 'var(--color-cyan)' }}>3. AGGRESSIVE SCALE BENCHMARK SETUP</span>
             </div>
-            <span style={{ color: wattsDelta >= 0 ? "var(--color-green)" : "var(--color-red)", fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
-              {wattsDelta >= 0 ? `+${wattsDelta}W (+${wattsPct}%) VS STOCK` : `${wattsDelta}W (${wattsPct}%) VS STOCK`}
+            <span style={{ color: 'var(--color-cyan)', fontSize: '11.5px', fontFamily: 'var(--font-mono)' }}>
+              {Math.round(optPt.watts)} W / {Math.round(optPt.amps)} A ({wattsDelta >= 0 ? `WORKBENCH +${wattsPct}% VS STOCK` : `WORKBENCH ${wattsPct}% VS STOCK`})
             </span>
           </div>
           <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', fontFamily: 'var(--font-mono)', lineHeight: '1.4' }}>

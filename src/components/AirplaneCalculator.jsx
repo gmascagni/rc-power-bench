@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { aircrafts, motors, batteries, escs, propellers } from '../data/rcData';
-import { getRecommendationsForAircraftSpecs, formatAircraftTitle } from '../utils/calcEngine';
+import { calculateSpecs, getRecommendationsForAircraftSpecs, formatAircraftTitle, formatWeight, formatSpeed } from '../utils/calcEngine';
 import { AlertTriangle, Plane, Zap, Shield, HelpCircle } from 'lucide-react';
 
 export default function AirplaneCalculator({
@@ -13,7 +13,8 @@ export default function AirplaneCalculator({
   setThrottle,
   setActiveTab,
   customFleet = [],
-  setCustomFleet = () => {}
+  setCustomFleet = () => {},
+  unitSystem = 'imperial'
 }) {
   const [modelName, setModelName] = useState("Custom Warbird .60");
   const [manufacturer, setManufacturer] = useState("Custom Builder");
@@ -78,7 +79,9 @@ export default function AirplaneCalculator({
     motors,
     batteries,
     escs,
-    propellers
+    propellers,
+    enginesCount,
+    flightStyle
   });
 
   // Calculated thrust and T:W for matching components
@@ -135,15 +138,15 @@ export default function AirplaneCalculator({
   };
 
   return (
-    <div className="crt-effect" style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
       <div className="metal-panel">
         <div className="screw" style={{ top: '8px', left: '8px' }}></div>
         <div className="screw" style={{ top: '8px', right: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', left: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', right: '8px' }}></div>
 
-        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>★ AIRPLANE CALCULATOR (AERODYNAMIC & AIRFRAME SPECIFICATION STUDIO)</div>
+        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div>✈️ AIRPLANE CALCULATOR — AERODYNAMIC & AIRFRAME SPECIFICATION STUDIO</div>
           <span style={{ fontSize: '10px', color: 'var(--color-amber-dim)' }}>STANDALONE AIRFRAME ENGINE</span>
         </div>
 

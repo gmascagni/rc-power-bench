@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { CircularGauge, HorizontalBarGauge } from './Gauges';
 import PowerCurveChart from './PowerCurveChart';
-import { calculateSpecs, getMaxCells, getMinCells, getRecommendationsForAircraftSpecs, formatAircraftTitle, tuneSetupForTargetVoltage } from '../utils/calcEngine';
+import { calculateSpecs, getMaxCells, getMinCells, getAirframeMaxCells, isEscVoltageCompatible, isMotorVoltageCompatible, getPropDiamBounds, getRecommendationsForAircraftSpecs, getPresetSetupForAircraft, getFastestSafeSetupForAircraft, formatAircraftTitle, tuneSetupForTargetVoltage, formatWeight, formatLength, formatArea, formatSpeed } from '../utils/calcEngine';
 import { recommendedSetups, aircrafts, motors, escs, batteries, propellers } from '../data/rcData';
-import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, CheckCircle, Zap, Shield, HelpCircle, Activity, Volume2, VolumeX } from 'lucide-react';
 import heroBanner from '../assets/hero-banner.jpg';
 import pinupPilot from '../assets/pinup-pilot.jpg';
 
@@ -173,7 +173,13 @@ export default function CockpitOverview({
   setThrottle,
   setActiveTab = () => {},
   customFleet = [],
-  setCustomFleet = () => {}
+  setCustomFleet = () => {},
+  unitSystem = 'imperial',
+  setUnitSystem = () => {},
+  crtEnabled = true,
+  setCrtEnabled = () => {},
+  soundEnabled = false,
+  setSoundEnabled = () => {}
 }) {
   const [isSimulating, setIsSimulating] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -243,58 +249,23 @@ export default function CockpitOverview({
   const [fastestSetup, setFastestSetup] = useState(null);
 
   useEffect(() => {
-    let bestPitchSpeed = 0;
-    let bestCombo = null;
-
-    // Rule: For airplanes smaller than 1.6m (<= 65" wingspan / 1.5m foam warbirds), keep battery cell count to 8S MAX
-    const maxAllowedCells = selectedAircraft.wingspan <= 65 ? 8 : 12;
-
-    for (const m of motors) {
-      const maxMotorCells = getMaxCells(m.voltageSupported);
-      const minMotorCells = getMinCells(m.voltageSupported);
-
-      for (const e of escs) {
-        const maxEscCells = getMaxCells(e.voltageSupported);
-        const minEscCells = getMinCells(e.voltageSupported);
-
-        for (const b of batteries) {
-          if (b.cells > maxAllowedCells) continue;
-          if (b.cells > maxMotorCells || b.cells < minMotorCells) continue;
-          if (b.cells > maxEscCells || b.cells < minEscCells) continue;
-
-          for (const p of propellers) {
-            const s = calculateSpecs({
-              aircraft: selectedAircraft,
-              motor: m,
-              esc: e,
-              battery: b,
-              propeller: p,
-              throttle: 100
-            });
-
-            // Ensure physical safety bounds are strictly preserved
-            const propRpmLimit = 190000 / p.diameter;
-            const isSafe = 
-              s.amps <= m.maxCurrent && 
-              s.amps <= e.maxAmps && 
-              s.watts <= m.maxPower &&
-              s.rpm <= propRpmLimit;
-            
-            if (isSafe && s.pitchSpeed > bestPitchSpeed) {
-              bestPitchSpeed = s.pitchSpeed;
-              bestCombo = {
-                motorId: m.id,
-                escId: e.id,
-                batteryId: b.id,
-                propellerId: p.id,
-                pitchSpeed: s.pitchSpeed
-              };
-            }
-          }
-        }
-      }
+    const fastest = getFastestSafeSetupForAircraft(selectedAircraft, {
+      motors,
+      escs,
+      batteries,
+      propellers
+    });
+    if (fastest && fastest.motor && fastest.esc && fastest.battery && fastest.propeller) {
+      setFastestSetup({
+        motorId: fastest.motor.id,
+        escId: fastest.esc.id,
+        batteryId: fastest.battery.id,
+        propellerId: fastest.propeller.id,
+        pitchSpeed: fastest.specs.pitchSpeed
+      });
+    } else {
+      setFastestSetup(null);
     }
-    setFastestSetup(bestCombo);
   }, [selectedAircraft]);
 
   const applyFastestSetup = () => {
@@ -315,20 +286,46 @@ export default function CockpitOverview({
   const [autoTuneNotice, setAutoTuneNotice] = useState(null);
 
   // Auto-Optimizer: Find the ideal safe propeller for selected motor on user's selected battery.
-  // If no safe prop exists on current battery (e.g. 360KV on 6S), dynamically search higher/lower voltage batteries!
+  // Enforces scale propeller diameter bounds (both minD and maxD) and safe thermal loads (<= 92%).
   const getOptimalPropForMotorAndBattery = (motorToOptimize, activeBattery, activeEsc) => {
     if (!motorToOptimize || !activeBattery) return null;
 
-    const escToUse = activeEsc || escs[0];
+    const stockProp = propellers.find(p => p.id === selectedAircraft?.stockSetup?.propellerId) || null;
+    const { minD, maxD } = getPropDiamBounds(dynamicAircraft, stockProp);
 
-    const testSetup = (b, p) => {
-      const maxMotorCells = getMaxCells(motorToOptimize.voltageSupported);
-      const minMotorCells = getMinCells(motorToOptimize.voltageSupported);
+    const findValidEscFor = (b, reqAmpsPerMotor) => {
+      if (activeEsc && isEscVoltageCompatible(activeEsc, b.cells) && activeEsc.maxAmps >= reqAmpsPerMotor * 1.08) {
+        return activeEsc;
+      }
+      const validEscs = escs
+        .filter(e => isEscVoltageCompatible(e, b.cells))
+        .sort((a, bEsc) => a.maxAmps - bEsc.maxAmps);
+      if (validEscs.length === 0) return activeEsc || escs[0];
+      return validEscs.find(e => e.maxAmps >= reqAmpsPerMotor * 1.18) || validEscs[validEscs.length - 1];
+    };
 
-      if (b.cells > maxMotorCells || b.cells < minMotorCells) {
+    const testSetup = (b, p, allowRelaxedBounds = false) => {
+      if (!isMotorVoltageCompatible(motorToOptimize, b.cells)) {
         return null;
       }
 
+      const dMin = allowRelaxedBounds ? Math.max(10, minD - 1) : minD;
+      const dMax = allowRelaxedBounds ? Math.min(26, maxD + 1) : maxD;
+      if (p.diameter < dMin || p.diameter > dMax) {
+        return null;
+      }
+
+      const probeEsc = activeEsc && isEscVoltageCompatible(activeEsc, b.cells) ? activeEsc : findValidEscFor(b, motorToOptimize.maxCurrent);
+      const probeSpecs = calculateSpecs({
+        aircraft: dynamicAircraft,
+        motor: motorToOptimize,
+        esc: probeEsc,
+        battery: b,
+        propeller: p,
+        throttle: 100
+      });
+
+      const escToUse = findValidEscFor(b, probeSpecs.ampsPerMotor);
       const s = calculateSpecs({
         aircraft: dynamicAircraft,
         motor: motorToOptimize,
@@ -338,82 +335,93 @@ export default function CockpitOverview({
         throttle: 100
       });
 
-      let minDiameterForClass = 11.0;
-      if (dynamicAircraft.wingspan >= 85 || (dynamicAircraft.class && dynamicAircraft.class.includes('GIANT SCALE'))) {
-        minDiameterForClass = 18.0;
-      } else if (dynamicAircraft.wingspan >= 70) {
-        minDiameterForClass = 14.0;
-      } else if (dynamicAircraft.class === '60-CLASS') {
-        minDiameterForClass = 12.0;
-      } else if (dynamicAircraft.class === '50-CLASS') {
-        minDiameterForClass = 11.0;
-      }
-
       const propRpmLimit = 190000 / p.diameter;
+      const motorWatts = s.wattsPerMotor ?? s.watts;
 
       // Physical & Electrical Safety Bounds
-      const isSafe = 
-        s.amps <= motorToOptimize.maxCurrent &&
-        s.amps <= escToUse.maxAmps &&
-        s.watts <= motorToOptimize.maxPower &&
+      const isSafe =
+        s.motorLoad <= 92 &&
+        s.escLoad <= 92 &&
+        s.batteryLoad <= 92 &&
+        motorWatts <= motorToOptimize.maxPower &&
         s.rpm <= propRpmLimit &&
-        s.thrustToWeight >= 0.50;
+        s.thrustToWeight >= 0.65;
 
       if (!isSafe) return null;
 
-      // Scale preference bonus for scale-appropriate prop diameters
-      const scaleBonus = p.diameter >= minDiameterForClass ? 50.0 : 0.0;
-      const score = scaleBonus + (s.pitchSpeed * 10.0) + (s.thrustToWeight * 5.0);
-      return { prop: p, specs: s, score };
+      const loadSweetSpot = 40 - Math.abs(76 - s.motorLoad) * 0.5;
+      const score = loadSweetSpot + (s.pitchSpeed * 8.0) + (s.thrustToWeight * 15.0);
+      return { prop: p, esc: escToUse, specs: s, score };
     };
 
-    // 1. Try active battery first
-    let bestCurrentScore = -1;
-    let bestCurrentProp = null;
+    // 1. Try active battery first within strict scale diameter bounds, then relaxed bounds (+-1")
+    for (const relaxed of [false, true]) {
+      let bestCurrentScore = -Infinity;
+      let bestCurrentRes = null;
 
-    for (const p of propellers) {
-      const res = testSetup(activeBattery, p);
-      if (res && res.score > bestCurrentScore) {
-        bestCurrentScore = res.score;
-        bestCurrentProp = res.prop;
+      for (const p of propellers) {
+        const res = testSetup(activeBattery, p, relaxed);
+        if (res && res.score > bestCurrentScore) {
+          bestCurrentScore = res.score;
+          bestCurrentRes = res;
+        }
+      }
+
+      if (bestCurrentRes) {
+        const escChanged = activeEsc && bestCurrentRes.esc.id !== activeEsc.id;
+        return {
+          prop: bestCurrentRes.prop,
+          recommendedBattery: null,
+          recommendedEsc: escChanged ? bestCurrentRes.esc : null,
+          notice: escChanged
+            ? `⚡ PROP & ESC MATCHED: Selected ${bestCurrentRes.prop.name} and upgraded ESC to ${bestCurrentRes.esc.name} for safe voltage/current headroom.`
+            : null
+        };
       }
     }
 
-    if (bestCurrentProp) {
-      return { prop: bestCurrentProp, recommendedBattery: null, notice: null };
-    }
+    // 2. If no prop works on active battery, search across scale-appropriate batteries supported by motor & airframe
+    const maxAirframeCells = getAirframeMaxCells(dynamicAircraft, activeBattery.cells);
+    const maxBatWeightG = (dynamicAircraft.flyingWeight || 8.5) * 453.592 * 0.32;
+    const candidateBatteries = batteries.filter(b =>
+      b.cells <= Math.max(maxAirframeCells, getMinCells(motorToOptimize.voltageSupported)) &&
+      b.weight <= maxBatWeightG * 1.35
+    );
+    const batPool = candidateBatteries.length > 0 ? candidateBatteries : batteries;
 
-    // 2. If no prop works on active battery, search across ALL supported batteries (e.g. 8S, 10S, 12S)!
-    let bestOverallScore = -1;
-    let bestOverallProp = null;
+    let bestOverallScore = -Infinity;
+    let bestOverallRes = null;
     let bestOverallBattery = null;
 
-    for (const b of batteries) {
+    for (const b of batPool) {
       for (const p of propellers) {
-        const res = testSetup(b, p);
+        const res = testSetup(b, p, true);
         if (res && res.score > bestOverallScore) {
           bestOverallScore = res.score;
-          bestOverallProp = res.prop;
+          bestOverallRes = res;
           bestOverallBattery = b;
         }
       }
     }
 
-    if (bestOverallProp && bestOverallBattery) {
+    if (bestOverallRes && bestOverallBattery) {
+      const escChanged = activeEsc && bestOverallRes.esc.id !== activeEsc.id;
       return {
-        prop: bestOverallProp,
+        prop: bestOverallRes.prop,
         recommendedBattery: bestOverallBattery,
-        notice: `⚡ VOLTAGE OPTIMIZED: ${motorToOptimize.name} requires ${bestOverallBattery.cells}S voltage. Auto-switched to ${bestOverallBattery.name} with ${bestOverallProp.name}!`
+        recommendedEsc: escChanged ? bestOverallRes.esc : null,
+        notice: `⚡ VOLTAGE OPTIMIZED: ${motorToOptimize.name} requires ${bestOverallBattery.cells}S voltage. Auto-switched to ${bestOverallBattery.name} with ${bestOverallRes.prop.name}${escChanged ? ` & ${bestOverallRes.esc.name}` : ''}!`
       };
     }
 
-    return { prop: null, recommendedBattery: null, error: `No safe propeller found for ${motorToOptimize.name}. Check motor KV rating or ESC / Battery limits.` };
+    return { prop: null, recommendedBattery: null, recommendedEsc: null, error: `No safe propeller found for ${motorToOptimize.name}. Check motor KV rating or ESC / Battery limits.` };
   };
 
   const handleTuneByVoltage = (targetCells) => {
     const result = tuneSetupForTargetVoltage({
       targetCells,
       aircraft: dynamicAircraft,
+      currentMotor: selectedMotor,
       motors,
       batteries,
       escs,
@@ -438,6 +446,9 @@ export default function CockpitOverview({
     if (result && result.prop) {
       if (result.recommendedBattery) {
         setSelectedBattery(result.recommendedBattery);
+      }
+      if (result.recommendedEsc) {
+        setSelectedEsc(result.recommendedEsc);
       }
       setSelectedPropeller(result.prop);
       setThrottle(100);
@@ -500,113 +511,23 @@ export default function CockpitOverview({
     throttle: 70
   });
 
-  // Apply Recommended Setup (Tailored dynamically to aircraft scale size & manufacturer specs)
+  // Apply Recommended Setup (Tailored dynamically to aircraft's Factory Stock baseline & scale size)
   const applySetup = (type) => {
     setActiveSetupType(type);
-    const ws = dynamicAircraft.wingspan || 63;
-    const isGiant = ws >= 80 || (dynamicAircraft.class && dynamicAircraft.class.includes('GIANT SCALE'));
-    const isTwin = (dynamicAircraft.enginesCount || 1) > 1;
+    setAutoTuneNotice(null);
 
-    let targetPropId = null;
-    let targetMotorId = null;
-    let targetBatteryId = null;
-    let targetEscId = null;
+    const preset = getPresetSetupForAircraft(dynamicAircraft, type, {
+      motors,
+      escs,
+      batteries,
+      propellers
+    });
 
-    if (type === 'scale' && dynamicAircraft.stockSetup) {
-      targetMotorId = dynamicAircraft.stockSetup.motorId;
-      targetBatteryId = dynamicAircraft.stockSetup.batteryId;
-      targetPropId = dynamicAircraft.stockSetup.propellerId;
-      targetEscId = dynamicAircraft.stockSetup.escId;
-    } else if (ws <= 52) {
-      // Sub-1.3m / 1.2m Foamies (Capped to 4S MAX for wing loading realism)
-      if (type === 'safe') {
-        targetMotorId = "spektrum-15-850";
-        targetBatteryId = "3s-2200mah-30c";
-        targetEscId = "avian-70a";
-        targetPropId = "eflite-12x8-3";
-      } else if (type === 'scale') {
-        targetMotorId = "spektrum-15-850";
-        targetBatteryId = "4s-2200mah-45c";
-        targetEscId = "avian-70a";
-        targetPropId = "eflite-12x8-3";
-      } else if (type === 'aggressive' || type === 'extreme') {
-        targetMotorId = "spektrum-15-850";
-        targetBatteryId = "4s-3200mah-50c";
-        targetEscId = "avian-70a";
-        targetPropId = type === 'extreme' ? "apc-13x8e" : "eflite-12x8-3";
-      }
-    } else if (ws <= 60) {
-      // 1.5m Foamies (Capped to 6S MAX for wing loading realism)
-      if (type === 'safe') {
-        targetMotorId = "spektrum-4260-480";
-        targetBatteryId = "4s-5000mah-30c";
-        targetEscId = "avian-70a";
-        targetPropId = "eflite-15x8-3";
-      } else if (type === 'scale') {
-        targetMotorId = "spektrum-4260-480";
-        targetBatteryId = "6s-5000mah-45c";
-        targetEscId = "avian-70a";
-        targetPropId = "eflite-15x8-3";
-      } else if (type === 'aggressive') {
-        targetMotorId = "spektrum-4260-480";
-        targetBatteryId = "6s-5000mah-45c";
-        targetEscId = "avian-70a";
-        targetPropId = "eflite-15x8-4";
-      } else if (type === 'extreme') {
-        targetMotorId = "spektrum-4260-480";
-        targetBatteryId = "6s-6000mah-50c";
-        targetEscId = "avian-100a";
-        targetPropId = "eflite-15x8-4";
-      }
-    } else if (isGiant) {
-      // 80"+ Giant Scale Warbirds (10S - 12S Heavy Outrunners)
-      if (type === 'safe') {
-        targetMotorId = "badass-4530-440";
-        targetBatteryId = "8s-5000mah-45c";
-        targetEscId = "hobbywing-120a-hv";
-        targetPropId = isTwin ? "apc-20x10e" : "apc-20x10e";
-      } else if (type === 'scale') {
-        targetMotorId = "badass-4530-440";
-        targetBatteryId = "10s-5000mah-45c";
-        targetEscId = "hobbywing-120a-hv";
-        targetPropId = isTwin ? "biela-20x12-3" : "apc-22x10e";
-      } else if (type === 'aggressive') {
-        targetMotorId = "badass-4530-360";
-        targetBatteryId = "12s-5000mah-45c";
-        targetEscId = "hobbywing-120a-hv";
-        targetPropId = isTwin ? "biela-20x12-3" : "apc-22x12e";
-      } else if (type === 'extreme') {
-        targetMotorId = "badass-5345-210";
-        targetBatteryId = "12s-5000mah-60c";
-        targetEscId = "castle-edge-160a";
-        targetPropId = "apc-24x12e";
-      }
-    } else {
-      // .60-Class & Mid-Scale Warbirds (6S - 8S Baseline)
-      const setup = recommendedSetups[type];
-      if (setup) {
-        targetMotorId = setup.motorId;
-        targetBatteryId = setup.batteryId;
-        targetEscId = setup.escId;
-        targetPropId = setup.propellerId;
-      }
-    }
-
-    if (targetMotorId) {
-      const m = motors.find(item => item.id === targetMotorId);
-      if (m) setSelectedMotor(m);
-    }
-    if (targetEscId) {
-      const e = escs.find(item => item.id === targetEscId);
-      if (e) setSelectedEsc(e);
-    }
-    if (targetBatteryId) {
-      const b = batteries.find(item => item.id === targetBatteryId);
-      if (b) setSelectedBattery(b);
-    }
-    if (targetPropId) {
-      const p = propellers.find(item => item.id === targetPropId);
-      if (p) setSelectedPropeller(p);
+    if (preset) {
+      if (preset.motor) setSelectedMotor(preset.motor);
+      if (preset.esc) setSelectedEsc(preset.esc);
+      if (preset.battery) setSelectedBattery(preset.battery);
+      if (preset.propeller) setSelectedPropeller(preset.propeller);
     }
     setThrottle(100);
   };
@@ -798,144 +719,137 @@ export default function CockpitOverview({
   };
 
   return (
-    <div className="crt-effect">
-      <div className="crt-vignette"></div>
-      
-      {/* 0. Top Header */}
-      <header className="metal-panel" style={{ marginBottom: '16px', borderRadius: '0', borderWidth: '0 0 2px 0', position: 'relative', overflow: 'hidden' }}>
+    <div>
+      {/* 0. Top Avionics Hangar Header */}
+      <header className="metal-panel" style={{ marginBottom: '12px', borderRadius: '0', borderWidth: '0 0 2px 0', position: 'relative', overflow: 'hidden' }}>
         <div className="screw" style={{ top: '8px', left: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', left: '8px' }}></div>
-        
-        {/* Red Ribbon in the top-right corner of the header panel */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: 0,
-          height: 0,
-          borderStyle: 'solid',
-          borderWidth: '0 38px 38px 0',
-          borderColor: `transparent var(--color-red) transparent transparent`,
-          zIndex: 20
-        }}>
-          <span style={{
-            position: 'absolute',
-            top: '3px',
-            right: '-32px',
-            color: '#fff',
-            fontSize: '7.5px',
-            fontWeight: 'bold',
-            transform: 'rotate(45deg)',
-            display: 'block',
-            width: '35px',
-            textAlign: 'center',
-            fontFamily: 'var(--font-mono)'
-          }}>v3.0.0</span>
-        </div>
+        <div className="screw" style={{ top: '8px', right: '8px' }}></div>
+        <div className="screw" style={{ bottom: '8px', right: '8px' }}></div>
 
-        <div className="flex-between header-flex" style={{ padding: '8px 24px' }}>
-          {/* Logo Section */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <svg width="180" height="50" viewBox="0 0 180 50">
+        <div className="flex-between header-flex" style={{ padding: '10px 24px', gap: '14px' }}>
+          {/* Brand Aviation Crest Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <svg width="175" height="48" viewBox="0 0 180 50">
               {/* Wing Left */}
-              <path d="M40,25 C20,13 10,16 2,21 C12,27 25,27 38,25 C28,29 18,31 8,31 C20,35 32,33 40,31" fill="#731b1b" stroke="#5a6778" strokeWidth="1" />
+              <path d="M40,25 C20,13 10,16 2,21 C12,27 25,27 38,25 C28,29 18,31 8,31 C20,35 32,33 40,31" fill="#0284c7" stroke="#94a3b8" strokeWidth="1" />
               {/* Wing Right */}
-              <path d="M140,25 C160,13 170,16 178,21 C168,27 155,27 142,25 C152,29 162,31 172,31 C160,35 148,33 140,31" fill="#731b1b" stroke="#5a6778" strokeWidth="1" />
-              {/* Gear wheel backing */}
-              <circle cx="90" cy="22" r="16" fill="#161a1f" stroke="#5a6778" strokeWidth="2.5" />
-              <circle cx="90" cy="22" r="12" fill="none" stroke="#8fa0b5" strokeWidth="1" strokeDasharray="3,3" />
-              {/* Inside Crosslines */}
-              <path d="M90,6 L90,38 M74,22 L106,22" stroke="#5a6778" strokeWidth="1.5" />
-              {/* Red Star in Center */}
-              <path d="M90,13 L93,20 L100,20 L95,24 L97,31 L90,27 L83,31 L85,24 L80,20 L87,20 Z" fill="#d13535" stroke="#fff" strokeWidth="0.5" />
-              {/* Logo Texts */}
-              <text x="90" y="7" fill="#e3edf7" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="var(--font-serif)" letterSpacing="0.5">RC POWER BENCH</text>
-              <rect x="79" y="34" width="22" height="9" rx="2" fill="#242a32" stroke="#5a6778" strokeWidth="1" />
-              <text x="90" y="41.5" fill="#63b3ed" fontSize="7.5" fontWeight="bold" textAnchor="middle">PRO</text>
+              <path d="M140,25 C160,13 170,16 178,21 C168,27 155,27 142,25 C152,29 162,31 172,31 C160,35 148,33 140,31" fill="#0284c7" stroke="#94a3b8" strokeWidth="1" />
+              {/* Avionics Compass Rose Bezel */}
+              <circle cx="90" cy="22" r="16" fill="#0f172a" stroke="#64748b" strokeWidth="2.5" />
+              <circle cx="90" cy="22" r="12" fill="none" stroke="#38bdf8" strokeWidth="1" strokeDasharray="3,3" />
+              <path d="M90,6 L90,38 M74,22 L106,22" stroke="#475569" strokeWidth="1.2" />
+              {/* Gold Aviation Star in Center */}
+              <path d="M90,12 L93,19 L100,19 L95,23.5 L97,30.5 L90,26.5 L83,30.5 L85,23.5 L80,19 L87,19 Z" fill="#f59e0b" stroke="#fff" strokeWidth="0.6" />
+              <text x="90" y="7" fill="#f8fafc" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="var(--font-serif)" letterSpacing="0.6">RC POWER BENCH</text>
+              <rect x="76" y="34" width="28" height="10" rx="3" fill="#0284c7" stroke="#7dd3fc" strokeWidth="1" />
+              <text x="90" y="41.5" fill="#fff" fontSize="7.2" fontWeight="bold" textAnchor="middle">PRO v3.2</text>
             </svg>
           </div>
 
-          {/* Center Info Panel */}
-          <div style={{ textAlign: 'center' }}>
-            <h1 className="glow-text" style={{ fontFamily: 'var(--font-serif)', fontSize: '28px', color: 'var(--color-amber)', letterSpacing: '2px', textTransform: 'uppercase' }}>
-              ★ {selectedAircraft.name} ★
+          {/* Center Active Airframe Telemetry Title */}
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <h1 className="glow-text" style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(18px, 2vw, 26px)', color: '#f8fafc', letterSpacing: '1.2px', textTransform: 'uppercase' }}>
+              ✈️ {formatAircraftTitle(selectedAircraft)}
             </h1>
-            <div className="flex-center gap-12" style={{ marginTop: '2px' }}>
-              <span style={{ fontSize: '12px', color: '#ffb347', fontWeight: 'bold', letterSpacing: '1.5px' }}>{selectedAircraft.class} ARF CONFIGURATOR</span>
+            <div className="flex-center gap-12" style={{ marginTop: '4px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '11.5px', color: '#fbbf24', fontWeight: 'bold', letterSpacing: '1px' }}>
+                {selectedAircraft.manufacturer} • {selectedAircraft.class}
+              </span>
               <span style={{ color: 'var(--color-panel-border)' }}>|</span>
-              <span style={{ fontFamily: 'var(--font-script)', fontSize: '18px', color: '#ffc97a', letterSpacing: '1px' }}>Fly Fast. Fly Hard. Keep 'Em Flying!</span>
+              <span style={{ fontSize: '11.5px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>
+                {(selectedAircraft.enginesCount || 1) > 1 ? `${selectedAircraft.enginesCount}x MULTI-ENGINE PROPULSION` : 'SINGLE-ENGINE PROPULSION'}
+              </span>
             </div>
           </div>
 
-          {/* Right Aviator Art Banner */}
-          <div className="header-aviator-banner" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ position: 'relative', width: '130px', height: '52px', border: '1.5px solid var(--color-panel-border)', borderRadius: '3px', overflow: 'hidden' }}>
-              <img 
-                src={new URL(`../assets/aircraft/${selectedAircraft.image}`, import.meta.url).href} 
-                alt={selectedAircraft.name} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-              />
-              {/* Crimson filter overlay */}
-              <div style={{ 
-                position: 'absolute', 
-                top: 0, left: 0, width: '100%', height: '100%', 
-                background: 'linear-gradient(to top, rgba(167, 46, 33, 0.5), rgba(18, 14, 12, 0.8))',
-                mixBlendMode: 'multiply' 
-              }}></div>
-              
-              <div style={{ 
-                position: 'absolute', 
-                top: '2px', 
-                right: '12px', 
-                fontSize: '18px', 
-                color: '#ff4d4d', 
-                fontFamily: 'var(--font-script)',
-                textShadow: '1px 1px 2px #000'
-              }}>
-                Crimson Skies
+          {/* Right Quick Avionics Utility Bar (Units, Theme, Audio, Aircraft Preview) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setUnitSystem(unitSystem === 'imperial' ? 'metric' : 'imperial')}
+              className="btn-retro"
+              title="Toggle Imperial (lbs/MPH/in) vs Metric (kg/KMH/mm)"
+              style={{ padding: '6px 10px', fontSize: '11px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)' }}
+            >
+              {unitSystem === 'imperial' ? '🇺🇸 LBS / MPH' : '🌍 KG / KMH'}
+            </button>
+
+            <button
+              onClick={() => setCrtEnabled(!crtEnabled)}
+              className="btn-retro"
+              title="Switch Avionics Backlight Theme"
+              style={{ padding: '6px 10px', fontSize: '11px' }}
+            >
+              {crtEnabled ? '☀️ SKY' : '🌙 AMBER'}
+            </button>
+
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`btn-retro ${soundEnabled ? 'active' : ''}`}
+              title="Toggle Live RPM Propeller Acoustic Synthesizer"
+              style={{ padding: '6px 10px', fontSize: '11px' }}
+            >
+              {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
+            </button>
+
+            <div className="header-aviator-banner" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '4px' }}>
+              <div style={{ position: 'relative', width: '104px', height: '44px', border: '1.5px solid var(--color-panel-border)', borderRadius: '6px', overflow: 'hidden', boxShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>
+                <img 
+                  src={new URL(`../assets/aircraft/${selectedAircraft.image}`, import.meta.url).href} 
+                  alt={selectedAircraft.name} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(15, 23, 42, 0.75), transparent)'
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '2px',
+                  right: '6px',
+                  fontSize: '9px',
+                  fontWeight: 'bold',
+                  color: '#38bdf8'
+                }}>
+                  FLIGHT DECK
+                </div>
               </div>
-              <div style={{ 
-                position: 'absolute', 
-                bottom: '1px', 
-                right: '12px', 
-                fontSize: '12px', 
-                color: '#ffc97a', 
-                fontFamily: 'var(--font-script)',
-                textShadow: '1px 1px 2px #000'
-              }}>
-                No Clouds Too High
-              </div>
-            </div>
-            <div style={{ position: 'relative', width: '52px', height: '52px', border: '2.5px solid #5a6778', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 10px rgba(0,0,0,0.8)' }}>
-              <img src={pinupPilot} alt="Pinup Aviator" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Prominent Simulation Disclaimer Bar */}
+      <div style={{ maxWidth: '1750px', margin: '0 auto' }}>
+        {/* Compact Pre-Flight Advisory Banner */}
         <div style={{
-          backgroundColor: '#1b1712',
-          border: '1px solid #7c5d2b',
-          borderRadius: '4px',
-          padding: '8px 12px',
-          marginBottom: '10px',
+          backgroundColor: 'rgba(15, 23, 42, 0.85)',
+          border: '1px solid #334155',
+          borderRadius: '6px',
+          padding: '7px 14px',
+          margin: '0 16px 6px 16px',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
           gap: '10px',
-          fontSize: '10.5px',
-          color: '#ffb347',
-          lineHeight: '1.3'
+          fontSize: '11px',
+          color: '#cbd5e1',
+          lineHeight: '1.35'
         }}>
-          <AlertTriangle size={18} style={{ flexShrink: 0, color: '#ffb347' }} />
-          <div>
-            <strong>DISCLAIMER & NOTICE:</strong> All values, specs, thrust ratios, and setup predictions are estimated simulation models based on standardized aerodynamic formulas and nominal manufacturer specifications. Actual in-flight performance, current draw, and thermal limits vary based on ambient conditions, battery health, and ESC timing. <em>Always perform static bench testing with a Watt meter before flight.</em>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '260px' }}>
+            <AlertTriangle size={16} style={{ flexShrink: 0, color: '#fbbf24' }} />
+            <div>
+              <strong style={{ color: '#fbbf24' }}>FLIGHT TELEMETRY ADVISORY:</strong> Static bench predictions follow standard propeller aerodynamic laws ($P \propto D^4 \cdot \text{Pitch} \cdot \text{RPM}^3$). Always verify current draw with a physical inline Wattmeter prior to maiden flight.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '6px', fontSize: '10.5px', fontWeight: 'bold', color: 'var(--color-cyan)' }}>
+            <span>WORKFLOW: 1. AIRCRAFT ➔ 2. PRESETS ➔ 3. POWERPLANT ➔ 4. TELEMETRY ➔ 5. PERFORMANCE ➔ 6. THROTTLE DYNO</span>
           </div>
         </div>
 
         <div className="dashboard-grid" style={{ position: 'relative' }}>
-        {/* Faint transparent selected airplane watermark background */}
+        {/* Subtle airplane silhouette watermark */}
         <div style={{
           position: 'absolute',
           top: '10%',
@@ -946,12 +860,12 @@ export default function CockpitOverview({
           backgroundSize: 'contain',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.37,
+          opacity: 0.08,
           pointerEvents: 'none',
           zIndex: 0
         }} />
         
-        {/* Left Side: Aircraft Selector & Database Specs */}
+        {/* Left Column: Step 1 (Select Aircraft & Airframe Specs) + Step 2 (Quick Presets & Voltage Matcher) */}
         <section className="metal-panel left-column">
           <div className="rivet top-left"></div>
           <div className="rivet top-right"></div>
@@ -959,15 +873,19 @@ export default function CockpitOverview({
           <div className="rivet bottom-right"></div>
           
           <div className="panel-header">
-            <span className="badge">1</span> SELECT AIRCRAFT
+            <span className="badge">1</span> SELECT AIRCRAFT & SPECS
           </div>
           
           <div className="card-content" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {/* Custom Aircraft Selector */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label htmlFor="aircraft-select" style={{ fontSize: '10.5px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>
+                ACTIVE AIRFRAME MODEL ({allAircrafts.length} IN HANGAR)
+              </label>
               <select 
+                id="aircraft-select"
                 className="retro-select" 
-                style={{ fontSize: '13.5px', paddingRight: '22px' }} 
+                style={{ fontSize: '13px', paddingRight: '22px' }} 
                 value={selectedAircraft.id} 
                 onChange={(e) => {
                   const ac = allAircrafts.find(item => item.id === e.target.value);
@@ -982,6 +900,7 @@ export default function CockpitOverview({
                       if (eEsc) setSelectedEsc(eEsc);
                       if (b) setSelectedBattery(b);
                       if (p) setSelectedPropeller(p);
+                      setActiveSetupType('scale');
                     }
                   }
                 }}
@@ -999,30 +918,27 @@ export default function CockpitOverview({
                   }}
                   className="btn-retro btn-red-launcher"
                   style={{
-                    fontSize: '12px',
-                    height: '40px',
-                    padding: '8px',
+                    fontSize: '11.5px',
+                    height: '38px',
+                    padding: '6px 8px',
                     justifyContent: 'center',
-                    fontWeight: 'bold',
-                    letterSpacing: '0.5px'
+                    fontWeight: 'bold'
                   }}
                 >
-                  ➕ NEW MODEL (WIZARD)
+                  ➕ NEW MODEL WIZARD
                 </button>
 
                 <button
                   onClick={() => setIsCustomPlaneOpen(true)}
                   className="btn-retro"
                   style={{
-                    fontSize: '12px',
-                    height: '40px',
-                    padding: '8px',
-                    background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
-                    border: '1.8px solid var(--color-cyan)',
+                    fontSize: '11.5px',
+                    height: '38px',
+                    padding: '6px 8px',
+                    border: '1.5px solid var(--color-cyan)',
                     color: 'var(--color-cyan)',
                     justifyContent: 'center',
-                    fontWeight: 'bold',
-                    letterSpacing: '0.5px'
+                    fontWeight: 'bold'
                   }}
                 >
                   ✈️ SPEC BUILDER
@@ -1032,30 +948,30 @@ export default function CockpitOverview({
               {/* User Input Model Disclaimer Banner */}
               {selectedAircraft.isUserInputModel && (
                 <div style={{
-                  backgroundColor: 'rgba(255, 179, 71, 0.1)',
-                  border: '1px solid #ffb347',
-                  borderRadius: '3.5px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                  border: '1px solid #f59e0b',
+                  borderRadius: '6px',
                   padding: '6px 8px',
                   fontSize: '11px',
-                  color: 'var(--color-amber)',
+                  color: '#fbbf24',
                   fontWeight: 'bold',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   lineHeight: '1.3'
                 }}>
-                  <AlertTriangle size={14} style={{ flexShrink: 0, color: '#ffb347' }} />
-                  <span>DISCLAIMER: USER INPUT MODEL - Calculations based on user-defined airframe specs.</span>
+                  <AlertTriangle size={14} style={{ flexShrink: 0, color: '#fbbf24' }} />
+                  <span>CUSTOM AIRFRAME: Calculations based on user-defined specs.</span>
                 </div>
               )}
             </div>
 
             {/* Aircraft Photo View */}
             <div style={{ 
-              height: '110px', 
-              border: '1px solid var(--color-panel-border)', 
-              borderRadius: '4px',
-              backgroundColor: '#120e0c',
+              height: '118px', 
+              border: '1.5px solid var(--color-panel-border)', 
+              borderRadius: '6px',
+              backgroundColor: '#0f172a',
               position: 'relative',
               overflow: 'hidden',
               display: 'flex',
@@ -1069,17 +985,17 @@ export default function CockpitOverview({
                   width: '100%', 
                   height: '100%', 
                   objectFit: 'cover',
-                  opacity: 0.85
+                  opacity: 0.92
                 }} 
               />
-              {/* Dynamic Nose Art Overlay Badge */}
+              {/* Dynamic Squadron Emblem Badge */}
               <div style={{
                 position: 'absolute',
                 top: '6px',
                 right: '6px',
                 width: '32px',
                 height: '32px',
-                border: '1.5px solid #8e6840',
+                border: '1.5px solid #94a3b8',
                 borderRadius: '50%',
                 overflow: 'hidden',
                 boxShadow: '0 2px 5px rgba(0,0,0,0.8)',
@@ -1090,26 +1006,136 @@ export default function CockpitOverview({
               <div style={{
                 position: 'absolute',
                 top: 0, left: 0, width: '100%', height: '100%',
-                background: 'linear-gradient(to top, rgba(18, 14, 12, 0.9) 0%, rgba(18, 14, 12, 0) 40%)'
+                background: 'linear-gradient(to top, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0) 45%)'
               }}></div>
-              <div style={{ position: 'absolute', bottom: '6px', left: '6px', fontSize: '10.5px', fontWeight: 'bold', color: '#fff', textShadow: '1px 1px 2px #000' }}>
-                {selectedAircraft.manufacturer}
+              <div style={{ position: 'absolute', bottom: '6px', left: '8px', right: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', fontWeight: 'bold', color: '#fff', textShadow: '1px 1px 2px #000' }}>
+                <span>{selectedAircraft.manufacturer}</span>
+                <span style={{ color: '#fbbf24' }}>{selectedAircraft.class}</span>
               </div>
             </div>
 
-            {/* Recommended Setup Buttons */}
-            <div>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-amber-dim)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                RECOMMENDED SETUPS
+            {/* Aircraft specs table (Placed right under the aircraft selector so Step 1 is cohesive!) */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.55)', border: '1px solid var(--color-panel-border)', borderRadius: '6px', padding: '8px 10px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-cyan)', marginBottom: '4px', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
+                <span>AIRFRAME SPECIFICATIONS</span>
+                <span>{unitSystem.toUpperCase()}</span>
               </div>
+              <table className="retro-table">
+                <tbody>
+                  <tr>
+                    <td className="label">Wingspan / Length</td>
+                    <td className="val">{formatLength(selectedAircraft.wingspan, unitSystem)} / {formatLength(selectedAircraft.length, unitSystem)}</td>
+                  </tr>
+                  <tr>
+                    <td className="label">Wing Area</td>
+                    <td className="val">{formatArea(selectedAircraft.wingArea, unitSystem)}</td>
+                  </tr>
+                  <tr>
+                    <td className="label">Airframe Wt (Empty)</td>
+                    <td className="val" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                      <input 
+                        type="number" 
+                        step="0.05"
+                        min="0.5"
+                        max="55"
+                        aria-label="Empty Airframe Weight in Pounds"
+                        value={adjustedEmptyWeight !== null ? adjustedEmptyWeight : selectedAircraft.emptyWeight} 
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val)) setAdjustedEmptyWeight(val);
+                        }}
+                        className="retro-input"
+                        style={{ 
+                          width: '58px', 
+                          padding: '2px 4px', 
+                          fontSize: '12px', 
+                          textAlign: 'right', 
+                          height: '22px', 
+                          margin: 0
+                        }}
+                      />
+                      <span style={{ fontSize: '11.5px' }}>lb</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Battery Mass</td>
+                    <td className="val" style={{ color: '#94a3b8', fontSize: '12px' }}>
+                      +{formatWeight(batteryWeightLbs, unitSystem, 2)} ({selectedBattery.weight}g)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">All-Up Flying Wt</td>
+                    <td className="val" style={{ color: 'var(--color-green)', fontWeight: 'bold' }}>
+                      {formatWeight(calculatedFlyingWeight, unitSystem, 2)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Vs. Factory Wt</td>
+                    <td className="val" style={{ 
+                      fontWeight: 'bold', 
+                      fontSize: '12px',
+                      color: weightDelta > 0.01 ? '#fbbf24' : weightDelta < -0.01 ? 'var(--color-green)' : '#f8fafc' 
+                    }}>
+                      {weightDelta > 0.01 ? `+${formatWeight(weightDelta, unitSystem, 2)} (+${weightDeltaPct}%)` : 
+                       weightDelta < -0.01 ? `${formatWeight(weightDelta, unitSystem, 2)} (${weightDeltaPct}%)` : 
+                       `EXACT MATCH`}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Recommended CG</td>
+                    <td className="val" style={{ color: '#fbbf24', fontWeight: 'bold', fontSize: '12px' }}>
+                      {selectedAircraft.suggestedCg || "4.25 in (108 mm)"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="label">Target Power</td>
+                    <td className="val">{selectedAircraft.powerRangeMin} - {selectedAircraft.powerRangeMax} W</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Builders Manual Link */}
+              {selectedAircraft.manualUrl && (
+                <a 
+                  href={selectedAircraft.manualUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-retro"
+                  style={{ 
+                    marginTop: '8px',
+                    fontSize: '11px', 
+                    padding: '6px 10px', 
+                    width: '100%', 
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>📥 OPEN BUILDER MANUAL</span>
+                </a>
+              )}
+            </div>
+
+            {/* Step 2: Recommended Setup Presets & Target Voltage Matcher */}
+            <div style={{ borderTop: '2px solid var(--color-panel-border)', paddingTop: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span className="badge" style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  minWidth: '22px', height: '22px', padding: '0 6px', borderRadius: '6px',
+                  background: 'linear-gradient(145deg, #0284c7, #0369a1)', border: '1px solid #38bdf8',
+                  fontSize: '12px', fontWeight: 'bold', color: '#fff'
+                }}>2</span>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f1f5f9', letterSpacing: '0.5px' }}>
+                  FLIGHT PROFILE PRESETS
+                </span>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {Object.keys(recommendedSetups).map((type) => {
                   const s = recommendedSetups[type];
                   const isActive = activeSetupType === type;
                   let starColor = "var(--color-amber-dim)";
                   if (type === 'safe') starColor = "var(--color-green)";
-                  else if (type === 'scale') starColor = "#ffb347";
-                  else if (type === 'aggressive') starColor = "var(--color-amber)";
+                  else if (type === 'scale') starColor = "#fbbf24";
+                  else if (type === 'aggressive') starColor = "var(--color-cyan)";
                   else starColor = "var(--color-red)";
 
                   return (
@@ -1117,14 +1143,14 @@ export default function CockpitOverview({
                       key={type}
                       onClick={() => applySetup(type)}
                       className={`btn-retro ${isActive ? 'active' : ''}`}
-                      style={{ justifyContent: 'space-between', padding: '7px 12px', fontSize: '12.5px' }}
+                      style={{ justifyContent: 'space-between', padding: '7px 12px', fontSize: '12px' }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ color: starColor }}>★</span>
                         <div style={{ textAlign: 'left' }}>
                           <div style={{ fontWeight: 'bold' }}>{type === 'scale' ? "FACTORY STOCK SPEC" : s.name}</div>
-                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', textTransform: 'none' }}>
-                            {type === 'scale' ? "Manufacturer BNF Baseline" : s.subtitle}
+                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', textTransform: 'none' }}>
+                            {type === 'scale' ? "Manufacturer BNF / ARF Baseline" : s.subtitle}
                           </div>
                         </div>
                       </div>
@@ -1140,22 +1166,21 @@ export default function CockpitOverview({
                     style={{ 
                       justifyContent: 'space-between', 
                       padding: '7px 12px', 
-                      fontSize: '12.5px',
-                      borderColor: activeSetupType === 'fastest' ? 'var(--color-red)' : 'rgba(209, 53, 53, 0.4)',
-                      boxShadow: activeSetupType === 'fastest' ? '0 0 10px var(--color-red-glow)' : 'none',
-                      marginTop: '6px'
+                      fontSize: '12px',
+                      borderColor: activeSetupType === 'fastest' ? '#f59e0b' : 'rgba(245, 158, 11, 0.45)',
+                      marginTop: '2px'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: 'var(--color-red)' }}>⚡</span>
+                      <span style={{ color: '#fbbf24' }}>⚡</span>
                       <div style={{ textAlign: 'left' }}>
-                        <div style={{ fontWeight: 'bold', color: 'var(--color-red)' }}>MAX SPEED OPTIMIZER</div>
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-                          Highest Pitch Speed on Safe ESC Current
+                        <div style={{ fontWeight: 'bold', color: '#fbbf24' }}>MAX SPEED OPTIMIZER</div>
+                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', textTransform: 'none' }}>
+                          Fastest Pitch Speed Within Safe ESC Limits
                         </div>
                       </div>
                     </div>
-                    <div className={`status-lamp ${activeSetupType === 'fastest' ? 'red' : 'red off'}`} />
+                    <div className={`status-lamp ${activeSetupType === 'fastest' ? 'amber' : 'amber off'}`} />
                   </button>
                 )}
 
@@ -1165,47 +1190,42 @@ export default function CockpitOverview({
                   style={{ 
                     justifyContent: 'space-between', 
                     padding: '7px 12px', 
-                    fontSize: '12.5px',
-                    borderColor: activeSetupType === 'motor-tuned' ? '#ffb347' : 'rgba(255, 179, 71, 0.4)',
-                    boxShadow: activeSetupType === 'motor-tuned' ? '0 0 10px rgba(255, 179, 71, 0.4)' : 'none',
-                    marginTop: '6px'
+                    fontSize: '12px',
+                    borderColor: activeSetupType === 'motor-tuned' ? 'var(--color-cyan)' : 'rgba(56, 189, 248, 0.4)'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: '#ffb347' }}>⚙</span>
+                    <span style={{ color: 'var(--color-cyan)' }}>⚙</span>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#ffb347' }}>AUTO-MATCH PROP ({selectedBattery.cells}S)</div>
-                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-                        Ideal prop for {selectedMotor.model} on {selectedBattery.cells}S
+                      <div style={{ fontWeight: 'bold', fontSize: '11.5px', color: 'var(--color-cyan)' }}>AUTO-MATCH PROP ({selectedBattery.cells}S)</div>
+                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', textTransform: 'none' }}>
+                        Best prop for {selectedMotor.model} on {selectedBattery.cells}S
                       </div>
                     </div>
                   </div>
                   <div className={`status-lamp ${activeSetupType === 'motor-tuned' ? 'green' : 'green off'}`} />
                 </button>
+
                 {autoTuneNotice && (
                   <div style={{
-                    marginTop: '8px',
+                    marginTop: '4px',
                     padding: '8px 10px',
-                    backgroundColor: 'rgba(255, 179, 71, 0.15)',
-                    border: '1px solid #ffb347',
-                    borderRadius: '4px',
-                    color: '#ffca36',
-                    fontSize: '11.5px',
+                    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                    border: '1px solid var(--color-cyan)',
+                    borderRadius: '6px',
+                    color: '#e0f2fe',
+                    fontSize: '11px',
                     lineHeight: '1.4',
-                    textAlign: 'left',
-                    boxShadow: '0 0 8px rgba(255, 179, 71, 0.3)'
+                    textAlign: 'left'
                   }}>
                     {autoTuneNotice}
                   </div>
                 )}
 
                 {/* Match Performance by Target Voltage Controls */}
-                <div style={{ marginTop: '12px', borderTop: '1px dashed var(--color-panel-border)', paddingTop: '10px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#63b3ed', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>⚡ MATCH PERFORMANCE BY TARGET VOLTAGE</span>
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px', lineHeight: '1.3' }}>
-                    Select target voltage cell count. Algorithm calculates ideal Motor KV, ESC, and propeller for maximum speed &amp; thrust:
+                <div style={{ marginTop: '8px', borderTop: '1px dashed var(--color-panel-border)', paddingTop: '8px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-cyan)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                    ⚡ ONE-CLICK VOLTAGE MATCHER
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '4px' }}>
                     {[3, 4, 5, 6, 8, 12].map((cells) => {
@@ -1220,9 +1240,8 @@ export default function CockpitOverview({
                             fontSize: '11.5px',
                             fontWeight: 'bold',
                             justifyContent: 'center',
-                            borderColor: isSelected ? '#63b3ed' : 'rgba(99, 179, 237, 0.4)',
-                            color: isSelected ? '#fff' : '#63b3ed',
-                            boxShadow: isSelected ? '0 0 8px rgba(99, 179, 237, 0.5)' : 'none'
+                            borderColor: isSelected ? 'var(--color-cyan)' : 'rgba(56, 189, 248, 0.35)',
+                            color: isSelected ? '#fff' : 'var(--color-cyan)'
                           }}
                         >
                           {cells}S
@@ -1233,184 +1252,36 @@ export default function CockpitOverview({
                 </div>
               </div>
             </div>
-
-            {/* Aircraft specs table */}
-            <div style={{ borderTop: '2px solid var(--color-panel-border)', paddingTop: '10px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', marginBottom: '6px', textTransform: 'uppercase' }}>
-                AIRCRAFT SPECS
-              </div>
-              <table className="retro-table">
-                <tbody>
-                  <tr>
-                    <td className="label">Wingspan</td>
-                    <td className="val">{selectedAircraft.wingspan} in</td>
-                  </tr>
-                  <tr>
-                    <td className="label">Length</td>
-                    <td className="val">{selectedAircraft.length} in</td>
-                  </tr>
-                  <tr>
-                    <td className="label">Wing Area</td>
-                    <td className="val">{selectedAircraft.wingArea} sq in</td>
-                  </tr>
-                  <tr>
-                    <td className="label">Airframe Wt (No Bat)</td>
-                    <td className="val" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-                      <input 
-                        type="number" 
-                        step="0.05"
-                        min="0.5"
-                        max="35"
-                        value={adjustedEmptyWeight !== null ? adjustedEmptyWeight : selectedAircraft.emptyWeight} 
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          if (!isNaN(val)) setAdjustedEmptyWeight(val);
-                        }}
-                        className="retro-input"
-                        style={{ 
-                          width: '45px', 
-                          padding: '1px 3px', 
-                          fontSize: '10.5px', 
-                          textAlign: 'right', 
-                          height: '16px', 
-                          margin: 0, 
-                          color: '#fff', 
-                          backgroundColor: '#120e0c',
-                          border: '1px solid var(--color-panel-border)',
-                          borderRadius: '2px'
-                        }}
-                      />
-                      <span>lb</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="label">Battery Weight</td>
-                    <td className="val" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '10px' }}>
-                      +{batteryWeightLbs.toFixed(2)} lb ({selectedBattery.weight}g)
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="label">Stock Flying Wt</td>
-                    <td className="val" style={{ color: 'var(--color-amber-dim)' }}>
-                      {stockFlyingWeight.toFixed(2)} lb
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="label">Modified Flying Wt</td>
-                    <td className="val" style={{ color: 'var(--color-green)', fontWeight: 'bold' }}>
-                      {calculatedFlyingWeight.toFixed(2)} lb
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="label">Weight Difference</td>
-                    <td className="val" style={{ 
-                      fontWeight: 'bold', 
-                      color: weightDelta > 0.01 ? '#ffb347' : weightDelta < -0.01 ? 'var(--color-green)' : '#fff' 
-                    }}>
-                      {weightDelta > 0.01 ? `+${weightDelta.toFixed(2)} lb (+${weightDeltaPct}%)` : 
-                       weightDelta < -0.01 ? `${weightDelta.toFixed(2)} lb (${weightDeltaPct}%)` : 
-                       `0.00 lb (MATCH)`}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="label">Suggested CG</td>
-                    <td className="val" style={{ color: '#ffb347', fontWeight: 'bold' }}>
-                      {selectedAircraft.suggestedCg || "4.25 in (108 mm)"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="label">Power Range</td>
-                    <td className="val">{selectedAircraft.powerRangeMin} - {selectedAircraft.powerRangeMax} W</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Builders Manual Download Section */}
-            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', textTransform: 'uppercase' }}>
-                BUILDERS MANUAL
-              </div>
-              {selectedAircraft.manualUrl ? (
-                <a 
-                  href={selectedAircraft.manualUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="btn-retro"
-                  style={{ 
-                    fontSize: '11px', 
-                    padding: '8px 12px', 
-                    textAlign: 'center', 
-                    width: '100%', 
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <span>📥 DOWNLOAD MANUAL (PDF)</span>
-                </a>
-              ) : (
-                <button 
-                  disabled
-                  className="btn-retro"
-                  style={{ 
-                    fontSize: '11px', 
-                    padding: '8px 12px', 
-                    width: '100%', 
-                    opacity: 0.5, 
-                    cursor: 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <span>⚠️ MANUAL: NOT AVAILABLE</span>
-                </button>
-              )}
-            </div>
-            
-            {/* Decal stamp */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
-              <svg width="100" height="24" viewBox="0 0 100 24">
-                <line x1="5" y1="12" x2="95" y2="12" stroke="var(--color-panel-border)" strokeWidth="1" />
-                <circle cx="50" cy="12" r="10" fill="#1c1512" stroke="var(--color-panel-border)" strokeWidth="1.5" />
-                <path d="M46,12 L49,7 L54,12 L49,17 Z" fill="var(--color-red)" />
-                <circle cx="50" cy="12" r="2" fill="#fff" />
-              </svg>
-            </div>
           </div>
         </section>
 
-        {/* Center Section: Current setup cards, setup notes, status bars, and dials dashboard */}
+        {/* Center Section: Step 3 (Powerplant Configuration), Step 4 (Live Telemetry Gauges), Step 5 (Flight Performance & Power Curve) */}
         <div className="middle-column" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Top middle panel group: Setup, notes, overall status */}
-          {/* Top middle panel group: Setup, notes, overall status */}
+          {/* Top middle panel group: Step 3 Powerplant Config, Flight Envelope Notes, System Load Margins */}
           <div className="middle-row-grid" style={{ gap: '16px' }}>
             
-            {/* 2. Current Setup component selector */}
+            {/* 3. Powerplant Configuration component selector */}
             <div className="metal-panel">
               <div className="rivet top-left"></div>
               <div className="rivet top-right"></div>
               <div className="rivet bottom-left"></div>
               <div className="rivet bottom-right"></div>
               <div className="panel-header">
-                <span className="badge">2</span> CURRENT SETUP
+                <span className="badge">3</span> POWERPLANT CONFIGURATION
               </div>
-              <div className="card-content setup-inner-grid" style={{ gap: '8px', padding: '8px' }}>
+              <div className="card-content setup-inner-grid" style={{ gap: '8px', padding: '10px' }}>
                 
                 {/* Motor Select */}
-                <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--color-panel-border)', padding: '8px', borderRadius: '6px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>MOTOR</div>
-                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={getMotorImage()} alt="Brushless Motor" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    <div style={{ fontSize: '11px', color: 'var(--color-cyan)', fontWeight: 'bold', letterSpacing: '0.5px' }}>BRUSHLESS MOTOR</div>
+                    <div style={{ height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={getMotorImage()} alt="Brushless Motor" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
+                      aria-label="Select Brushless Motor"
+                      style={{ fontSize: '12px', padding: '5px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedMotor.id}
                       onChange={(e) => {
@@ -1421,25 +1292,26 @@ export default function CockpitOverview({
                       {motors.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      Mod: {selectedMotor.model}
+                  <div style={{ fontSize: '10.5px', color: '#cbd5e1', marginTop: '6px', lineHeight: '1.35' }}>
+                    <div style={{ fontWeight: 'bold', color: '#fbbf24', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedMotor.kv} KV • Max {selectedMotor.maxCurrent}A
                     </div>
                     <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      Volt: {(selectedMotor.voltageSupported || "").replace(" LiPo", "")}
+                      Rated: {(selectedMotor.voltageSupported || "").replace(" LiPo", "")}
                     </div>
                   </div>
                 </div>
 
                 {/* ESC Select */}
-                <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--color-panel-border)', padding: '8px', borderRadius: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>ESC</div>
-                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={getEscImage()} alt="Electronic Speed Controller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    <div style={{ fontSize: '11px', color: 'var(--color-cyan)', fontWeight: 'bold', letterSpacing: '0.5px' }}>SPEED CONTROLLER (ESC)</div>
+                    <div style={{ height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={getEscImage()} alt="Electronic Speed Controller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
+                      aria-label="Select Electronic Speed Controller"
+                      style={{ fontSize: '12px', padding: '5px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedEsc.id}
                       onChange={(e) => {
@@ -1450,25 +1322,26 @@ export default function CockpitOverview({
                       {escs.map(escItem => <option key={escItem.id} value={escItem.id}>{escItem.name}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      Mod: {selectedEsc.model}
+                  <div style={{ fontSize: '10.5px', color: '#cbd5e1', marginTop: '6px', lineHeight: '1.35' }}>
+                    <div style={{ fontWeight: 'bold', color: '#fbbf24', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedEsc.maxAmps}A Cont / {selectedEsc.burstAmps}A Burst
                     </div>
                     <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      Volt: {(selectedEsc.voltageSupported || "").replace(" LiPo", "")}
+                      Rated: {(selectedEsc.voltageSupported || "").replace(" LiPo", "")}
                     </div>
                   </div>
                 </div>
 
                 {/* Battery Select */}
-                <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--color-panel-border)', padding: '8px', borderRadius: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>BATTERY</div>
-                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={getBatteryImage()} alt="LiPo Battery" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    <div style={{ fontSize: '11px', color: 'var(--color-cyan)', fontWeight: 'bold', letterSpacing: '0.5px' }}>LIPO BATTERY PACK</div>
+                    <div style={{ height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={getBatteryImage()} alt="LiPo Battery" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
+                      aria-label="Select LiPo Battery Pack"
+                      style={{ fontSize: '12px', padding: '5px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedBattery.id}
                       onChange={(e) => {
@@ -1479,25 +1352,26 @@ export default function CockpitOverview({
                       {batteries.map(b => <option key={b.id} value={b.id}>{b.name.replace(" LIPO", "")}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347' }}>
-                      {selectedBattery.cells}S Pack
+                  <div style={{ fontSize: '10.5px', color: '#cbd5e1', marginTop: '6px', lineHeight: '1.35' }}>
+                    <div style={{ fontWeight: 'bold', color: '#fbbf24' }}>
+                      {selectedBattery.cells}S ({(selectedBattery.cells * 3.7).toFixed(1)}V) • {selectedBattery.cRating}C
                     </div>
                     <div>
-                      Cap: {selectedBattery.capacity}mAh
+                      {selectedBattery.capacity}mAh ({selectedBattery.weight}g)
                     </div>
                   </div>
                 </div>
 
                 {/* Propeller Select */}
-                <div style={{ border: '1px solid var(--color-panel-border)', padding: '6px', borderRadius: '3px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--color-panel-border)', padding: '8px', borderRadius: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: 'var(--color-amber-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>PROPELLER</div>
-                    <div style={{ height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
-                      <img src={getPropellerImage()} alt="Propeller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '3px' }} />
+                    <div style={{ fontSize: '11px', color: 'var(--color-cyan)', fontWeight: 'bold', letterSpacing: '0.5px' }}>PROPELLER</div>
+                    <div style={{ height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', overflow: 'hidden' }}>
+                      <img src={getPropellerImage()} alt="Propeller" style={{ height: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
                     </div>
                     <select 
-                      style={{ fontSize: '12px', padding: '3px', width: '100%' }} 
+                      aria-label="Select Propeller"
+                      style={{ fontSize: '12px', padding: '5px', width: '100%' }} 
                       className="retro-select" 
                       value={selectedPropeller.id}
                       onChange={(e) => {
@@ -1508,14 +1382,16 @@ export default function CockpitOverview({
                       {propellers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', lineHeight: '1.3' }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffb347' }}>Size: {selectedPropeller.diameter}&quot;x{selectedPropeller.pitch}&quot;</div>
-                    <div>Type: {selectedPropeller.type}</div>
+                  <div style={{ fontSize: '10.5px', color: '#cbd5e1', marginTop: '6px', lineHeight: '1.35' }}>
+                    <div style={{ fontWeight: 'bold', color: '#fbbf24' }}>
+                      {selectedPropeller.diameter}&quot; × {selectedPropeller.pitch}&quot; ({selectedPropeller.blades || 2}-Blade)
+                    </div>
+                    <div>{selectedPropeller.type}</div>
                   </div>
                 </div>
 
                 {/* Motor Auto-Tune Action Bar */}
-                <div style={{ gridColumn: '1 / -1', padding: '6px', borderTop: '1px solid var(--color-panel-border)', backgroundColor: 'rgba(255, 179, 71, 0.04)', borderRadius: '0 0 3px 3px' }}>
+                <div style={{ gridColumn: '1 / -1', paddingTop: '4px' }}>
                   <button
                     onClick={handleAutoTuneForMotor}
                     className="btn-retro"
@@ -1523,216 +1399,264 @@ export default function CockpitOverview({
                       width: '100%',
                       justifyContent: 'center',
                       padding: '7px 10px',
-                      fontSize: '11.5px',
+                      fontSize: '11px',
                       fontWeight: 'bold',
-                      borderColor: activeSetupType === 'motor-tuned' ? '#ffb347' : 'var(--color-panel-border)',
-                      color: '#ffb347',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
+                      borderColor: 'var(--color-cyan)',
+                      color: 'var(--color-cyan)'
                     }}
                   >
-                    <span>⚡ AUTO-MATCH RECOMMENDED PROP FOR {selectedMotor.name} ON {selectedBattery.cells}S</span>
+                    <span>⚡ AUTO-MATCH OPTIMAL PROP FOR {selectedMotor.name} ({selectedBattery.cells}S)</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 3. Setup Notes / Dynamic Performance Bounds */}
+            {/* Flight Envelope & Setup Briefing */}
             <div className="metal-panel">
               <div className="rivet top-left"></div>
               <div className="rivet top-right"></div>
               <div className="rivet bottom-left"></div>
               <div className="rivet bottom-right"></div>
               <div className="panel-header">
-                <span className="badge">3</span> SETUP NOTES
+                <span>📋 FLIGHT ENVELOPE BRIEFING</span>
               </div>
-              <div className="card-content" style={{ padding: '8px', fontSize: '12.5px' }}>
-                <div style={{ color: '#ffb347', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '12.5px', marginBottom: '4px' }}>
-                  {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].name : (activeSetupType === 'fastest' ? "SPEED RUN SETUP" : "CUSTOM WORKBENCH CONFIG")}
+              <div className="card-content" style={{ padding: '12px', fontSize: '12.5px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
+                <div>
+                  <div style={{ color: '#fbbf24', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '13px', marginBottom: '6px' }}>
+                    {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].name : (activeSetupType === 'fastest' ? "MAX SPEED RUN SETUP" : "CUSTOM WORKBENCH CONFIG")}
+                  </div>
+                  <div style={{ background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--color-panel-border)', borderRadius: '6px', padding: '8px 10px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div className="flex-between">
+                      <span style={{ color: 'var(--color-amber-dim)' }}>Nominal / Charged:</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>
+                        {selectedBattery.cells}S ({(selectedBattery.cells * 3.7).toFixed(1)}V – {(selectedBattery.cells * 4.2).toFixed(1)}V)
+                      </span>
+                    </div>
+                    <div className="flex-between">
+                      <span style={{ color: 'var(--color-amber-dim)' }}>Cruise / WOT Power:</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>
+                        {Math.round(cruiseSpecs.watts)}W – {fullSpecs.watts}W
+                      </span>
+                    </div>
+                    <div className="flex-between">
+                      <span style={{ color: 'var(--color-amber-dim)' }}>Level / Pitch Speed:</span>
+                      <span style={{ fontWeight: 'bold', color: 'var(--color-green)' }}>
+                        {formatSpeed(fullSpecs.topSpeed, unitSystem)} / {formatSpeed(fullSpecs.pitchSpeed, unitSystem)}
+                      </span>
+                    </div>
+                    <div className="flex-between">
+                      <span style={{ color: 'var(--color-amber-dim)' }}>Cruise / Peak Current:</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>
+                        {Math.round(cruiseSpecs.amps)}A – {Math.round(fullSpecs.amps)}A
+                      </span>
+                    </div>
+                  </div>
+                  <p style={{ color: '#e2e8f0', fontSize: '11.5px', lineHeight: '1.4' }}>
+                    {activeSetupType && recommendedSetups[activeSetupType]
+                      ? recommendedSetups[activeSetupType].notes.behavior
+                      : (activeSetupType === 'fastest'
+                        ? "High-velocity speed configuration tuned for maximum pitch speed within ESC & motor thermal limits."
+                        : "Custom powerplant combination. Review load percentages and Validator safety checks before flight.")}
+                  </p>
                 </div>
-                <div style={{ borderBottom: '1px solid var(--color-panel-border)', paddingBottom: '4px', marginBottom: '4px' }}>
-                  <div className="flex-between">
-                    <span style={{ color: 'var(--color-amber-dim)' }}>Voltage Range:</span>
-                    <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {selectedBattery.cells}S ({(selectedBattery.cells * 3.7).toFixed(1)}V - {(selectedBattery.cells * 4.2).toFixed(1)}V)
-                    </span>
-                  </div>
-                  <div className="flex-between">
-                    <span style={{ color: 'var(--color-amber-dim)' }}>Power Range:</span>
-                    <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {Math.round(cruiseSpecs.watts)} - {fullSpecs.watts} W
-                    </span>
-                  </div>
-                  <div className="flex-between">
-                    <span style={{ color: 'var(--color-amber-dim)' }}>Speed Est:</span>
-                    <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {fullSpecs.topSpeed} MPH / {fullSpecs.pitchSpeed} MPH Pitch
-                    </span>
-                  </div>
-                  <div className="flex-between">
-                    <span style={{ color: 'var(--color-amber-dim)' }}>Amps Range:</span>
-                    <span style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {Math.round(cruiseSpecs.amps)} - {Math.round(fullSpecs.amps)} A
-                    </span>
-                  </div>
-                </div>
-                <p style={{ color: '#fff', fontSize: '11.5px', lineHeight: '1.3' }}>
-                  {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.behavior : (activeSetupType === 'fastest' ? "Extreme performance speed run setup. Tuned for maximum pitch speed and high static load." : "Analyzing electrical characteristics of custom setup. Check Validator for details.")}
-                </p>
-                <div style={{ color: 'var(--color-red)', fontWeight: 'bold', marginTop: '6px', fontSize: '11px', lineHeight: '1.2' }}>
-                  WARNING: {activeSetupType && recommendedSetups[activeSetupType] ? recommendedSetups[activeSetupType].notes.warning : (activeSetupType === 'fastest' ? "Monitor high current draw and temperatures closely to prevent battery thermal runaway." : "Ensure continuous cooling airflow around motor windings on static tests.")}
+                <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '6px', padding: '6px 8px', color: '#fca5a5', fontWeight: 'bold', fontSize: '10.5px', lineHeight: '1.3' }}>
+                  ⚠️ THERMAL NOTE: {
+                    fullSpecs.motorLoad > 95 || fullSpecs.escLoad > 95
+                      ? `High peak draw (${Math.round(fullSpecs.amps)}A on ${selectedBattery.cells}S with ${selectedPropeller.diameter}x${selectedPropeller.pitch}). Throttle management required on level passes!`
+                      : activeSetupType === 'extreme' || activeSetupType === 'fastest'
+                        ? `High-output ${selectedBattery.cells}S setup (${Math.round(fullSpecs.amps)}A WOT on ${selectedPropeller.diameter}x${selectedPropeller.pitch}). Ensure 3:1 cowl exit-to-inlet airflow for ${selectedEsc.maxAmps}A ESC cooling.`
+                        : activeSetupType === 'aggressive'
+                          ? `Sport-scale load (${Math.round(fullSpecs.amps)}A peak with ${selectedPropeller.diameter}x${selectedPropeller.pitch} on ${selectedBattery.cells}S). Monitor ESC & motor temps after sustained vertical climbs.`
+                          : `Nominal thermal envelope (${Math.round(fullSpecs.amps)}A WOT / ${fullSpecs.motorLoad}% motor load on ${selectedBattery.cells}S with ${selectedPropeller.diameter}x${selectedPropeller.pitch}). Maintain standard cowl cooling airflow.`
+                  }
                 </div>
               </div>
             </div>
 
-            {/* 4. System Status Panel */}
+            {/* System Load & Safety Margins Panel */}
             <div className="metal-panel">
               <div className="rivet top-left"></div>
               <div className="rivet top-right"></div>
               <div className="rivet bottom-left"></div>
               <div className="rivet bottom-right"></div>
               <div className="panel-header">
-                <span className="badge">4</span> SYSTEM STATUS
+                <span>🛡️ SYSTEM LOAD MARGINS</span>
               </div>
-              <div className="card-content" style={{ padding: '8px' }}>
-                <div className="flex-between" style={{ marginBottom: '4px' }}>
-                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>OVERALL STATUS</span>
-                  <span className={
-                    specs.overallStatus === "GOOD" ? "glow-text-green" :
-                    specs.overallStatus === "WARNING" ? "glow-text" : "glow-text-red"
-                  } style={{ fontWeight: 'bold', fontSize: '13px' }}>
-                    {specs.overallStatus}
-                  </span>
+              <div className="card-content" style={{ padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div className="flex-between" style={{ marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>DIAGNOSTIC STATUS</span>
+                    <span className={
+                      specs.overallStatus === "GOOD" ? "glow-text-green" :
+                      specs.overallStatus === "WARNING" ? "glow-text" : "glow-text-red"
+                    } style={{ fontWeight: 'bold', fontSize: '13.5px' }}>
+                      ● {specs.overallStatus}
+                    </span>
+                  </div>
+
+                  {(() => {
+                    const motorAmps = specs.ampsPerMotor ?? specs.amps;
+                    const currentRatio = motorAmps / Math.max(selectedMotor.maxCurrent, 1);
+                    let drawColor = "var(--color-green)";
+                    let drawGlow = "0 0 8px var(--color-green-glow)";
+                    if (currentRatio > 1.0) {
+                      drawColor = "var(--color-red)";
+                      drawGlow = "0 0 8px var(--color-red-glow)";
+                    } else if (currentRatio >= 0.85) {
+                      drawColor = "#fbbf24";
+                      drawGlow = "0 0 8px rgba(251, 191, 36, 0.4)";
+                    }
+
+                    return (
+                      <div className="flex-between" style={{ marginBottom: '10px', borderBottom: '1px dashed rgba(148,163,184,0.25)', paddingBottom: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>
+                          {(dynamicAircraft.enginesCount || 1) > 1 ? `CURRENT (${dynamicAircraft.enginesCount}x TOTAL / MOTOR)` : 'ACTIVE CURRENT DRAW'}
+                        </span>
+                        <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: drawColor, textShadow: drawGlow, fontFamily: 'var(--font-mono)' }}>
+                          {(dynamicAircraft.enginesCount || 1) > 1 ? `${specs.amps}A (${motorAmps}A/ea)` : `${specs.amps} A`}
+                        </span>
+                      </div>
+                    );
+                  })()}
+
+                  <HorizontalBarGauge label="Motor Current Load" value={specs.motorLoad} percentage={specs.motorLoad} />
+                  <HorizontalBarGauge label="ESC Current Load" value={specs.escLoad} percentage={specs.escLoad} />
+                  <HorizontalBarGauge label="Battery C-Rating Load" value={specs.batteryLoad} percentage={specs.batteryLoad} />
                 </div>
 
-                {(() => {
-                  const currentRatio = specs.amps / Math.max(selectedMotor.maxCurrent, 1);
-                  let drawColor = "var(--color-green)";
-                  let drawGlow = "0 0 8px var(--color-green-glow)";
-                  if (currentRatio > 1.0) {
-                    drawColor = "var(--color-red)";
-                    drawGlow = "0 0 8px var(--color-red-glow)";
-                  } else if (currentRatio >= 0.85) {
-                    drawColor = "#ffc107";
-                    drawGlow = "0 0 8px rgba(255, 193, 7, 0.5)";
-                  }
-
-                  return (
-                    <div className="flex-between" style={{ marginBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.08)', paddingBottom: '4px' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>CURRENT DRAW</span>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: drawColor, textShadow: drawGlow, fontFamily: 'var(--font-mono)' }}>{specs.amps} A</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--color-panel-border)', paddingTop: '8px', marginTop: '6px' }}>
+                  <div>
+                    <div style={{ fontSize: '9.5px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>BUS STABILITY</div>
+                    <div className={
+                      specs.powerSystemStatus === "STABLE" ? "glow-text-green" :
+                      specs.powerSystemStatus === "STRESSED" ? "glow-text" : "glow-text-red"
+                    } style={{ fontWeight: 'bold', fontSize: '12px' }}>
+                      {specs.powerSystemStatus}
                     </div>
-                  );
-                })()}
-
-                <HorizontalBarGauge label="Motor Load" value={specs.motorLoad} percentage={specs.motorLoad} />
-                <HorizontalBarGauge label="ESC Load" value={specs.escLoad} percentage={specs.escLoad} />
-                <HorizontalBarGauge label="Battery Load" value={specs.batteryLoad} percentage={specs.batteryLoad} />
-
-                <div className="flex-between" style={{ borderTop: '1px solid var(--color-panel-border)', paddingTop: '6px', marginTop: '4px' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--color-amber-dim)' }}>POWER SYSTEM</span>
-                  <span className={
-                    specs.powerSystemStatus === "STABLE" ? "glow-text-green" :
-                    specs.powerSystemStatus === "STRESSED" ? "glow-text" : "glow-text-red"
-                  } style={{ fontWeight: 'bold', fontSize: '11px' }}>
-                    {specs.powerSystemStatus}
-                  </span>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('validator')}
+                    className="btn-retro"
+                    style={{ fontSize: '10.5px', padding: '5px 10px', borderColor: 'var(--color-cyan)', color: 'var(--color-cyan)' }}
+                  >
+                    🛡️ FULL SAFETY AUDIT ➔
+                  </button>
                 </div>
               </div>
             </div>
 
           </div>
 
-          {/* 5. Live gauges dashboard */}
+          {/* 4. Live Avionics Telemetry Gauges */}
           <div className="metal-panel">
             <div className="rivet top-left"></div>
             <div className="rivet top-right"></div>
             <div className="rivet bottom-left"></div>
             <div className="rivet bottom-right"></div>
-            <div className="panel-header">
-              <span className="badge">5</span> LIVE SYSTEM DIAGNOSTICS
+            <div className="panel-header" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="badge">4</span> LIVE AVIONICS TELEMETRY (@ {throttle}% THROTTLE)
+              </div>
+              <span style={{ fontSize: '11.5px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>
+                {specs.watts}W TOTAL • {(specs.watts / Math.max(dynamicAircraft.flyingWeight, 0.1)).toFixed(0)} W/LB
+              </span>
             </div>
-            <div className="card-content" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: '8px', padding: '12px 6px' }}>
-              <CircularGauge label="RPM" value={specs.rpm} min={0} max={16000} unit="RPM" warningThreshold={80} dangerThreshold={90} />
-              <CircularGauge label="AMPS" value={specs.amps} min={0} max={160} unit="AMPS" warningThreshold={85} dangerThreshold={95} />
-              <CircularGauge label="VOLTS" value={specs.volts} min={0} max={40} unit="VOLTS" warningThreshold={80} dangerThreshold={90} />
-              <CircularGauge label="WATTS" value={specs.watts} min={0} max={4000} unit="WATTS" warningThreshold={80} dangerThreshold={90} />
-              <CircularGauge label="EFFICIENCY" value={specs.efficiency} min={0} max={100} unit="EFFICIENCY" warningThreshold={60} dangerThreshold={75} />
-              <CircularGauge label="TEMP" value={specs.temp} min={0} max={150} unit="°C TEMP" warningThreshold={70} dangerThreshold={85} />
-            </div>
+            {(() => {
+              const engines = dynamicAircraft.enginesCount || 1;
+              const ratedTotalAmps = Math.max(selectedMotor.maxCurrent, selectedEsc.maxAmps) * engines;
+              const gaugeMaxAmps = ratedTotalAmps <= 80 ? 80 : (ratedTotalAmps <= 160 ? 160 : (ratedTotalAmps <= 240 ? 240 : 400));
+              const gaugeMaxVolts = selectedBattery.cells >= 10 ? 60 : 40;
+              const ratedTotalWatts = Math.max(selectedMotor.maxPower * engines, fullSpecs.watts * 1.15);
+              const gaugeMaxWatts = ratedTotalWatts <= 1200 ? 1200 : (ratedTotalWatts <= 2400 ? 2400 : (ratedTotalWatts <= 4000 ? 4000 : (ratedTotalWatts <= 8000 ? 8000 : 12000)));
+              const propLimitRpm = Math.round(190000 / Math.max(selectedPropeller.diameter, 10));
+              const rpmLoadPct = Math.round((specs.rpm / propLimitRpm) * 100);
+              const currentLoadPct = Math.max(specs.motorLoad, specs.escLoad, specs.batteryLoad);
+              const wattsLoadPct = Math.round((specs.wattsPerMotor / Math.max(selectedMotor.maxPower, 1)) * 100);
+
+              return (
+                <div className="card-content" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: '8px', padding: '14px 8px' }}>
+                  <CircularGauge label="RPM" value={specs.rpm} min={0} max={16000} unit="RPM" warningThreshold={82} dangerThreshold={95} loadPct={rpmLoadPct} />
+                  <CircularGauge label="AMPS" value={specs.amps} min={0} max={gaugeMaxAmps} unit="AMPS" warningThreshold={85} dangerThreshold={100} loadPct={currentLoadPct} />
+                  <CircularGauge label="VOLTS" value={specs.volts} min={0} max={gaugeMaxVolts} unit="VOLTS" warningThreshold={95} dangerThreshold={105} loadPct={50} />
+                  <CircularGauge label="WATTS" value={specs.watts} min={0} max={gaugeMaxWatts} unit="WATTS" warningThreshold={85} dangerThreshold={100} loadPct={wattsLoadPct} />
+                  <CircularGauge label="EFFICIENCY" value={specs.efficiency} min={0} max={100} unit="EFFICIENCY" warningThreshold={60} dangerThreshold={75} />
+                  <CircularGauge label="TEMP" value={specs.temp} min={0} max={150} unit="°C TEMP" warningThreshold={70} dangerThreshold={85} />
+                </div>
+              );
+            })()}
           </div>
 
-          {/* Performance prediction & power curve bottom row */}
+          {/* 5. Flight Performance Prediction & Power Curve bottom row */}
           <div className="bottom-row-grid" style={{ gap: '16px' }}>
             
-            {/* 7. Performance Prediction card with plane image on left and specs table on right */}
+            {/* 5. Performance Prediction card */}
             <div className="metal-panel">
               <div className="rivet top-left"></div>
               <div className="rivet top-right"></div>
               <div className="rivet bottom-left"></div>
               <div className="rivet bottom-right"></div>
               <div className="panel-header">
-                <span className="badge">7</span> PERFORMANCE PREDICTION
+                <span className="badge">5</span> FLIGHT PERFORMANCE & ENVELOPE
               </div>
-              <div className="card-content prediction-inner-grid" style={{ gap: '10px', padding: '8px' }}>
-                {/* Flight Photo with red/vignette overlay */}
+              <div className="card-content prediction-inner-grid" style={{ gap: '12px', padding: '10px' }}>
+                {/* Clean Aviation Hangar Photo Card */}
                 <div style={{ 
                   border: '1.5px solid var(--color-panel-border)', 
-                  borderRadius: '3.5px', 
+                  borderRadius: '6px', 
                   position: 'relative', 
                   overflow: 'hidden', 
-                  height: '116px',
-                  boxShadow: 'inset 0 0 10px rgba(0,0,0,0.9)'
+                  minHeight: '130px',
+                  boxShadow: 'inset 0 0 12px rgba(0,0,0,0.7)'
                 }}>
                   <img 
                     src={new URL(`../assets/aircraft/${selectedAircraft.image}`, import.meta.url).href} 
                     alt={selectedAircraft.name} 
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   />
-                  {/* Crimson overlay filter */}
                   <div style={{ 
                     position: 'absolute', 
-                    top: 0, left: 0, width: '100%', height: '100%', 
-                    background: 'linear-gradient(to top, rgba(167, 46, 33, 0.45), rgba(18, 14, 12, 0.75))',
-                    mixBlendMode: 'multiply' 
+                    inset: 0,
+                    background: 'linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, transparent 50%)'
                   }}></div>
+                  <div style={{ position: 'absolute', bottom: '6px', left: '8px', fontSize: '10.5px', fontWeight: 'bold', color: '#38bdf8' }}>
+                    {formatSpeed(specs.topSpeed, unitSystem)} EST. LEVEL
+                  </div>
                 </div>
 
                 <div>
-                  <table className="retro-table" style={{ fontSize: '10px' }}>
+                  <table className="retro-table" style={{ fontSize: '11px' }}>
                     <tbody>
                       <tr>
                         <td className="label">Static Thrust</td>
-                        <td className="val" style={{ color: '#50e3c2', fontWeight: 'bold' }}>{specs.thrust} lbs ({ (specs.thrust * 0.45359).toFixed(2) } kg)</td>
-                      </tr>
-                      <tr>
-                        <td className="label">Thrust to Weight</td>
-                        <td className="val" style={{ color: '#ff8888', fontWeight: 'bold' }}>{specs.thrustToWeight} : 1 ({dynamicAircraft.flyingWeight.toFixed(2)} lb All-Up)</td>
-                      </tr>
-                      <tr>
-                        <td className="label">Vertical Performance</td>
-                        <td className="val">
-                          {specs.thrustToWeight >= 1.2 ? "★★★★★" : 
-                           specs.thrustToWeight >= 0.9 ? "★★★★☆" : 
-                           specs.thrustToWeight >= 0.7 ? "★★★☆☆" : "★★☆☆☆"}
+                        <td className="val" style={{ color: '#38bdf8', fontWeight: 'bold' }}>
+                          {formatWeight(specs.thrust, unitSystem, 2)} ({unitSystem === 'imperial' ? `${(specs.thrust * 0.453592).toFixed(2)} kg` : `${specs.thrust} lbs`})
                         </td>
                       </tr>
                       <tr>
-                        <td className="label">Acceleration</td>
-                        <td className="val">
-                          {specs.thrustToWeight >= 1.2 ? "★★★★★" : 
-                           specs.thrustToWeight >= 0.95 ? "★★★★☆" : 
-                           specs.thrustToWeight >= 0.75 ? "★★★☆☆" : "★★☆☆☆"}
+                        <td className="label">Thrust-to-Weight</td>
+                        <td className="val" style={{ color: '#fbbf24', fontWeight: 'bold' }}>
+                          {specs.thrustToWeight} : 1 ({formatWeight(dynamicAircraft.flyingWeight, unitSystem, 1)})
                         </td>
+                      </tr>
+                      <tr>
+                        <td className="label">Climb / Vertical</td>
+                        <td className="val" style={{ color: 'var(--color-green)' }}>
+                          {specs.thrustToWeight >= 1.2 ? "★★★★★ Unlimited" : 
+                           specs.thrustToWeight >= 0.9 ? "★★★★☆ Strong Scale" : 
+                           specs.thrustToWeight >= 0.7 ? "★★★☆☆ Scale" : "★★☆☆☆ Marginal"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="label">Pitch Speed</td>
+                        <td className="val">{formatSpeed(specs.pitchSpeed, unitSystem)}</td>
                       </tr>
                       <tr>
                         <td className="label">Top Speed (Level)</td>
-                        <td className="val" style={{ color: 'var(--color-green)' }}>~{specs.topSpeed} MPH</td>
+                        <td className="val" style={{ color: 'var(--color-green)' }}>~{formatSpeed(specs.topSpeed, unitSystem)}</td>
                       </tr>
                       <tr>
-                        <td className="label">Flight Time (Est)</td>
-                        <td className="val" style={{ color: '#fff' }}>{specs.flightTimeMin}-{specs.flightTimeMax} MIN</td>
+                        <td className="label">Mixed Flight Time</td>
+                        <td className="val" style={{ color: '#fff' }}>{specs.flightTimeMin} – {specs.flightTimeMax} MIN</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1740,39 +1664,42 @@ export default function CockpitOverview({
               </div>
             </div>
 
-            {/* Thrust to Weight ratio gauge in its own panel */}
+            {/* Thrust to Weight ratio gauge */}
             <div className="metal-panel">
               <div className="rivet top-left"></div>
               <div className="rivet top-right"></div>
               <div className="rivet bottom-left"></div>
               <div className="rivet bottom-right"></div>
-              <div className="panel-header" style={{ fontSize: '10px', justifyContent: 'center' }}>
-                ★ THRUST / WT RATIO
+              <div className="panel-header" style={{ fontSize: '12px', justifyContent: 'center' }}>
+                🎯 T:W RATIO
               </div>
-              <div className="card-content flex-center" style={{ padding: '6px' }}>
+              <div className="card-content flex-center" style={{ padding: '8px', flexDirection: 'column', gap: '6px' }}>
                 <CircularGauge 
                   label="THRUST RATIO" 
                   value={specs.thrustToWeight} 
                   min={0} 
                   max={2.0} 
-                  unit="RATIO" 
+                  unit="T:W" 
                   warningThreshold={150} 
                   dangerThreshold={180}
-                  size={92} 
+                  size={96} 
                 />
+                <div style={{ fontSize: '10.5px', color: 'var(--color-amber-dim)', textAlign: 'center' }}>
+                  {specs.thrustToWeight >= 1.0 ? 'Vertical Capable' : 'Scale Warbird'}
+                </div>
               </div>
             </div>
 
-            {/* 8. Power Curve graph */}
+            {/* Power Curve graph */}
             <div className="metal-panel">
               <div className="rivet top-left"></div>
               <div className="rivet top-right"></div>
               <div className="rivet bottom-left"></div>
               <div className="rivet bottom-right"></div>
               <div className="panel-header">
-                <span className="badge">8</span> POWER CURVE (ESTIMATED)
+                <span>📈 POWER & CURRENT CURVE (0–100% THROTTLE)</span>
               </div>
-              <div className="card-content" style={{ padding: '4px 8px' }}>
+              <div className="card-content" style={{ padding: '8px 10px' }}>
                 <PowerCurveChart 
                   aircraft={dynamicAircraft}
                   motor={selectedMotor}
@@ -1788,8 +1715,8 @@ export default function CockpitOverview({
 
         </div>
 
-        {/* Right Side: Throttle slider, calculation launcher, and action utilities */}
-        <section className="metal-panel right-column" style={{ height: '100%', justifyContent: 'space-between' }}>
+        {/* Right Side: Step 6 (Throttle Quadrant, Dyno Sweep & Tools) */}
+        <section className="metal-panel right-column" style={{ justifyContent: 'space-between' }}>
           <div className="rivet top-left"></div>
           <div className="rivet top-right"></div>
           <div className="rivet bottom-left"></div>
@@ -1797,34 +1724,101 @@ export default function CockpitOverview({
           
           <div>
             <div className="panel-header" style={{ borderBottom: '2px solid var(--color-panel-border)' }}>
-              <span className="badge">6</span> CONTROL BENCH
+              <span className="badge">6</span> THROTTLE & DYNO BENCH
             </div>
             
-            {/* Throttle slider element styled as a retro military control lever */}
-            <div className="card-content" style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-amber-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                THROTTLE ACTUATOR
+            {/* Touch-First & Desktop-Friendly Throttle Quadrant */}
+            <div className="card-content" style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 'bold', color: 'var(--color-amber-dim)', textTransform: 'uppercase' }}>
+                  THROTTLE QUADRANT
+                </span>
+                <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)' }}>
+                  {throttle}%
+                </span>
               </div>
-              
-              <div style={{
-                position: 'relative',
-                height: '240px',
-                width: '60px',
-                background: 'linear-gradient(90deg, #12161a 0%, #252c35 50%, #12161a 100%)',
-                border: '3px solid var(--color-panel-border)',
-                borderRadius: '30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: 'inset 0 0 15px rgba(0,0,0,0.9)'
-              }}>
+
+              {/* Native Accessible Range Input (Works on Mobile Touch, Keyboard, and Desktop Mouse) */}
+              <div style={{ width: '100%', padding: '4px 0' }}>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  aria-label="Throttle Quadrant Percentage"
+                  value={throttle}
+                  disabled={isSimulating}
+                  onChange={(e) => setThrottle(Number(e.target.value))}
+                  className="throttle-range-slider"
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--color-amber-dim)', marginTop: '2px' }}>
+                  <span>IDLE (0%)</span>
+                  <span>CRUISE (50%)</span>
+                  <span>WOT (100%)</span>
+                </div>
+              </div>
+
+              {/* Quick Detent Preset Buttons (25%, 50%, 75%, 100%) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', width: '100%' }}>
+                {[0, 25, 50, 75, 100].map(pct => (
+                  <button
+                    key={pct}
+                    type="button"
+                    onClick={() => setThrottle(pct)}
+                    className={`btn-retro ${throttle === pct ? 'active' : ''}`}
+                    style={{ padding: '5px 2px', fontSize: '10.5px', justifyContent: 'center' }}
+                  >
+                    {pct}%
+                  </button>
+                ))}
+              </div>
+
+              {/* Visual Vertical Throttle Quadrant Indicator (Supports Pointer/Touch Drag) */}
+              <div
+                style={{
+                  position: 'relative',
+                  height: '180px',
+                  width: '64px',
+                  background: 'linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+                  border: '2px solid var(--color-panel-border)',
+                  borderRadius: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 'inset 0 0 15px rgba(0,0,0,0.85)',
+                  touchAction: 'none',
+                  cursor: 'ns-resize'
+                }}
+                onPointerDown={(e) => {
+                  if (isSimulating) return;
+                  const slider = e.currentTarget;
+                  slider.setPointerCapture(e.pointerId);
+                  const updateFromPointer = (clientY) => {
+                    const rect = slider.getBoundingClientRect();
+                    const y = clientY - rect.top - 24;
+                    const h = 132;
+                    const rawPct = 100 - (y / h) * 100;
+                    setThrottle(Math.round(Math.max(Math.min(rawPct, 100), 0)));
+                  };
+                  updateFromPointer(e.clientY);
+
+                  const handlePointerMove = (moveEvent) => updateFromPointer(moveEvent.clientY);
+                  const handlePointerUp = () => {
+                    slider.removeEventListener('pointermove', handlePointerMove);
+                    slider.removeEventListener('pointerup', handlePointerUp);
+                    slider.removeEventListener('pointercancel', handlePointerUp);
+                  };
+                  slider.addEventListener('pointermove', handlePointerMove);
+                  slider.addEventListener('pointerup', handlePointerUp);
+                  slider.addEventListener('pointercancel', handlePointerUp);
+                }}
+              >
                 {/* Tick marks on slot */}
-                <div style={{ position: 'absolute', left: '10px', height: '180px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', color: 'var(--color-panel-border)', fontSize: '8px', fontWeight: 'bold' }}>
+                <div style={{ position: 'absolute', left: '9px', height: '132px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', color: 'var(--color-amber-dim)', fontSize: '8.5px', fontWeight: 'bold', pointerEvents: 'none' }}>
                   <span>100</span>
-                  <span>80</span>
-                  <span>60</span>
-                  <span>40</span>
-                  <span>20</span>
+                  <span>75</span>
+                  <span>50</span>
+                  <span>25</span>
                   <span>0</span>
                 </div>
                 
@@ -1832,75 +1826,48 @@ export default function CockpitOverview({
                 <div style={{
                   position: 'absolute',
                   width: '6px',
-                  height: '180px',
-                  backgroundColor: '#0a0706',
-                  borderRadius: '3px',
-                  boxShadow: '0 1px 1px rgba(255,255,255,0.05)'
+                  height: '132px',
+                  backgroundColor: '#090d16',
+                  borderRadius: '3px'
                 }}></div>
                 
-                {/* Knob */}
+                {/* Avionics Throttle Handle */}
                 <div 
                   style={{
                     position: 'absolute',
-                    bottom: `${12 + (throttle / 100) * 180}px`,
-                    width: '32px',
+                    bottom: `${12 + (throttle / 100) * 132}px`,
+                    width: '36px',
                     height: '24px',
-                    background: 'radial-gradient(circle at 10px 8px, #731b1b 0%, #2c0a0a 100%)',
-                    border: '2px solid var(--color-red)',
-                    borderRadius: '4px',
-                    cursor: 'ns-resize',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.8), 0 0 10px var(--color-red-glow)',
+                    background: 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)',
+                    border: '2px solid #e0f2fe',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.8), 0 0 10px rgba(56, 189, 248, 0.5)',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    pointerEvents: 'none',
                     transition: isSimulating ? 'bottom 0.03s linear' : 'none'
                   }}
-                  onMouseDown={(e) => {
-                    const slider = e.currentTarget.parentElement;
-                    if (!slider || isSimulating) return;
-                    
-                    const handleMouseMove = (moveEvent) => {
-                      const rect = slider.getBoundingClientRect();
-                      const y = moveEvent.clientY - rect.top - 30; // offset padding
-                      const h = 180; // height of track
-                      const rawPct = 100 - (y / h) * 100;
-                      const newT = Math.round(Math.max(Math.min(rawPct, 100), 0));
-                      setThrottle(newT);
-                    };
-
-                    const handleMouseUp = () => {
-                      window.removeEventListener('mousemove', handleMouseMove);
-                      window.removeEventListener('mouseup', handleMouseUp);
-                    };
-
-                    window.addEventListener('mousemove', handleMouseMove);
-                    window.addEventListener('mouseup', handleMouseUp);
-                  }}
                 >
-                  <div style={{ width: '24px', height: '2px', backgroundColor: '#fff', opacity: 0.7 }} />
+                  <div style={{ width: '22px', height: '2px', backgroundColor: '#fff', opacity: 0.9 }} />
                 </div>
-              </div>
-
-              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 8px rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>
-                {throttle}% LOAD
               </div>
             </div>
 
-            {/* Run calculation button */}
+            {/* Run calculation & studio buttons */}
             <div style={{ padding: '0 12px 12px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button 
                 onClick={runSimulation}
                 className="btn-retro btn-red-launcher"
-                style={{ width: '100%', height: '56px', display: 'flex', flexDirection: 'column', padding: '8px' }}
+                style={{ width: '100%', height: '52px', display: 'flex', flexDirection: 'column', padding: '8px', justifyContent: 'center' }}
                 disabled={isSimulating}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Activity size={20} className={isSimulating ? "animate-pulse" : ""} />
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 'bold' }}>RUN CALCULATION</div>
-                    <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-mono)' }}>
-                      {isSimulating ? "Diagnostics Sweep Active..." : "Update Live System Data"}
+                    <div style={{ fontSize: '13px', fontWeight: 'bold' }}>RUN DYNO SWEEP</div>
+                    <div style={{ fontSize: '9px', opacity: 0.85, fontFamily: 'var(--font-mono)' }}>
+                      {isSimulating ? "Sweeping 0% → 100% Load..." : "0–100% Automated Bench Test"}
                     </div>
                   </div>
                 </div>
@@ -1912,24 +1879,20 @@ export default function CockpitOverview({
                 className="btn-retro"
                 style={{
                   width: '100%',
-                  height: '56px',
+                  height: '50px',
                   display: 'flex',
                   alignItems: 'center',
                   padding: '8px 12px',
-                  background: 'linear-gradient(180deg, #1a364e 0%, #0b1926 100%)',
-                  border: '2px solid var(--color-cyan)',
-                  color: 'var(--color-cyan)',
-                  borderRadius: '4px',
-                  boxShadow: '0 0 12px rgba(99, 179, 237, 0.3), inset 0 0 8px rgba(99, 179, 237, 0.1)',
-                  cursor: 'pointer'
+                  border: '1.5px solid var(--color-cyan)',
+                  color: 'var(--color-cyan)'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>✈️</span>
+                  <span style={{ fontSize: '18px' }}>✈️</span>
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.5px' }}>AIRPLANE SPEC BUILDER</div>
-                    <div style={{ fontSize: '8.5px', color: 'rgba(99, 179, 237, 0.85)', fontFamily: 'var(--font-mono)' }}>
-                      Search Models, Custom Specs & Auto-Recommend
+                    <div style={{ fontSize: '12px', fontWeight: 'bold' }}>AIRPLANE SPEC BUILDER</div>
+                    <div style={{ fontSize: '8.5px', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                      Search Models & Auto-Recommend
                     </div>
                   </div>
                 </div>
@@ -1941,24 +1904,18 @@ export default function CockpitOverview({
                 className="btn-retro"
                 style={{
                   width: '100%',
-                  height: '52px',
+                  height: '50px',
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '8px 12px',
-                  background: 'linear-gradient(180deg, #222b36 0%, #11171f 100%)',
-                  border: '1.8px solid #63b3ed',
-                  color: '#63b3ed',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  boxShadow: '0 0 10px rgba(99, 179, 237, 0.15)'
+                  padding: '8px 12px'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '18px' }}>📊</span>
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>AIRPLANE CALCULATOR</div>
-                    <div style={{ fontSize: '8px', color: 'rgba(99, 179, 237, 0.75)', fontFamily: 'var(--font-mono)' }}>
-                      Wing Loading, WCL 3D Index & Stall Speed Engine
+                    <div style={{ fontSize: '12px', fontWeight: 'bold' }}>WING LOADING & WCL STUDIO</div>
+                    <div style={{ fontSize: '8.5px', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                      Cubic Wing Loading & Stall Speed
                     </div>
                   </div>
                 </div>
@@ -1967,31 +1924,30 @@ export default function CockpitOverview({
           </div>
 
           {/* Action buttons (compare, save, export) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', borderTop: '2px solid var(--color-panel-border)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', borderTop: '1.5px solid var(--color-panel-border)' }}>
             
             {saveMessage && (
               <div style={{
                 textAlign: 'center',
-                fontSize: '10px',
+                fontSize: '10.5px',
                 color: 'var(--color-green)',
                 fontWeight: 'bold',
-                animation: 'pulse 1s infinite',
                 marginBottom: '4px'
               }}>
-                {saveMessage}
+                ✓ {saveMessage}
               </div>
             )}
 
-            <button onClick={() => setIsCompareOpen(true)} className="btn-retro" style={{ fontSize: '11px', width: '100%' }}>
+            <button onClick={() => setIsCompareOpen(true)} className="btn-retro" style={{ fontSize: '11.5px', width: '100%' }}>
               <span>🔍 COMPARE SETUPS</span>
             </button>
             
-            <button onClick={saveCurrentSetup} className="btn-retro" style={{ fontSize: '11px', width: '100%' }}>
-              <span>💾 SAVE SETUP</span>
+            <button onClick={saveCurrentSetup} className="btn-retro" style={{ fontSize: '11.5px', width: '100%' }}>
+              <span>💾 SAVE TO HANGAR LOG</span>
             </button>
             
-            <button onClick={() => setIsExportOpen(true)} className="btn-retro" style={{ fontSize: '11px', width: '100%' }}>
-              <span>📤 EXPORT REPORT</span>
+            <button onClick={() => setIsExportOpen(true)} className="btn-retro" style={{ fontSize: '11.5px', width: '100%' }}>
+              <span>📤 EXPORT TELEMETRY</span>
             </button>
           </div>
         </section>
@@ -2040,11 +1996,16 @@ export default function CockpitOverview({
                 </thead>
                 <tbody>
                   {(() => {
-                    const recSetup = recommendedSetups.scale;
-                    const recMotor = motors.find(m => m.id === recSetup.motorId) || selectedMotor;
-                    const recEsc = escs.find(e => e.id === recSetup.escId) || selectedEsc;
-                    const recBattery = batteries.find(b => b.id === recSetup.batteryId) || selectedBattery;
-                    const recPropeller = propellers.find(p => p.id === recSetup.propellerId) || selectedPropeller;
+                    const stockPreset = getPresetSetupForAircraft(selectedAircraft, 'scale', {
+                      motors,
+                      escs,
+                      batteries,
+                      propellers
+                    });
+                    const recMotor = stockPreset?.motor || selectedMotor;
+                    const recEsc = stockPreset?.esc || selectedEsc;
+                    const recBattery = stockPreset?.battery || selectedBattery;
+                    const recPropeller = stockPreset?.propeller || selectedPropeller;
                     const stockBatteryWeightLbs = (recBattery.weight || 0) / 453.59;
                     const stockDynamicAircraft = {
                       ...selectedAircraft,
@@ -2065,7 +2026,7 @@ export default function CockpitOverview({
                     let sAc = null, sM = null, sE = null, sB = null, sP = null;
                     let savedDynamicAircraft = null;
                     if (savedConfig) {
-                      sAc = aircrafts.find(a => a.id === savedConfig.aircraftId) || selectedAircraft;
+                      sAc = allAircrafts.find(a => a.id === savedConfig.aircraftId) || selectedAircraft;
                       sM = motors.find(m => m.id === savedConfig.motorId) || selectedMotor;
                       sE = escs.find(e => e.id === savedConfig.escId) || selectedEsc;
                       sB = batteries.find(b => b.id === savedConfig.batteryId) || selectedBattery;
@@ -2227,7 +2188,7 @@ export default function CockpitOverview({
                           type="button"
                           className="btn-retro"
                           style={{ fontSize: '8.5px', padding: '2px 6px', borderColor: 'var(--color-panel-border)', color: '#ffc97a' }}
-                          onClick={() => setWizardSearchQuery(tag)}
+                          onClick={() => setPlaneSearchQuery(tag)}
                         >
                           ✈️ {tag}
                         </button>
@@ -2723,6 +2684,7 @@ export default function CockpitOverview({
 
               {/* Step 4: Recommendations */}
               {wizardStep === 4 && (() => {
+                const effectiveWizardCells = wizardTargetCells > 8 && wizardWingspan <= 65 ? 8 : wizardTargetCells;
                 const recs = getRecommendationsForAircraftSpecs({
                   wingspan: wizardWingspan,
                   length: wizardLength,
@@ -2731,7 +2693,9 @@ export default function CockpitOverview({
                   motors,
                   batteries,
                   escs,
-                  propellers
+                  propellers,
+                  flightStyle: wizardStyle,
+                  targetCellsOverride: effectiveWizardCells
                 });
 
                 return (
@@ -2745,7 +2709,7 @@ export default function CockpitOverview({
                       </div>
                       <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
                         <div style={{ fontSize: '8.5px', color: 'var(--color-amber-dim)' }}>BATTERY</div>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-amber)' }}>{wizardTargetCells}S LiPo</div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--color-amber)' }}>{recs.targetCells}S LiPo</div>
                       </div>
                       <div style={{ padding: '8px', background: '#13171b', borderRadius: '4px', border: '1px solid var(--color-panel-border)' }}>
                         <div style={{ fontSize: '8.5px', color: 'var(--color-amber-dim)' }}>PROP SIZE</div>
@@ -2777,6 +2741,7 @@ export default function CockpitOverview({
 
               {/* Step 5: Review & Save */}
               {wizardStep === 5 && (() => {
+                const effectiveWizardCells = wizardTargetCells > 8 && wizardWingspan <= 65 ? 8 : wizardTargetCells;
                 const recs = getRecommendationsForAircraftSpecs({
                   wingspan: wizardWingspan,
                   length: wizardLength,
@@ -2785,7 +2750,9 @@ export default function CockpitOverview({
                   motors,
                   batteries,
                   escs,
-                  propellers
+                  propellers,
+                  flightStyle: wizardStyle,
+                  targetCellsOverride: effectiveWizardCells
                 });
 
                 return (

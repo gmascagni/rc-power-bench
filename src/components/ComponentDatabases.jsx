@@ -178,9 +178,9 @@ export default function ComponentDatabases({
 
   const cardStyle = (isActive) => ({
     border: `2px solid ${isActive ? 'var(--color-amber)' : 'var(--color-panel-border)'}`,
-    borderRadius: '4px',
+    borderRadius: '6px',
     padding: '12px',
-    backgroundColor: isActive ? 'rgba(229,157,50,0.05)' : '#16100d',
+    backgroundColor: isActive ? 'rgba(56,189,248,0.08)' : 'var(--color-card-bg)',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -196,15 +196,15 @@ export default function ComponentDatabases({
   };
 
   return (
-    <div className="crt-effect" style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
       <div className="metal-panel" style={{ minHeight: '500px' }}>
         <div className="screw" style={{ top: '8px', left: '8px' }}></div>
         <div className="screw" style={{ top: '8px', right: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', left: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', right: '8px' }}></div>
         
-        <div className="panel-header" style={{ justifyContent: 'space-between' }}>
-          <span>★ COMPONENT COMPARTMENT ARCHIVES</span>
+        <div className="panel-header" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <span>⚡ POWERPLANT COMPONENT ARCHIVES</span>
           
           <div style={{ display: 'flex', gap: '4px' }}>
             {['motors', 'props', 'batteries', 'escs'].map(tab => (

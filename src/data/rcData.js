@@ -15,7 +15,7 @@ export const aircrafts = [
     suggestedCg: "4.85 in (123 mm)",
     description: "Dark Horse Kits 86\" Grumman F8F Bearcat. Compact giant scale airframe built for high speed passes.",
     manualUrl: null,
-    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "spektrum-6362", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "darkhorse-p51",
@@ -26,14 +26,14 @@ export const aircrafts = [
     wingArea: 1150,
     emptyWeight: 14.5,
     flyingWeight: 18.0,
-    powerRangeMin: 2200,
+    powerRangeMin: 1700,
     powerRangeMax: 3600,
     manufacturer: "Dark Horse Kits / RC-Builder",
     image: "p51.jpg",
     suggestedCg: "4.75 in (120 mm)",
     description: "Dark Horse Kits razorback P-51B Mustang laser short kit. High-precision interlocking CAD balsa cutouts for custom scale builders.",
     manualUrl: null,
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-6360ea-11", batteryId: "8s-5000mah-45c", propellerId: "apc-18x8e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "eflite-corsair-1.2m",
@@ -124,7 +124,7 @@ export const aircrafts = [
     description: "Lockheed P-38 Lightning. Twin-engine heavy fighter with a twin-boom design and central nacelle. Marked with bold Normandy stripes for D-Day operations.",
     manualUrl: null,
     enginesCount: 2,
-    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-14x10e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "sunnysky-x4120", batteryId: "spektrum-6s-5000-120c", propellerId: "apc-14x8e", escId: "hobbywing-flyfun-120a" }
   },
   {
     id: "flightline-b25",
@@ -135,15 +135,15 @@ export const aircrafts = [
     wingArea: 640,
     emptyWeight: 7.2,
     flyingWeight: 8.8,
-    powerRangeMin: 1200,
-    powerRangeMax: 2200,
+    powerRangeMin: 1000,
+    powerRangeMax: 2000,
     manufacturer: "FlightLine / Motion RC",
     image: "b25.jpg",
     suggestedCg: "3.75 in (95 mm)",
     description: "FlightLine 1600mm B-25J Mitchell Twin. High performance scale twin electric warbird with electric retracts and scale LED navigation lighting.",
     manualUrl: null,
     enginesCount: 2,
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "4s-5000mah-30c", propellerId: "eflite-12x8-3", escId: "hobbywing-skywalker80" }
+    stockSetup: { motorId: "avian-4260-800", batteryId: "4s-5000mah-30c", propellerId: "eflite-12x8-3", escId: "hobbywing-skywalker80" }
   },
   {
     id: "hangar9-b25",
@@ -271,7 +271,7 @@ export const aircrafts = [
     description: "Boeing B-17G Flying Fortress 4-Engine Heavy Bomber. Features 4 electric outrunners, operating bomb bay, and scale turret detail.",
     manualUrl: null,
     enginesCount: 4,
-    stockSetup: { motorId: "spektrum-4260-480", batteryId: "4s-5000mah-30c", propellerId: "apc-12x8e", escId: "hobbywing-skywalker80" }
+    stockSetup: { motorId: "avian-4260-800", batteryId: "spektrum-4s-5000-120c", propellerId: "apc-12x8e", escId: "hobbywing-skywalker80" }
   },
   {
     id: "spitfire-mk9",
@@ -289,7 +289,7 @@ export const aircrafts = [
     suggestedCg: "4.75 in (120 mm)",
     description: "Supermarine Spitfire. The iconic British interceptor of the Battle of Britain. Featuring Normandy invasion stripes painted on elliptical wings.",
     manualUrl: null,
-    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-15x10e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "sunnysky-x4120", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-flyfun-120a" }
   },
   {
     id: "legend-skyraider",
@@ -307,7 +307,7 @@ export const aircrafts = [
     suggestedCg: "4.85 in (123 mm)",
     description: "Legend Hobby 86\" Douglas A-1 Skyraider. Heavy attack aircraft featuring ordnance hardpoints and high payload capacity.",
     manualUrl: "https://www.legendhobby.com",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "spektrum-6362", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "legend-b25",
@@ -326,7 +326,7 @@ export const aircrafts = [
     description: "Legend Hobby 95\" B-25 Mitchell ARF. Premium multi-engine scale warbird with aluminum spinner hubs, functional flaps, and twin radial cowls.",
     manualUrl: "https://www.legendhobby.com",
     enginesCount: 2,
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "scorpion-4035-330", batteryId: "8s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "legend-p47-snafu",
@@ -337,14 +337,14 @@ export const aircrafts = [
     wingArea: 1180,
     emptyWeight: 15.5,
     flyingWeight: 19.5,
-    powerRangeMin: 2400,
+    powerRangeMin: 1700,
     powerRangeMax: 3900,
     manufacturer: "Legend Hobby",
     image: "p47.jpg",
     suggestedCg: "4.50 in (114 mm)",
     description: "Legend Hobby 81\" P-47D Thunderbolt ARF. Beautifully covered scale warbird with factory-painted camouflage.",
     manualUrl: "https://www.legendhobby.com",
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-6360ea-11", batteryId: "8s-5000mah-45c", propellerId: "apc-18x8e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "natbalsa-b25",
@@ -381,7 +381,7 @@ export const aircrafts = [
     suggestedCg: "5.00 in (127 mm)",
     description: "National Balsa laser-cut short kit for 86\" Curtiss P-40 Warhawk.",
     manualUrl: "https://www.nationalbalsa.com",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "spektrum-6362", batteryId: "10s-5000mah-45c", propellerId: "apc-22x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "nexa-b25",
@@ -456,7 +456,7 @@ export const aircrafts = [
     description: "Seagull Models 95\" B-25 Mitchell Twin ARF. Large scale balsa ARF finished in authentic Doolittle Raid scheme with twin electric nacelles.",
     manualUrl: "https://www.legendhobby.com",
     enginesCount: 2,
-    stockSetup: { motorId: "rimfire-120", batteryId: "8s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "scorpion-4035-330", batteryId: "8s-5000mah-45c", propellerId: "apc-18x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "seagull-mosquito-80",
@@ -565,7 +565,7 @@ export const aircrafts = [
     suggestedCg: "4.50 in (115 mm)",
     description: "Seagull Models P-47D Thunderbolt 'Snafu'. Classic 60-size stand-off scale warbird. Finished in Olive Drab with yellow nose cowl and black/white invasion stripes.",
     manualUrl: "https://www.legendhobby.com/manuals/SEA207%20P-47D%20SNAFU%2063inch.pdf",
-    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "hobbywing-flyfun-120a" }
+    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-14x8e", escId: "hobbywing-flyfun-120a" }
   },
   {
     id: "topflite-b25",
@@ -602,7 +602,7 @@ export const aircrafts = [
     suggestedCg: "4.50 in (114 mm)",
     description: "Chance Vought F4U Corsair. Carrier-capable fighter bomber. Known for its distinct inverted gull wings and dark navy blue paint scheme.",
     manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=11649",
-    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "castle-talon90" }
+    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-14x8e", escId: "castle-talon90" }
   },
   {
     id: "topflite-p40",
@@ -620,7 +620,7 @@ export const aircrafts = [
     suggestedCg: "4.25 in (108 mm)",
     description: "Curtiss P-40 Warhawk. The workhorse WWII fighter famous for the Flying Tigers shark mouth nose art. Rugged airframe with unique landing gear twist rotation.",
     manualUrl: "https://outerzone.co.uk/plan_details.asp?ID=13591",
-    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-15x8e", escId: "castle-talon90" }
+    stockSetup: { motorId: "rimfire-60", batteryId: "6s-5000mah-45c", propellerId: "apc-14x8e", escId: "castle-talon90" }
   },
   {
     id: "topflite-p51",
@@ -657,7 +657,7 @@ export const aircrafts = [
     description: "Nick Ziroli Giant Scale B-25 Mitchell. World-famous 101\" twin bomber design built from Ziroli plans or National Balsa / Precision Kit Cutters short kits.",
     manualUrl: "https://ziroliplans.com/b-25-mitchell-plan.html",
     enginesCount: 2,
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "biela-20x12-3", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-6360", batteryId: "10s-5000mah-45c", propellerId: "apc-20x10e", escId: "hobbywing-120a-hv" }
   },
   {
     id: "ziroli-corsair",
@@ -675,7 +675,7 @@ export const aircrafts = [
     suggestedCg: "5.00 in (127 mm)",
     description: "Ziroli 93\" F4U Corsair. Magnificent inverted gull wing design, supported by precision balsa laser short kits.",
     manualUrl: "https://ziroliplans.com/f4u-1-corsair-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-ga6000-180", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "castle-edge-160a" }
   },
   {
     id: "ziroli-hellcat",
@@ -693,7 +693,7 @@ export const aircrafts = [
     suggestedCg: "5.50 in (140 mm)",
     description: "Ziroli 95\" F6F Hellcat. Giant scale carrier warbird with rotating retracts, laser cut by RC-Builder Workshop & Kit Cutters.",
     manualUrl: "https://ziroliplans.com/f6f-hellcat-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-ga6000-180", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "castle-edge-160a" }
   },
   {
     id: "ziroli-p47",
@@ -711,7 +711,7 @@ export const aircrafts = [
     suggestedCg: "5.75 in (146 mm)",
     description: "Nick Ziroli 92\" P-47 Thunderbolt. Iconic heavy-duty razorback or bubble canopy giant scale balsa build.",
     manualUrl: "https://ziroliplans.com/p-47-thunderbolt-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-ga6000-180", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "castle-edge-160a" }
   },
   {
     id: "ziroli-p51",
@@ -729,7 +729,7 @@ export const aircrafts = [
     suggestedCg: "5.25 in (133 mm)",
     description: "Nick Ziroli 98\" P-51D Mustang. Competition giant scale warbird featuring unmatched scale fidelity, available as laser-cut short kit via Dark Horse Kits & National Balsa.",
     manualUrl: "https://ziroliplans.com/p-51d-mustang-plan.html",
-    stockSetup: { motorId: "badass-4530-440", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "hobbywing-120a-hv" }
+    stockSetup: { motorId: "dualsky-ga6000-180", batteryId: "12s-5000mah-45c", propellerId: "apc-24x12e", escId: "castle-edge-160a" }
   }
 ];
 
@@ -1181,6 +1181,20 @@ const rawMotors = [
     noLoadCurrent: 1.4,
     voltageSupported: "10S - 12S LiPo (37.0V - 44.4V)",
     type: "Brushless Outrunner"
+  },
+  {
+    id: "dualsky-ga8000-190",
+    name: "DUALSKY GA8000.8 215KV (80cc GIANT CLASS)",
+    model: "GA8000.8-215KV",
+    brand: "Dualsky",
+    kv: 215,
+    weight: 1480,
+    maxCurrent: 185,
+    maxPower: 8500,
+    internalResistance: 0.010,
+    noLoadCurrent: 1.8,
+    voltageSupported: "10S - 14S LiPo (37.0V - 51.8V)",
+    type: "Brushless Outrunner"
   }
 ];
 
@@ -1332,14 +1346,14 @@ const rawEscs = [
   },
   {
     id: "avian-80a-hv",
-    name: "SPEKTRUM AVIAN 80A SMART HV",
-    model: "SPMXAE1080HV",
+    name: "SPEKTRUM AVIAN 80A SMART (3S-12S)",
+    model: "SPMXAE1080",
     brand: "Spektrum",
     maxAmps: 80,
     burstAmps: 120,
     resistance: 0.0018,
     weight: 105,
-    voltageSupported: "6S - 12S LiPo (22.2V - 44.4V)",
+    voltageSupported: "3S - 12S LiPo (11.1V - 44.4V)",
     becOutput: "BEC: 6.0V/7.4V/8.4V @ 8A"
   },
   {
@@ -1365,12 +1379,84 @@ const rawEscs = [
     weight: 120,
     voltageSupported: "3S - 6S LiPo (11.1V - 22.2V)",
     becOutput: "BEC: 6.0V-8.4V @ 8A"
+  },
+  {
+    id: "hobbywing-200a-hv",
+    name: "HOBBYWING PLATINUM PRO 200A HV V4.1",
+    model: "Platinum-200A-HV-V4.1",
+    brand: "Hobbywing",
+    maxAmps: 200,
+    burstAmps: 300,
+    resistance: 0.0004,
+    weight: 325,
+    voltageSupported: "6S - 14S LiPo (22.2V - 51.8V)",
+    becOutput: "BEC: 5.0V-8.0V Adjustable @ 10A/30A"
   }
 ];
 
 export const escs = [...rawEscs].sort((a, b) => a.name.localeCompare(b.name));
 
-export const batteries = [
+const rawBatteries = [
+  {
+    id: "3s-2200mah-30c",
+    name: "3S 2200mAh 30C LIPO",
+    cells: 3,
+    capacity: 2200,
+    cRating: 30,
+    internalResistance: 0.0045,
+    weight: 185,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "3s-4000mah-50c",
+    name: "3S 4000mAh 50C LIPO",
+    cells: 3,
+    capacity: 4000,
+    cRating: 50,
+    internalResistance: 0.0028,
+    weight: 310,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "3s-5000mah-100c",
+    name: "3S 5000mAh 100C SMART G2",
+    cells: 3,
+    capacity: 5000,
+    cRating: 100,
+    internalResistance: 0.0018,
+    weight: 385,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "4s-2200mah-45c",
+    name: "4S 2200mAh 45C LIPO",
+    cells: 4,
+    capacity: 2200,
+    cRating: 45,
+    internalResistance: 0.0035,
+    weight: 245,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "4s-3200mah-50c",
+    name: "4S 3200mAh 50C LIPO",
+    cells: 4,
+    capacity: 3200,
+    cRating: 50,
+    internalResistance: 0.0028,
+    weight: 345,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "4s-5000mah-30c",
+    name: "4S 5000mAh 30C LIPO",
+    cells: 4,
+    capacity: 5000,
+    cRating: 30,
+    internalResistance: 0.0025,
+    weight: 475,
+    brand: "Gens Ace"
+  },
   {
     id: "6s-5000mah-45c",
     name: "6S 5000mAh 45C LIPO",
@@ -1412,6 +1498,16 @@ export const batteries = [
     brand: "SMC Racing"
   },
   {
+    id: "8s-5000mah-45c",
+    name: "8S 5000mAh 45C LIPO",
+    cells: 8,
+    capacity: 5000,
+    cRating: 45,
+    internalResistance: 0.0019,
+    weight: 910,
+    brand: "Spektrum Smart"
+  },
+  {
     id: "8s-5000mah-50c",
     name: "8S 5000mAh 50C LIPO",
     cells: 8,
@@ -1419,6 +1515,16 @@ export const batteries = [
     cRating: 50,
     internalResistance: 0.0018, // Total 0.0144
     weight: 920,
+    brand: "Gens Ace"
+  },
+  {
+    id: "10s-5000mah-45c",
+    name: "10S 5000mAh 45C LIPO",
+    cells: 10,
+    capacity: 5000,
+    cRating: 45,
+    internalResistance: 0.0017,
+    weight: 1160,
     brand: "Gens Ace"
   },
   {
@@ -1430,6 +1536,16 @@ export const batteries = [
     internalResistance: 0.0016, // Total 0.016
     weight: 1180,
     brand: "SMC Racing"
+  },
+  {
+    id: "12s-5000mah-45c",
+    name: "12S 5000mAh 45C LIPO",
+    cells: 12,
+    capacity: 5000,
+    cRating: 45,
+    internalResistance: 0.0016,
+    weight: 1420,
+    brand: "Gens Ace"
   },
   {
     id: "12s-5000mah-60c",
@@ -1520,10 +1636,65 @@ export const batteries = [
     internalResistance: 0.0008,
     weight: 960,
     brand: "SMC Racing"
+  },
+  {
+    id: "spektrum-10s-5000-100c",
+    name: "SPEKTRUM SMART G2 AIR 10S 5000mAh 100C LIPO",
+    cells: 10,
+    capacity: 5000,
+    cRating: 100,
+    internalResistance: 0.0010,
+    weight: 1200,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "smc-10s-6200-fixedwing",
+    name: "SMC TRUE FLIGHT EXTREME 10S 6200mAh 120C LIPO",
+    cells: 10,
+    capacity: 6200,
+    cRating: 120,
+    internalResistance: 0.0008,
+    weight: 1380,
+    brand: "SMC Racing"
+  },
+  {
+    id: "spektrum-12s-5000-100c",
+    name: "SPEKTRUM SMART G2 AIR 12S 5000mAh 100C LIPO",
+    cells: 12,
+    capacity: 5000,
+    cRating: 100,
+    internalResistance: 0.0010,
+    weight: 1440,
+    brand: "Spektrum Smart"
+  },
+  {
+    id: "smc-12s-6200-fixedwing",
+    name: "SMC TRUE FLIGHT EXTREME 12S 6200mAh 120C LIPO",
+    cells: 12,
+    capacity: 6200,
+    cRating: 120,
+    internalResistance: 0.0008,
+    weight: 1620,
+    brand: "SMC Racing"
   }
 ];
 
+export const batteries = [...rawBatteries].sort((a, b) => {
+  if (a.cells !== b.cells) return a.cells - b.cells;
+  if (a.capacity !== b.capacity) return a.capacity - b.capacity;
+  return a.name.localeCompare(b.name);
+});
+
 const rawPropellers = [
+  {
+    id: "apc-12x8e",
+    name: "APC 12 x 8E",
+    diameter: 12,
+    pitch: 8,
+    type: "Electric",
+    blades: 2,
+    kProp: 0.90
+  },
   {
     id: "apc-13x6e",
     name: "APC 13 x 6E",
@@ -1726,6 +1897,24 @@ const rawPropellers = [
     id: "apc-18x10e",
     name: "APC 18 x 10E",
     diameter: 18,
+    pitch: 10,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.10
+  },
+  {
+    id: "apc-18x12e",
+    name: "APC 18 x 12E",
+    diameter: 18,
+    pitch: 12,
+    type: "Electric",
+    blades: 2,
+    kProp: 1.12
+  },
+  {
+    id: "apc-19x10e",
+    name: "APC 19 x 10E (GIANT SCALE)",
+    diameter: 19,
     pitch: 10,
     type: "Electric",
     blades: 2,

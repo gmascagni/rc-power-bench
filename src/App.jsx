@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, 
   Plane, 
@@ -18,6 +18,7 @@ import AirplaneCalculator from './components/AirplaneCalculator';
 import ValidatorChecks from './components/ValidatorChecks';
 import SettingsOptions from './components/SettingsOptions';
 import { aircrafts, motors, escs, batteries, propellers } from './data/rcData';
+import { calculateSpecs } from './utils/calcEngine';
 
 function App() {
   // Navigation Tabs state
@@ -34,12 +35,13 @@ function App() {
     }
   });
 
-  // Selected components state (initialized to default Scale Performance baseline)
-  const [selectedAircraft, setSelectedAircraft] = useState(aircrafts[0]); // P-51D Mustang
-  const [selectedMotor, setSelectedMotor] = useState(motors[0]); // SunnySky X4120 600KV
-  const [selectedEsc, setSelectedEsc] = useState(escs[0]); // Hobbywing Platinum 120A HV
-  const [selectedBattery, setSelectedBattery] = useState(batteries[0]); // 6S 5000mAh 45C
-  const [selectedPropeller, setSelectedPropeller] = useState(propellers[0]); // APC 15x10E
+  // Selected components state (initialized to default aircraft's Factory Stock setup)
+  const initialStock = aircrafts[0]?.stockSetup || {};
+  const [selectedAircraft, setSelectedAircraft] = useState(aircrafts[0]);
+  const [selectedMotor, setSelectedMotor] = useState(() => motors.find(m => m.id === initialStock.motorId) || motors[0]);
+  const [selectedEsc, setSelectedEsc] = useState(() => escs.find(e => e.id === initialStock.escId) || escs[0]);
+  const [selectedBattery, setSelectedBattery] = useState(() => batteries.find(b => b.id === initialStock.batteryId) || batteries[0]);
+  const [selectedPropeller, setSelectedPropeller] = useState(() => propellers.find(p => p.id === initialStock.propellerId) || propellers[0]);
   const [activeSetupType, setActiveSetupType] = useState('scale'); // Recommended setup tracking
 
   // Shared calculations slider load
@@ -49,6 +51,60 @@ function App() {
   const [crtEnabled, setCrtEnabled] = useState(true);
   const [unitSystem, setUnitSystem] = useState('imperial'); // 'imperial' or 'metric'
   const [soundEnabled, setSoundEnabled] = useState(false);
+
+  // Web Audio Synthesizer for Dyno Acoustic Telemetry Feedback
+  const audioCtxRef = useRef(null);
+  const oscRef = useRef(null);
+  const gainRef = useRef(null);
+
+  useEffect(() => {
+    if (!soundEnabled || throttle <= 0) {
+      if (gainRef.current && audioCtxRef.current) {
+        gainRef.current.gain.setTargetAtTime(0, audioCtxRef.current.currentTime, 0.08);
+      }
+      return;
+    }
+
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const ctx = new AudioContextClass();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        gain.gain.value = 0;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        audioCtxRef.current = ctx;
+        oscRef.current = osc;
+        gainRef.current = gain;
+      }
+
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+
+      const specs = calculateSpecs({
+        aircraft: selectedAircraft,
+        motor: selectedMotor,
+        esc: selectedEsc,
+        battery: selectedBattery,
+        propeller: selectedPropeller,
+        throttle
+      });
+
+      const blades = selectedPropeller?.blades || 2;
+      const fundamentalHz = Math.max(45, Math.min((specs.rpm / 60) * blades, 420));
+      const targetGain = Math.min(0.035, 0.005 + (throttle / 100) * 0.025);
+
+      oscRef.current.frequency.setTargetAtTime(fundamentalHz, audioCtxRef.current.currentTime, 0.05);
+      gainRef.current.gain.setTargetAtTime(targetGain, audioCtxRef.current.currentTime, 0.05);
+    } catch {
+      // Ignore Web Audio autoplay restrictions until user interaction
+    }
+  }, [soundEnabled, throttle, selectedAircraft, selectedMotor, selectedEsc, selectedBattery, selectedPropeller]);
 
   // Render Page Content based on tab Selection
   const renderContent = () => {
@@ -70,8 +126,15 @@ function App() {
             setActiveSetupType={setActiveSetupType}
             throttle={throttle}
             setThrottle={setThrottle}
+            setActiveTab={setActiveTab}
             customFleet={customFleet}
             setCustomFleet={setCustomFleet}
+            unitSystem={unitSystem}
+            setUnitSystem={setUnitSystem}
+            crtEnabled={crtEnabled}
+            setCrtEnabled={setCrtEnabled}
+            soundEnabled={soundEnabled}
+            setSoundEnabled={setSoundEnabled}
           />
         );
       case 'aircraft':
@@ -87,6 +150,7 @@ function App() {
             setActiveTab={setActiveTab}
             customFleet={customFleet}
             setCustomFleet={setCustomFleet}
+            unitSystem={unitSystem}
           />
         );
       case 'components':
@@ -102,10 +166,11 @@ function App() {
             setSelectedPropeller={setSelectedPropeller}
             setActiveTab={setActiveTab}
             initialSubTab={componentSubTab}
+            unitSystem={unitSystem}
           />
         );
       case 'calculator':
-        return <CalculatorEngine />;
+        return <CalculatorEngine unitSystem={unitSystem} />;
       case 'plane-calculator':
         return (
           <AirplaneCalculator 
@@ -119,6 +184,7 @@ function App() {
             setActiveTab={setActiveTab}
             customFleet={customFleet}
             setCustomFleet={setCustomFleet}
+            unitSystem={unitSystem}
           />
         );
       case 'validator':
@@ -129,6 +195,7 @@ function App() {
             selectedEsc={selectedEsc}
             selectedBattery={selectedBattery}
             selectedPropeller={selectedPropeller}
+            unitSystem={unitSystem}
           />
         );
       case 'settings':

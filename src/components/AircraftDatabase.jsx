@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { aircrafts, motors, batteries, escs, propellers } from '../data/rcData';
-import { getRecommendationsForAircraftSpecs, formatAircraftTitle } from '../utils/calcEngine';
+import { getRecommendationsForAircraftSpecs, formatAircraftTitle, formatLength, formatArea, formatWeight } from '../utils/calcEngine';
 
 export default function AircraftDatabase({ 
   selectedAircraft, 
@@ -12,7 +12,8 @@ export default function AircraftDatabase({
   setThrottle,
   setActiveTab,
   customFleet = [],
-  setCustomFleet = () => {}
+  setCustomFleet = () => {},
+  unitSystem = 'imperial'
 }) {
   const allAircrafts = [...aircrafts, ...customFleet].sort((a, b) => formatAircraftTitle(a).localeCompare(formatAircraftTitle(b)));
 
@@ -87,15 +88,15 @@ export default function AircraftDatabase({
   };
 
   return (
-    <div className="crt-effect" style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', maxWidth: '1200px', margin: '0 auto' }}>
       <div className="metal-panel" style={{ minHeight: '500px' }}>
         <div className="screw" style={{ top: '8px', left: '8px' }}></div>
         <div className="screw" style={{ top: '8px', right: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', left: '8px' }}></div>
         <div className="screw" style={{ bottom: '8px', right: '8px' }}></div>
         
-        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>★ WARBIRD DATA REGISTRY (.60-CLASS & CUSTOM FLEET)</div>
+        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div>✈️ AIRCRAFT HANGAR REGISTRY (.60-CLASS, GIANT SCALE & CUSTOM FLEET)</div>
           <span style={{ fontSize: '10px', color: 'var(--color-amber-dim)' }}>{allAircrafts.length} MODELS REGISTERED</span>
         </div>
         
@@ -166,15 +167,15 @@ export default function AircraftDatabase({
                       <tbody>
                         <tr>
                           <td className="label">WINGSPAN</td>
-                          <td className="val">{ac.wingspan} in</td>
+                          <td className="val">{formatLength(ac.wingspan, unitSystem)}</td>
                         </tr>
                         <tr>
                           <td className="label">WING AREA</td>
-                          <td className="val">{ac.wingArea} sq in</td>
+                          <td className="val">{formatArea(ac.wingArea, unitSystem)}</td>
                         </tr>
                         <tr>
                           <td className="label">FLYING WEIGHT</td>
-                          <td className="val">{ac.flyingWeight.toFixed(1)} lbs</td>
+                          <td className="val">{formatWeight(ac.flyingWeight, unitSystem, 1)}</td>
                         </tr>
                         <tr>
                           <td className="label">POWER REQUIREMENT</td>
@@ -187,6 +188,17 @@ export default function AircraftDatabase({
                   <button 
                     onClick={() => {
                       setSelectedAircraft(ac);
+                      if (ac.stockSetup) {
+                        const m = motors.find(item => item.id === ac.stockSetup.motorId);
+                        const e = escs.find(item => item.id === ac.stockSetup.escId);
+                        const b = batteries.find(item => item.id === ac.stockSetup.batteryId);
+                        const p = propellers.find(item => item.id === ac.stockSetup.propellerId);
+                        if (m && setSelectedMotor) setSelectedMotor(m);
+                        if (e && setSelectedEsc) setSelectedEsc(e);
+                        if (b && setSelectedBattery) setSelectedBattery(b);
+                        if (p && setSelectedPropeller) setSelectedPropeller(p);
+                      }
+                      if (setThrottle) setThrottle(100);
                       setActiveTab('cockpit');
                     }}
                     className={`btn-retro ${isActive ? 'active' : ''}`}
