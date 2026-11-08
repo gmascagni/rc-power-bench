@@ -33,5 +33,21 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot-portrait.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Avionics Cockpit Telemetry & Dyno Bench"
+    },
+    {
+      "src": "./screenshot-landscape.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Aircraft Hangar & Brushless Configurator"
+    }
   ]
 }
