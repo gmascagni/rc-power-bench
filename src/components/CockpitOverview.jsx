@@ -840,7 +840,7 @@ export default function CockpitOverview({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '260px' }}>
             <AlertTriangle size={16} style={{ flexShrink: 0, color: '#fbbf24' }} />
             <div>
-              <strong style={{ color: '#fbbf24' }}>FLIGHT TELEMETRY ADVISORY:</strong> Static bench predictions follow standard propeller aerodynamic laws ($P \propto D^4 \cdot \text{Pitch} \cdot \text{RPM}^3$). Always verify current draw with a physical inline Wattmeter prior to maiden flight.
+              <strong style={{ color: '#fbbf24' }}>FLIGHT TELEMETRY ADVISORY:</strong> Static bench predictions follow standard propeller aerodynamic laws (P ∝ D⁴ × Pitch × RPM³). Always verify current draw with a physical inline Wattmeter prior to maiden flight.
             </div>
           </div>
           <div style={{ display: 'flex', gap: '6px', fontSize: '10.5px', fontWeight: 'bold', color: 'var(--color-cyan)' }}>
